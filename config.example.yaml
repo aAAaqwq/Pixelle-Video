@@ -1,0 +1,116 @@
+# ReelForge Configuration Example
+# 复制此文件为 config.yaml 并填入你的配置
+
+# Project name
+project_name: ReelForge
+
+# ==================== LLM Configuration ====================
+# Simple 3-field configuration - works with any OpenAI SDK compatible LLM
+#
+# Popular choices (copy one of these):
+#
+# Qwen Max (推荐中文):
+#   api_key: "sk-xxx"
+#   base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
+#   model: "qwen-max"
+#   # Get API key: https://dashscope.console.aliyun.com/apiKey
+#
+# OpenAI GPT-4o:
+#   api_key: "sk-xxx"
+#   base_url: "https://api.openai.com/v1"
+#   model: "gpt-4o"
+#   # Get API key: https://platform.openai.com/api-keys
+#
+# Claude Sonnet 4:
+#   api_key: "sk-ant-xxx"
+#   base_url: "https://api.anthropic.com/v1/"
+#   model: "claude-sonnet-4-5"
+#   # Get API key: https://console.anthropic.com/settings/keys
+#
+# DeepSeek (超高性价比):
+#   api_key: "sk-xxx"
+#   base_url: "https://api.deepseek.com"
+#   model: "deepseek-chat"
+#   # Get API key: https://platform.deepseek.com/api_keys
+#
+# Ollama (本地免费):
+#   api_key: "ollama"  # Any value works
+#   base_url: "http://localhost:11434/v1"
+#   model: "llama3.2"
+#   # Install: https://ollama.com/download
+#   # Then: ollama pull llama3.2
+#
+llm:
+  api_key: ""  # Fill in your API key
+  base_url: ""  # LLM API endpoint
+  model: ""  # Model name
+
+# ==================== TTS Configuration ====================
+tts:
+  default: edge
+  
+  # Edge TTS - Free, good quality
+  edge:
+    # No configuration needed
+  
+  # Azure TTS - Premium quality (optional)
+  # azure:
+  #   api_key: your_azure_key
+  #   region: eastus
+  #   voice: zh-CN-XiaoxiaoNeural
+
+# ==================== Image Generation Configuration ====================
+image:
+  default: comfykit
+  
+  # ComfyKit - Local or cloud ComfyUI
+  comfykit:
+    comfyui_url: http://127.0.0.1:8188  # Local ComfyUI server
+    # runninghub_api_key: ""             # Optional: RunningHub cloud API key
+
+# ==================== Book Fetcher Configuration ====================
+book_fetcher:
+  default: google
+  
+  # Google Books API (free, no key needed, works for English/Chinese books)
+  # Will automatically fallback to LLM if API fails or book not found
+  google:
+    # No configuration needed
+  
+  # Douban (requires custom implementation)
+  douban:
+    # Implement your own logic in reelforge/capabilities/book_fetcher.py
+
+# ==================== External MCP Servers (Optional) ====================
+mcp_servers: []
+  # Example: Add custom MCP server
+  # - name: custom_llm_server
+  #   url: http://localhost:8080/mcp
+  #   protocol: sse
+  #   enabled: true
+  #   description: My custom LLM server
+  
+  # Example: Add Pixelle MCP server
+  # - name: pixelle
+  #   url: http://localhost:8888/mcp
+  #   protocol: sse
+  #   enabled: false
+  #   description: Pixelle image generation
+
+# ==================== Notes ====================
+# 1. LLM Configuration:
+#    - Simple 3-field config: api_key, base_url, model
+#    - Works with ANY OpenAI SDK compatible LLM
+#    - Popular choices listed in comments above
+#    - Switch LLM: just copy-paste different values from comments
+#    - WebUI provides quick preset selection
+#
+# 2. Ollama (Recommended for Privacy):
+#    - FREE: No API costs
+#    - PRIVATE: Data never leaves your machine
+#    - Install: https://ollama.com/download
+#    - Usage: ollama pull llama3.2
+#
+# 3. Security:
+#    - Never commit config.yaml to version control
+#    - All sensitive data (API keys) should stay local

@@ -1,0 +1,159 @@
+{
+  "language_name": "English",
+  "t": {
+    "app.title": "🔨 ReelForge - Modular Video Creation Platform",
+    "app.subtitle": "Forge your perfect reel engine",
+    
+    "section.content_input": "📖 Content Input",
+    "section.style_settings": "⚙️ Custom Settings",
+    "section.video_generation": "🎬 Generate Video",
+    
+    "input_mode.book": "📚 Book Name",
+    "input_mode.topic": "💡 Topic",
+    "input_mode.custom": "✍️ Custom Content",
+    
+    "input.book_name": "Book Name",
+    "input.book_name_placeholder": "e.g., Atomic Habits, How to Win Friends",
+    "input.book_name_help": "Enter the book name, will fetch book info and generate video",
+    
+    "input.topic": "Topic",
+    "input.topic_placeholder": "e.g., How to build passive income, How to build good habits",
+    "input.topic_help": "Enter a topic, AI will generate content based on it",
+    
+    "input.content": "Content",
+    "input.content_placeholder": "Enter your custom content here...",
+    "input.content_help": "Provide your own content for video generation",
+    
+    "input.title": "Title (Optional)",
+    "input.title_placeholder": "Video title (auto-generated if empty)",
+    
+    "book.search": "🔍 Search Book",
+    "book.searching": "Searching book...",
+    "book.found": "✅ Book found!",
+    "book.not_found": "❌ Failed to fetch book: {error}",
+    "book.name_required": "Please enter a book name",
+    
+    "book.title": "Title",
+    "book.author": "Author",
+    "book.rating": "Rating",
+    "book.summary": "📝 Summary",
+    
+    "voice.title": "🎤 Voice Selection",
+    "voice.male_professional": "🎤 Male-Professional",
+    "voice.male_young": "🎙️ Male-Young",
+    "voice.female_gentle": "🎵 Female-Gentle",
+    "voice.female_energetic": "🎶 Female-Energetic",
+    "voice.preview": "▶ Preview Voice",
+    "voice.previewing": "Generating voice preview...",
+    "voice.preview_failed": "Preview failed: {error}",
+    
+    "style.title": "🎨 Illustration Style",
+    "style.custom": "Custom",
+    "style.description": "Style Description",
+    "style.description_placeholder": "Describe the illustration style you want (any language)...",
+    "style.preview": "🖼️ Preview Style",
+    "style.previewing": "Generating style preview...",
+    "style.preview_caption": "Style Preview",
+    "style.preview_failed": "Preview failed: {error}",
+    "style.generated_prompt": "Generated prompt: {prompt}",
+    
+    "template.title": "📐 Storyboard Template",
+    "template.classic": "Classic",
+    "template.modern": "Modern",
+    "template.neon": "Neon",
+    
+    "video.title": "🎬 Video Settings",
+    "video.frames": "Frames",
+    "video.frames_help": "More frames = longer video",
+    "video.frames_label": "Frames: {n}",
+    
+    "bgm.title": "🎵 Background Music",
+    "bgm.none": "🔇 No BGM",
+    "bgm.preview": "▶ Preview Music",
+    "bgm.preview_failed": "❌ Music file not found: {file}",
+    
+    "btn.generate": "🎬 Generate Video",
+    "btn.save_config": "💾 Save Configuration",
+    "btn.reset_config": "🔄 Reset to Default",
+    "btn.save_and_start": "Save and Start",
+    "btn.test_connection": "Test Connection",
+    
+    "status.initializing": "🔧 Initializing...",
+    "status.generating": "🚀 Generating video...",
+    "status.success": "✅ Video generated successfully!",
+    "status.error": "❌ Generation failed: {error}",
+    "status.video_generated": "✅ Video generated: {path}",
+    "status.video_not_found": "Video file not found: {path}",
+    "status.config_saved": "✅ Configuration saved",
+    "status.config_reset": "✅ Configuration reset to default",
+    "status.connection_success": "✅ Connected",
+    "status.connection_failed": "❌ Connection failed",
+    
+    "progress.generating_narrations": "Generating narrations...",
+    "progress.generating_image_prompts": "Generating image prompts...",
+    "progress.frame": "Frame {current}/{total}",
+    "progress.frame_step": "Frame {current}/{total} - Step {step}/4: {action}",
+    "progress.step_audio": "Generating audio",
+    "progress.step_image": "Generating image",
+    "progress.step_compose": "Composing frame",
+    "progress.step_video": "Creating video segment",
+    "progress.concatenating": "Concatenating video segments...",
+    "progress.finalizing": "Finalizing...",
+    
+    "error.input_required": "❌ Please provide book name, topic, or content",
+    "error.api_key_required": "❌ Please enter API Key",
+    "error.missing_field": "Please enter {field}",
+    
+    "info.duration": "Duration",
+    "info.file_size": "File Size",
+    "info.frames": "Scenes",
+    "info.scenes_unit": " scenes",
+    "info.resolution": "Resolution",
+    "info.video_information": "📊 Video Information",
+    "info.no_video_yet": "Video preview will appear here after generation",
+    
+    "settings.title": "⚙️ System Configuration (Required)",
+    "settings.not_configured": "⚠️ Please complete system configuration before generating videos",
+    "settings.llm.title": "🤖 Large Language Model",
+    "settings.llm.quick_select": "Quick Select",
+    "settings.llm.quick_select_help": "Choose a preset LLM or custom configuration",
+    "settings.llm.get_api_key": "Get API Key",
+    "settings.llm.api_key": "API Key",
+    "settings.llm.api_key_help": "Enter your API Key",
+    "settings.llm.base_url": "Base URL",
+    "settings.llm.base_url_help": "API service address",
+    "settings.llm.model": "Model",
+    "settings.llm.model_help": "Model name",
+    
+    "settings.tts.title": "🎤 Text-to-Speech",
+    "settings.tts.provider": "Provider",
+    "settings.tts.provider_help": "Select TTS service provider",
+    "settings.tts.edge_info": "💡 Edge TTS is free and requires no configuration",
+    
+    "settings.image.title": "🎨 Image Generation",
+    "settings.image.local_title": "Local/Self-hosted ComfyUI",
+    "settings.image.cloud_title": "RunningHub Cloud",
+    "settings.image.comfyui_url": "ComfyUI Service URL",
+    "settings.image.comfyui_url_help": "Local or remote ComfyUI service URL, default: http://127.0.0.1:8188",
+    "settings.image.runninghub_api_key": "RunningHub API Key",
+    "settings.image.runninghub_api_key_help": "Visit https://runninghub.ai to register and get API Key",
+    
+    "settings.book.title": "📚 Book Information",
+    "settings.book.provider": "Provider",
+    "settings.book.provider_help": "Select book information source",
+    
+    "welcome.first_time": "🎉 Welcome to ReelForge! Please complete basic configuration",
+    "welcome.config_hint": "💡 First-time setup requires API Key configuration, you can modify it in advanced settings later",
+    
+    "wizard.llm_required": "🤖 Large Language Model Configuration (Required)",
+    "wizard.image_optional": "🎨 Image Generation Configuration (Optional)",
+    "wizard.image_hint": "💡 If not configured, default template will be used (no AI image generation)",
+    "wizard.configure_image": "Configure Image Generation (Recommended)",
+    
+    "label.required": "(Required)",
+    "label.optional": "(Optional)",
+    
+    "language.select": "🌐 Language"
+  }
+}
+

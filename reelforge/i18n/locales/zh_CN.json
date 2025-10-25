@@ -1,0 +1,159 @@
+{
+  "language_name": "简体中文",
+  "t": {
+    "app.title": "🔨 ReelForge - 模块化视频创作平台",
+    "app.subtitle": "打造专属你的视频创作引擎",
+    
+    "section.content_input": "📖 内容输入",
+    "section.style_settings": "⚙️ 自定义设置",
+    "section.video_generation": "🎬 生成视频",
+    
+    "input_mode.book": "📚 书名",
+    "input_mode.topic": "💡 主题",
+    "input_mode.custom": "✍️ 自定义内容",
+    
+    "input.book_name": "书名",
+    "input.book_name_placeholder": "例如：原子习惯、人性的弱点、Atomic Habits",
+    "input.book_name_help": "输入书名，将自动获取书籍信息并生成视频",
+    
+    "input.topic": "主题",
+    "input.topic_placeholder": "例如：如何增加被动收入、How to build good habits",
+    "input.topic_help": "输入一个主题，AI 将根据主题生成内容",
+    
+    "input.content": "内容",
+    "input.content_placeholder": "在此输入您的自定义内容...",
+    "input.content_help": "提供您自己的内容用于视频生成",
+    
+    "input.title": "标题（可选）",
+    "input.title_placeholder": "视频标题（留空则自动生成）",
+    
+    "book.search": "🔍 搜索书籍",
+    "book.searching": "正在搜索书籍...",
+    "book.found": "✅ 找到书籍！",
+    "book.not_found": "❌ 获取书籍失败：{error}",
+    "book.name_required": "请输入书名",
+    
+    "book.title": "书名",
+    "book.author": "作者",
+    "book.rating": "评分",
+    "book.summary": "📝 简介",
+    
+    "voice.title": "🎤 语音选择",
+    "voice.male_professional": "🎤 男声-专业",
+    "voice.male_young": "🎙️ 男声-年轻",
+    "voice.female_gentle": "🎵 女声-温柔",
+    "voice.female_energetic": "🎶 女声-活力",
+    "voice.preview": "▶ 试听语音",
+    "voice.previewing": "正在生成语音预览...",
+    "voice.preview_failed": "预览失败：{error}",
+    
+    "style.title": "🎨 插图风格",
+    "style.custom": "自定义",
+    "style.description": "风格描述",
+    "style.description_placeholder": "描述您想要的插图风格（任何语言）...",
+    "style.preview": "🖼️ 预览风格",
+    "style.previewing": "正在生成风格预览...",
+    "style.preview_caption": "风格预览",
+    "style.preview_failed": "预览失败：{error}",
+    "style.generated_prompt": "生成的提示词：{prompt}",
+    
+    "template.title": "📐 分镜模板",
+    "template.classic": "Classic",
+    "template.modern": "Modern",
+    "template.neon": "Neon",
+    
+    "video.title": "🎬 视频设置",
+    "video.frames": "帧数",
+    "video.frames_help": "更多帧数 = 更长视频",
+    "video.frames_label": "帧数：{n}",
+    
+    "bgm.title": "🎵 背景音乐",
+    "bgm.none": "🔇 无背景音乐",
+    "bgm.preview": "▶ 试听音乐",
+    "bgm.preview_failed": "❌ 音乐文件未找到：{file}",
+    
+    "btn.generate": "🎬 生成视频",
+    "btn.save_config": "💾 保存配置",
+    "btn.reset_config": "🔄 重置默认",
+    "btn.save_and_start": "保存并开始",
+    "btn.test_connection": "测试连接",
+    
+    "status.initializing": "🔧 正在初始化...",
+    "status.generating": "🚀 正在生成视频...",
+    "status.success": "✅ 视频生成成功！",
+    "status.error": "❌ 生成失败：{error}",
+    "status.video_generated": "✅ 视频已生成：{path}",
+    "status.video_not_found": "视频文件未找到：{path}",
+    "status.config_saved": "✅ 配置已保存",
+    "status.config_reset": "✅ 配置已重置为默认值",
+    "status.connection_success": "✅ 连接成功",
+    "status.connection_failed": "❌ 连接失败",
+    
+    "progress.generating_narrations": "生成旁白...",
+    "progress.generating_image_prompts": "生成图片提示词...",
+    "progress.frame": "分镜 {current}/{total}",
+    "progress.frame_step": "分镜 {current}/{total} - 步骤 {step}/4: {action}",
+    "progress.step_audio": "生成语音",
+    "progress.step_image": "生成插图",
+    "progress.step_compose": "合成画面",
+    "progress.step_video": "创建视频片段",
+    "progress.concatenating": "拼接视频片段...",
+    "progress.finalizing": "完成中...",
+    
+    "error.input_required": "❌ 请提供书名、主题或内容",
+    "error.api_key_required": "❌ 请填写 API Key",
+    "error.missing_field": "请填写 {field}",
+    
+    "info.duration": "时长",
+    "info.file_size": "文件大小",
+    "info.frames": "分镜数",
+    "info.scenes_unit": "分镜",
+    "info.resolution": "分辨率",
+    "info.video_information": "📊 视频信息",
+    "info.no_video_yet": "生成视频后，预览将显示在这里",
+    
+    "settings.title": "⚙️ 系统配置（必需）",
+    "settings.not_configured": "⚠️ 请先完成系统配置才能生成视频",
+    "settings.llm.title": "🤖 大语言模型",
+    "settings.llm.quick_select": "快速选择",
+    "settings.llm.quick_select_help": "选择预置的 LLM 或自定义配置",
+    "settings.llm.get_api_key": "获取 API Key",
+    "settings.llm.api_key": "API Key",
+    "settings.llm.api_key_help": "填入您的 API Key",
+    "settings.llm.base_url": "Base URL",
+    "settings.llm.base_url_help": "API 服务地址",
+    "settings.llm.model": "Model",
+    "settings.llm.model_help": "模型名称",
+    
+    "settings.tts.title": "🎤 语音合成",
+    "settings.tts.provider": "服务商",
+    "settings.tts.provider_help": "选择 TTS 服务提供商",
+    "settings.tts.edge_info": "💡 Edge TTS 是免费的，无需配置",
+    
+    "settings.image.title": "🎨 图像生成",
+    "settings.image.local_title": "本地/自建 ComfyUI",
+    "settings.image.cloud_title": "RunningHub 云端",
+    "settings.image.comfyui_url": "ComfyUI 服务地址",
+    "settings.image.comfyui_url_help": "本地或远程 ComfyUI 服务地址，默认: http://127.0.0.1:8188",
+    "settings.image.runninghub_api_key": "RunningHub API Key",
+    "settings.image.runninghub_api_key_help": "访问 https://runninghub.ai 注册并获取 API Key",
+    
+    "settings.book.title": "📚 书籍信息",
+    "settings.book.provider": "服务商",
+    "settings.book.provider_help": "选择书籍信息来源",
+    
+    "welcome.first_time": "🎉 欢迎使用 ReelForge！请先完成基础配置",
+    "welcome.config_hint": "💡 首次使用需要配置 API Key，后续可以在高级设置中修改",
+    
+    "wizard.llm_required": "🤖 大语言模型配置（必需）",
+    "wizard.image_optional": "🎨 图像生成配置（可选）",
+    "wizard.image_hint": "💡 如果不配置图像生成，将使用默认模板（无 AI 生图）",
+    "wizard.configure_image": "配置图像生成（推荐）",
+    
+    "label.required": "（必需）",
+    "label.optional": "（可选）",
+    
+    "language.select": "🌐 语言"
+  }
+}
+
