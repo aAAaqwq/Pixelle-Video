@@ -223,10 +223,10 @@ def render_advanced_settings(config_manager: ConfigManager):
                     if preset_config.get("api_key_url"):
                         st.markdown(f"🔑 [{tr('settings.llm.get_api_key')}]({preset_config['api_key_url']})")
                 else:
-                    # Custom: clear all fields (let user fill custom config)
-                    default_api_key = ""
-                    default_base_url = ""
-                    default_model = ""
+                    # Custom: show current saved config (if any)
+                    default_api_key = current_llm["api_key"]
+                    default_base_url = current_llm["base_url"]
+                    default_model = current_llm["model"]
                 
                 st.markdown("---")
                 

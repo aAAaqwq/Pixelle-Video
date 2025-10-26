@@ -54,6 +54,8 @@ test_outputs/
 *.bak
 test_*.py
 
+!bgm/default.mp3
+
 # Temp files
 temp/
 tmp/
