@@ -63,7 +63,7 @@ def tr(key: str, fallback: Optional[str] = None, **kwargs) -> str:
         Translated text
     
     Example:
-        tr("app.title")  # => "ReelForge - AI书单视频生成器"
+        tr("app.title")  # => "ReelForge"
         tr("error.missing_field", field="API Key")  # => "请填写 API Key"
     """
     locale = _locales.get(_current_language, {})

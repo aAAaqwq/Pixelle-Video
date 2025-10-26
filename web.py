@@ -355,7 +355,7 @@ def main():
     # Top bar: Title + Language selector
     col1, col2 = st.columns([4, 1])
     with col1:
-        st.title(tr("app.title"))
+        st.markdown(f"<h3>{tr('app.title')}</h3>", unsafe_allow_html=True)
     with col2:
         render_language_selector()
     
