@@ -101,7 +101,7 @@ class VideoService:
                 - "filter": Slower but handles different formats
             bgm_path: Background music file path (optional)
                 - None: No BGM
-                - "default" or "happy": Use built-in BGM from bgm/ folder
+                - Filename (e.g., "default.mp3", "happy.mp3"): Use built-in BGM from bgm/ folder
                 - Custom path: Use custom BGM file
             bgm_volume: BGM volume level (0.0-1.0), default 0.2
             bgm_mode: BGM playback mode
@@ -504,11 +504,11 @@ class VideoService:
     
     def _resolve_bgm_path(self, bgm_path: str) -> str:
         """
-        Resolve BGM path (preset name or custom path)
+        Resolve BGM path (filename or custom path)
         
         Args:
             bgm_path: Can be:
-                - Preset name (e.g., "default", "happy"): auto-resolved from bgm/ directory
+                - Filename with extension (e.g., "default.mp3", "happy.mp3"): auto-resolved from bgm/ directory
                 - Custom file path (absolute or relative)
         
         Returns:
@@ -521,8 +521,8 @@ class VideoService:
         if os.path.exists(bgm_path):
             return os.path.abspath(bgm_path)
         
-        # Try as preset in bgm/ directory
-        preset_path = f"bgm/{bgm_path}.mp3"
+        # Try as filename in bgm/ directory
+        preset_path = f"bgm/{bgm_path}"
         if os.path.exists(preset_path):
             return os.path.abspath(preset_path)
         
@@ -532,9 +532,9 @@ class VideoService:
             os.path.abspath(preset_path)
         ]
         
-        # List available presets
+        # List available BGM files
         available_bgm = self._list_available_bgm()
-        available_msg = f"\n  Available presets: {', '.join(available_bgm)}" if available_bgm else ""
+        available_msg = f"\n  Available BGM files: {', '.join(available_bgm)}" if available_bgm else ""
         
         raise FileNotFoundError(
             f"BGM file not found: '{bgm_path}'\n"
@@ -546,10 +546,10 @@ class VideoService:
     
     def _list_available_bgm(self) -> list[str]:
         """
-        List available preset BGM files
+        List available BGM files in bgm/ directory
         
         Returns:
-            List of preset names (without .mp3 extension)
+            List of filenames (with extensions)
         """
         bgm_dir = "bgm"
         if not os.path.exists(bgm_dir):
@@ -557,7 +557,9 @@ class VideoService:
         
         try:
             files = os.listdir(bgm_dir)
-            return [f[:-4] for f in files if f.endswith('.mp3')]
+            # Return all audio files (mp3, wav, ogg, flac, etc.)
+            audio_extensions = ('.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac')
+            return [f for f in files if f.lower().endswith(audio_extensions)]
         except Exception:
             return []
 

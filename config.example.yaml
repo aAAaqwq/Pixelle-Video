@@ -56,6 +56,16 @@ image:
   default: default  # Default preset name (uses workflows/image_default.json)
   comfyui_url: http://127.0.0.1:8188  # Local ComfyUI server
   # runninghub_api_key: ""             # Optional: RunningHub cloud API key
+  
+  # Prompt prefix - automatically added to all image prompts
+  # Leave empty ("") if you don't want any prefix
+  prompt_prefix: "Pure white background, minimalist illustration, matchstick figure style, black and white line drawing, simple clean lines"
+  
+  # Common examples:
+  # prompt_prefix: ""  # No prefix
+  # prompt_prefix: "anime style, vibrant colors, cel shading"  # Anime style
+  # prompt_prefix: "watercolor painting, soft edges, artistic"  # Watercolor
+  # prompt_prefix: "photorealistic, 8k, professional photography"  # Realistic
 
 # ==================== Notes ====================
 # 1. LLM Configuration:

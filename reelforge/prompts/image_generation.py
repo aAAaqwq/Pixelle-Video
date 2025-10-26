@@ -50,7 +50,6 @@ IMAGE_PROMPT_GENERATION_PROMPT = """# 角色定位
 
 ## 图像提示词规范
 - 语言：**必须使用英文**（用于 AI 图像生成模型）
-- 画面风格：{style_description}
 - 描述结构：scene + character action + emotion + symbolic elements
 - 描述长度：确保描述清晰完整且富有创意（建议 50-100 个英文单词）
 
@@ -100,8 +99,7 @@ IMAGE_PROMPT_GENERATION_PROMPT = """# 角色定位
 5. **图像提示词必须使用英文**（for AI image generation models）
 6. 图像提示词必须准确反映对应旁白的具体内容和情感
 7. 每个图像都要有创意性和视觉冲击力，避免千篇一律
-8. 严格遵守上述指定的画面风格要求（{style_description}）
-9. 确保视觉画面能增强文案的说服力和观众的理解度
+8. 确保视觉画面能增强文案的说服力和观众的理解度
 
 现在，请为上述 {narrations_count} 个旁白创作对应的 {narrations_count} 个**英文**图像提示词。只输出JSON，不要其他内容。
 """
@@ -110,54 +108,24 @@ IMAGE_PROMPT_GENERATION_PROMPT = """# 角色定位
 def build_image_prompt_prompt(
     narrations: List[str],
     min_words: int,
-    max_words: int,
-    image_style_preset: Optional[str] = None,
-    image_style_description: Optional[str] = None
+    max_words: int
 ) -> str:
     """
     Build image prompt generation prompt
+    
+    Note: Style/prefix will be applied later via prompt_prefix in config.
     
     Args:
         narrations: List of narrations
         min_words: Minimum word count
         max_words: Maximum word count
-        image_style_preset: Preset style name (e.g., "minimal", "stick_figure", "concept")
-                           Available presets: see IMAGE_STYLE_PRESETS
-        image_style_description: Custom style description (overrides preset if provided)
-                                Example: "warm scenes, soft lighting, professional photography"
     
     Returns:
-        Formatted prompt
+        Formatted prompt for LLM
     
-    Examples:
-        # Use preset style
-        >>> build_image_prompt_prompt(narrations, 50, 100, image_style_preset="minimal")
-        
-        # Use custom style
-        >>> build_image_prompt_prompt(
-        ...     narrations, 50, 100, 
-        ...     image_style_description="cyberpunk style, neon colors, futuristic"
-        ... )
-        
-        # Use default style (stick_figure)
+    Example:
         >>> build_image_prompt_prompt(narrations, 50, 100)
     """
-    # Determine style description
-    if image_style_description:
-        # Custom description takes priority
-        style_desc = image_style_description
-    elif image_style_preset:
-        # Use preset
-        if image_style_preset not in IMAGE_STYLE_PRESETS:
-            raise ValueError(
-                f"Unknown preset '{image_style_preset}'. "
-                f"Available presets: {list(IMAGE_STYLE_PRESETS.keys())}"
-            )
-        style_desc = IMAGE_STYLE_PRESETS[image_style_preset]["description"]
-    else:
-        # Use default preset
-        style_desc = IMAGE_STYLE_PRESETS[DEFAULT_IMAGE_STYLE]["description"]
-    
     narrations_json = json.dumps(
         {"narrations": narrations},
         ensure_ascii=False,
@@ -168,7 +136,6 @@ def build_image_prompt_prompt(
         narrations_json=narrations_json,
         narrations_count=len(narrations),
         min_words=min_words,
-        max_words=max_words,
-        style_description=style_desc
+        max_words=max_words
     )
 

@@ -28,8 +28,6 @@ class ImagePromptGeneratorService:
         self,
         narrations: List[str],
         config: StoryboardConfig,
-        image_style_preset: str = None,
-        image_style_description: str = None,
         batch_size: int = 10,
         max_retries: int = 3,
         progress_callback: Optional[Callable] = None
@@ -40,14 +38,12 @@ class ImagePromptGeneratorService:
         Args:
             narrations: List of narrations
             config: Storyboard configuration
-            image_style_preset: Preset style name (e.g., "minimal", "futuristic")
-            image_style_description: Custom style description (overrides preset)
             batch_size: Max narrations per batch (default: 10)
             max_retries: Max retry attempts per batch (default: 3)
             progress_callback: Optional callback(completed, total, message) for progress updates
             
         Returns:
-            List of image prompts with style applied
+            List of image prompts with prompt_prefix applied (from config)
             
         Raises:
             ValueError: If batch fails after max_retries
@@ -117,28 +113,20 @@ class ImagePromptGeneratorService:
         base_prompts = all_base_prompts
         logger.info(f"✅ All batches completed. Total prompts: {len(base_prompts)}")
         
-        # 5. Apply style to each prompt using FinalImagePromptService
-        from reelforge.services.final_image_prompt import StylePreset
+        # 5. Apply prompt prefix to each prompt
+        from reelforge.utils.prompt_helper import build_image_prompt
         
-        # Convert style preset name to enum if provided
-        style_preset_enum = None
-        if image_style_preset:
-            try:
-                style_preset_enum = StylePreset[image_style_preset.upper()]
-            except KeyError:
-                logger.warning(f"Unknown style preset: {image_style_preset}")
+        # Get prompt prefix from config
+        image_config = self.core.config.get("image", {})
+        prompt_prefix = image_config.get("prompt_prefix", "")
         
-        # Apply style to each base prompt
+        # Apply prefix to each base prompt
         final_prompts = []
         for base_prompt in base_prompts:
-            final_prompt = await self.core.generate_final_image_prompt(
-                prompt=base_prompt,
-                style_preset=style_preset_enum,
-                custom_style_description=image_style_description or ""
-            )
+            final_prompt = build_image_prompt(base_prompt, prompt_prefix)
             final_prompts.append(final_prompt)
         
-        logger.info(f"Generated {len(final_prompts)} final image prompts with style applied")
+        logger.info(f"Generated {len(final_prompts)} final image prompts with prefix applied")
         return final_prompts
     
     async def _generate_batch_prompts(
@@ -170,9 +158,7 @@ class ImagePromptGeneratorService:
         prompt = build_image_prompt_prompt(
             narrations=batch_narrations,
             min_words=config.min_image_prompt_words,
-            max_words=config.max_image_prompt_words,
-            image_style_preset=None,
-            image_style_description=None
+            max_words=config.max_image_prompt_words
         )
         
         # 2. Call LLM

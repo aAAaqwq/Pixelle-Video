@@ -14,11 +14,6 @@ from reelforge.services.image_prompt_generator import ImagePromptGeneratorServic
 from reelforge.services.frame_composer import FrameComposerService
 from reelforge.services.storyboard_processor import StoryboardProcessorService
 from reelforge.services.video_generator import VideoGeneratorService
-from reelforge.services.final_image_prompt import (
-    FinalImagePromptService, 
-    StylePreset, 
-    PresetValue
-)
 
 __all__ = [
     "BaseService",
@@ -31,8 +26,5 @@ __all__ = [
     "FrameComposerService",
     "StoryboardProcessorService",
     "VideoGeneratorService",
-    "FinalImagePromptService",
-    "StylePreset",
-    "PresetValue",
 ]
 

@@ -140,9 +140,10 @@ class StoryboardProcessorService:
         """Step 2: Generate image using ComfyKit"""
         logger.debug(f"  2/4: Generating image for frame {frame.index}...")
         
-        # Call Image generation (using default preset)
+        # Call Image generation (with optional preset)
         image_url = await self.core.image(
             prompt=frame.image_prompt,
+            preset=config.image_preset,  # Pass preset from config (None = use default)
             width=config.image_width,
             height=config.image_height
         )
@@ -201,19 +202,17 @@ class StoryboardProcessorService:
         from pathlib import Path
         
         # Resolve template path
-        template_name = config.frame_template
-        if not template_name.endswith('.html'):
-            template_name = f"{template_name}.html"
+        template_filename = config.frame_template
         
         # Try templates/ directory first
-        template_path = Path(f"templates/{template_name}")
+        template_path = Path(f"templates/{template_filename}")
         if not template_path.exists():
-            # Try as absolute path
-            template_path = Path(template_name)
+            # Try as absolute/relative path
+            template_path = Path(template_filename)
             if not template_path.exists():
                 raise FileNotFoundError(
-                    f"Template not found: {template_name}. "
-                    f"Available templates: classic, modern, minimal"
+                    f"Template not found: {template_filename}. "
+                    f"Built-in templates: default.html, modern.html, neon.html"
                 )
         
         # Get storyboard for content metadata

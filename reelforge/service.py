@@ -66,7 +66,6 @@ class ReelForgeCore:
         # Content generation services
         self.narration_generator = None
         self.image_prompt_generator = None
-        self.generate_final_image_prompt = None
         
         # Frame processing services
         self.frame_composer = None
@@ -111,11 +110,9 @@ class ReelForgeCore:
         # 5. Initialize content generation services
         from reelforge.services.narration_generator import NarrationGeneratorService
         from reelforge.services.image_prompt_generator import ImagePromptGeneratorService
-        from reelforge.services.final_image_prompt import FinalImagePromptService
         
         self.narration_generator = NarrationGeneratorService(self)
         self.image_prompt_generator = ImagePromptGeneratorService(self)
-        self.generate_final_image_prompt = FinalImagePromptService(self)
         
         # 6. Initialize frame processing services
         from reelforge.services.frame_composer import FrameComposerService

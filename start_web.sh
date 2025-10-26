@@ -15,5 +15,5 @@ if [ ! -f config.yaml ]; then
 fi
 
 # Start Streamlit
-uv run streamlit run web.py --server.port=8501 --server.address=localhost
+uv run streamlit run web.py
 

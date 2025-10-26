@@ -77,51 +77,32 @@ def init_i18n():
 # Preview Cache Functions
 # ============================================================================
 
-def generate_style_preview_cached(
-    style_preset_name: str,
-    custom_style_description: str
-):
+def generate_style_preview_cached(prompt_prefix: str):
     """
     Generate and cache visual style preview
     
     Args:
-        style_preset_name: Preset style name ("minimal", "futuristic", etc.) or empty
-        custom_style_description: Custom description or empty
+        prompt_prefix: Prompt prefix to test
     
     Returns:
-        Tuple of (image_path, converted_prompt_if_custom)
+        Generated image path
     """
-    from reelforge.services.final_image_prompt import StylePreset
+    from reelforge.utils.prompt_helper import build_image_prompt
     
     reelforge = get_reelforge()
     
-    # Convert style preset name to enum
-    style_preset = None
-    if style_preset_name:
-        try:
-            style_preset = StylePreset[style_preset_name.upper()]
-        except KeyError:
-            pass
-    
-    # Generate final prompt using the new service
-    final_prompt = run_async(reelforge.generate_final_image_prompt(
-        prompt="A peaceful mountain landscape",
-        style_preset=style_preset,
-        custom_style_description=custom_style_description
-    ))
+    # Build final prompt with prefix
+    test_prompt = "A peaceful mountain landscape"
+    final_prompt = build_image_prompt(test_prompt, prompt_prefix)
     
     # Generate preview image (small size for speed)
-    # Using default preset (workflows/image_default.json)
     preview_image_path = run_async(reelforge.image(
         prompt=final_prompt,
         width=512,
         height=512
     ))
     
-    # Return converted prompt only for custom mode
-    converted_prompt = final_prompt if custom_style_description else None
-    
-    return preview_image_path, converted_prompt
+    return preview_image_path
 
 
 # ============================================================================
@@ -452,53 +433,7 @@ def main():
             
             st.markdown("---")
             
-            # Background music
-            st.markdown(f"**{tr('bgm.title')}**")
-            
-            # Dynamically scan bgm folder for music files (support common audio formats)
-            bgm_folder = Path("bgm")
-            bgm_files = []
-            if bgm_folder.exists():
-                audio_extensions = ["*.mp3", "*.wav", "*.flac", "*.m4a", "*.aac", "*.ogg"]
-                for ext in audio_extensions:
-                    bgm_files.extend([f.name for f in bgm_folder.glob(ext)])
-                bgm_files.sort()
-            
-            # Add special "None" option
-            bgm_options = [tr("bgm.none")] + bgm_files
-            
-            # Default to "default.mp3" if exists, otherwise first option
-            default_index = 0
-            if "default.mp3" in bgm_files:
-                default_index = bgm_options.index("default.mp3")
-            
-            bgm_choice = st.selectbox(
-                "BGM",
-                bgm_options,
-                index=default_index,
-                label_visibility="collapsed"
-            )
-            
-            # BGM preview button (only if BGM is not "None")
-            if bgm_choice != tr("bgm.none"):
-                if st.button(tr("bgm.preview"), key="preview_bgm", use_container_width=True):
-                    bgm_file_path = f"bgm/{bgm_choice}"
-                    if os.path.exists(bgm_file_path):
-                        st.audio(bgm_file_path)
-                    else:
-                        st.error(tr("bgm.preview_failed", file=bgm_choice))
-            
-            # Extract filename without extension for bgm_path (service layer expects stem only)
-            bgm_path = None if bgm_choice == tr("bgm.none") else Path(bgm_choice).stem
-    
-    # ========================================================================
-    # Middle Column: Custom Settings (Voice & Visual Style & Template)
-    # ========================================================================
-    with middle_col:
-        with st.container(border=True):
-            st.markdown(f"**{tr('section.style_settings')}**")
-            
-            # Voice selection
+            # Voice selection (moved from middle column)
             st.markdown(f"**{tr('voice.title')}**")
             voice_id = st.selectbox(
                 "Voice",
@@ -538,63 +473,108 @@ def main():
                     except Exception as e:
                         st.error(tr("voice.preview_failed", error=str(e)))
                         logger.exception(e)
+    
+    # ========================================================================
+    # Middle Column: Custom Settings (BGM & Visual Style & Template)
+    # ========================================================================
+    with middle_col:
+        with st.container(border=True):
+            st.markdown(f"**{tr('section.style_settings')}**")
             
-            st.markdown("---")
+            # Background music (moved from left column)
+            st.markdown(f"**{tr('bgm.title')}**")
+            st.caption(tr("bgm.custom_help"))
             
-            # Visual style (Illustration Style)
-            st.markdown(f"**{tr('style.title')}**")
+            # Dynamically scan bgm folder for music files (support common audio formats)
+            bgm_folder = Path("bgm")
+            bgm_files = []
+            if bgm_folder.exists():
+                audio_extensions = ["*.mp3", "*.wav", "*.flac", "*.m4a", "*.aac", "*.ogg"]
+                for ext in audio_extensions:
+                    bgm_files.extend([f.name for f in bgm_folder.glob(ext)])
+                bgm_files.sort()
             
-            # Get available presets dynamically from StylePreset enum
-            from reelforge.services.final_image_prompt import StylePreset
+            # Add special "None" option
+            bgm_options = [tr("bgm.none")] + bgm_files
             
-            # Build preset options (enum values + custom)
-            preset_options = [preset.name.lower() for preset in StylePreset]
-            preset_options.append("custom")
+            # Default to "default.mp3" if exists, otherwise first option
+            default_index = 0
+            if "default.mp3" in bgm_files:
+                default_index = bgm_options.index("default.mp3")
             
-            # Dynamic display name function
-            def get_preset_display(preset_name: str) -> str:
-                if preset_name == "custom":
-                    return tr("style.custom")
-                # Find the enum by name and get its display_name
-                for preset in StylePreset:
-                    if preset.name.lower() == preset_name:
-                        return preset.value.display_name
-                return preset_name.replace("_", " ").title()
-            
-            # Change from radio to selectbox (dropdown)
-            style_preset = st.selectbox(
-                "Style Preset",
-                preset_options,
-                format_func=get_preset_display,
+            bgm_choice = st.selectbox(
+                "BGM",
+                bgm_options,
+                index=default_index,
                 label_visibility="collapsed"
             )
             
-            # Custom style description input (only show for custom mode)
-            custom_style_description = ""
-            if style_preset == "custom":
-                custom_style_description = st.text_area(
-                    tr("style.description"),
-                    placeholder=tr("style.description_placeholder"),
-                    height=80,
-                    label_visibility="collapsed"
-                )
+            # BGM preview button (only if BGM is not "None")
+            if bgm_choice != tr("bgm.none"):
+                if st.button(tr("bgm.preview"), key="preview_bgm", use_container_width=True):
+                    bgm_file_path = f"bgm/{bgm_choice}"
+                    if os.path.exists(bgm_file_path):
+                        st.audio(bgm_file_path)
+                    else:
+                        st.error(tr("bgm.preview_failed", file=bgm_choice))
+            
+            # Use full filename for bgm_path (including extension)
+            bgm_path = None if bgm_choice == tr("bgm.none") else bgm_choice
+            
+            
+            # Visual style (Workflow + Prompt Prefix)
+            st.markdown(f"**{tr('style.title')}**")
+            
+            # 1. ComfyUI Workflow selection
+            st.caption(tr("style.workflow"))
+            st.caption(tr("style.workflow_help"))
+            
+            # Dynamically scan workflows folder for image_*.json files
+            workflows_folder = Path("workflows")
+            workflow_files = []
+            if workflows_folder.exists():
+                workflow_files = sorted([f.name for f in workflows_folder.glob("image_*.json")])
+            
+            # Default to "image_default.json" if exists, otherwise first option
+            default_workflow_index = 0
+            if "image_default.json" in workflow_files:
+                default_workflow_index = workflow_files.index("image_default.json")
+            
+            workflow_filename = st.selectbox(
+                "Workflow",
+                workflow_files if workflow_files else ["image_default.json"],
+                index=default_workflow_index,
+                label_visibility="collapsed",
+                key="image_preset_select"
+            )
+            
+            # Extract preset name from filename: "image_default.json" -> "default"
+            image_preset = workflow_filename.replace("image_", "").replace(".json", "") if workflow_filename else None
+            
+            
+            # 2. Prompt prefix input
+            st.caption(tr("style.prompt_prefix"))
+            
+            # Get current prompt_prefix from config
+            image_config = config_manager.config.get("image", {})
+            current_prefix = image_config.get("prompt_prefix", "")
+            
+            # Prompt prefix input (temporary, not saved to config)
+            prompt_prefix = st.text_area(
+                "Prompt Prefix",
+                value=current_prefix,
+                placeholder=tr("style.prompt_prefix_placeholder"),
+                height=80,
+                label_visibility="collapsed",
+                help=tr("style.prompt_prefix_help")
+            )
             
             # Visual style preview button
             if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
                 with st.spinner(tr("style.previewing")):
                     try:
                         # Generate preview using cached function
-                        preset_name = style_preset if style_preset != "custom" else ""
-                        custom_desc = custom_style_description if style_preset == "custom" else ""
-                        
-                        preview_image_path, generated_prompt = generate_style_preview_cached(
-                            style_preset_name=preset_name,
-                            custom_style_description=custom_desc
-                        )
-                        
-                        # Show generated prompt if custom mode
-                        if generated_prompt:
-                            st.info(tr("style.generated_prompt", prompt=generated_prompt))
+                        preview_image_path = generate_style_preview_cached(prompt_prefix)
                         
                         # Display preview (support both URL and local path)
                         if preview_image_path:
@@ -609,21 +589,39 @@ def main():
                                 img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
                             
                             st.markdown(img_html, unsafe_allow_html=True)
-                            st.caption(tr("style.preview_caption"))
+                            st.caption("Preview with test prompt: 'A peaceful mountain landscape'")
+                            
+                            # Show the final prompt used
+                            from reelforge.utils.prompt_helper import build_image_prompt
+                            test_prompt = "A peaceful mountain landscape"
+                            final_prompt = build_image_prompt(test_prompt, prompt_prefix)
+                            st.info(f"Final prompt used: {final_prompt}")
                         else:
                             st.error("Failed to generate preview image")
                     except Exception as e:
                         st.error(tr("style.preview_failed", error=str(e)))
                         logger.exception(e)
             
-            st.markdown("---")
             
             # Frame template (moved from right column)
             st.markdown(f"**{tr('template.title')}**")
+            st.caption(tr("template.custom_help"))
+            
+            # Dynamically scan templates folder for HTML files
+            templates_folder = Path("templates")
+            template_files = []
+            if templates_folder.exists():
+                template_files = sorted([f.name for f in templates_folder.glob("*.html")])
+            
+            # Default to default.html if exists, otherwise first option
+            default_template_index = 0
+            if "default.html" in template_files:
+                default_template_index = template_files.index("default.html")
+            
             frame_template = st.selectbox(
                 "Template",
-                ["classic", "modern", "neon"],
-                format_func=lambda x: tr(f"template.{x}"),
+                template_files if template_files else ["default.html"],
+                index=default_template_index,
                 label_visibility="collapsed"
             )
     
@@ -688,26 +686,16 @@ def main():
                         status_text.text(message)
                         progress_bar.progress(min(int(event.progress * 100), 99))  # Cap at 99% until complete
                     
-                    # Prepare image style parameters
-                    style_preset_param = None
-                    style_description_param = None
-                    
-                    if style_preset == "custom":
-                        # Custom mode: pass user description as-is
-                        style_description_param = custom_style_description
-                    else:
-                        # Preset mode: pass preset name
-                        style_preset_param = style_preset
-                    
+                    # Generate video (directly pass parameters)
                     result = run_async(reelforge.generate_video(
                         text=text,
                         mode=mode,
                         title=title if title else None,
                         n_scenes=n_scenes,
                         voice_id=voice_id,
-                        image_style_preset=style_preset_param,
-                        image_style_description=style_description_param,
+                        image_preset=image_preset,  # Pass image_preset
                         frame_template=frame_template,
+                        prompt_prefix=prompt_prefix,  # Pass prompt_prefix
                         bgm_path=bgm_path,
                         progress_callback=update_progress,
                     ))

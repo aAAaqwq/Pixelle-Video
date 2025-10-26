@@ -56,7 +56,12 @@
     "voice.previewing": "Generating voice preview...",
     "voice.preview_failed": "Preview failed: {error}",
     
-    "style.title": "🎨 Illustration Style",
+    "style.title": "🎨 Image Settings",
+    "style.workflow": "ComfyUI Workflow",
+    "style.workflow_help": "💡 Custom: Place image_xxx.json in workflows/ folder",
+    "style.prompt_prefix": "Style Prompt Prefix",
+    "style.prompt_prefix_placeholder": "Enter style prefix (leave empty for config default)",
+    "style.prompt_prefix_help": "This text will be automatically added before all image generation prompts. To permanently change, edit config.yaml",
     "style.custom": "Custom",
     "style.description": "Style Description",
     "style.description_placeholder": "Describe the illustration style you want (any language)...",
@@ -67,9 +72,10 @@
     "style.generated_prompt": "Generated prompt: {prompt}",
     
     "template.title": "📐 Storyboard Template",
-    "template.classic": "Classic",
+    "template.default": "Default",
     "template.modern": "Modern",
     "template.neon": "Neon",
+    "template.custom_help": "💡 Custom: Place .html files in templates/ folder",
     
     "video.title": "🎬 Video Settings",
     "video.frames": "Scenes",
@@ -81,6 +87,7 @@
     "bgm.none": "🔇 No BGM",
     "bgm.preview": "▶ Preview Music",
     "bgm.preview_failed": "❌ Music file not found: {file}",
+    "bgm.custom_help": "💡 Custom: Place audio files in bgm/ folder",
     
     "btn.generate": "🎬 Generate Video",
     "btn.save_config": "💾 Save Configuration",

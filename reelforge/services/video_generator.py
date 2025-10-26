@@ -66,8 +66,7 @@ class VideoGeneratorService:
         # === Image Parameters ===
         image_width: int = 1024,
         image_height: int = 1024,
-        image_style_preset: Optional[str] = None,
-        image_style_description: Optional[str] = None,
+        image_preset: Optional[str] = None,
         
         # === Video Parameters ===
         video_width: int = 1080,
@@ -76,6 +75,9 @@ class VideoGeneratorService:
         
         # === Frame Template ===
         frame_template: Optional[str] = None,
+        
+        # === Image Style ===
+        prompt_prefix: Optional[str] = None,
         
         # === BGM Parameters ===
         bgm_path: Optional[str] = None,
@@ -119,17 +121,19 @@ class VideoGeneratorService:
             
             image_width: Generated image width (default 1024)
             image_height: Generated image height (default 1024)
-            image_style_preset: Preset style name (e.g., "minimal", "concept", "cinematic")
-            image_style_description: Custom style description (overrides preset)
+            image_preset: Image workflow preset (e.g., "flux", "sdxl", None = use default)
             
             video_width: Final video width (default 1080)
             video_height: Final video height (default 1920)
             video_fps: Video frame rate (default 30)
             
-            frame_template: HTML template name or path (None = use PIL)
-                           e.g., "classic", "modern", "minimal", or custom path
+            frame_template: HTML template filename or path (None = use PIL)
+                           e.g., "default.html", "modern.html", "neon.html", or custom path
             
-            bgm_path: BGM path ("default", "happy", custom path, or None)
+            prompt_prefix: Image prompt prefix (overrides config.yaml if provided)
+                          e.g., "anime style, vibrant colors" or "" for no prefix
+            
+            bgm_path: BGM path (filename like "default.mp3", custom path, or None)
             bgm_volume: BGM volume 0.0-1.0 (default 0.2)
             bgm_mode: BGM mode "once" or "loop" (default "loop")
             
@@ -211,6 +215,7 @@ class VideoGeneratorService:
             voice_id=voice_id,
             image_width=image_width,
             image_height=image_height,
+            image_preset=image_preset,
             frame_template=frame_template
         )
         
@@ -248,25 +253,36 @@ class VideoGeneratorService:
             # Step 2: Generate image prompts
             self._report_progress(progress_callback, "generating_image_prompts", 0.15)
             
-            # Create progress callback wrapper for image prompt generation (15%-30% range)
-            def image_prompt_progress(completed: int, total: int, message: str):
-                # Map batch progress to 15%-30% range
-                batch_progress = completed / total if total > 0 else 0
-                overall_progress = 0.15 + (batch_progress * 0.15)  # 15% -> 30%
-                self._report_progress(
-                    progress_callback, 
-                    "generating_image_prompts", 
-                    overall_progress,
-                    extra_info=message
-                )
+            # Override prompt_prefix if provided (temporarily modify config)
+            original_prefix = None
+            if prompt_prefix is not None:
+                image_config = self.core.config.get("image", {})
+                original_prefix = image_config.get("prompt_prefix")
+                image_config["prompt_prefix"] = prompt_prefix
+                logger.info(f"Using custom prompt_prefix: '{prompt_prefix}'")
             
-            image_prompts = await self.core.image_prompt_generator.generate_image_prompts(
-                narrations=narrations,
-                config=config,
-                image_style_preset=image_style_preset,
-                image_style_description=image_style_description,
-                progress_callback=image_prompt_progress
-            )
+            try:
+                # Create progress callback wrapper for image prompt generation (15%-30% range)
+                def image_prompt_progress(completed: int, total: int, message: str):
+                    # Map batch progress to 15%-30% range
+                    batch_progress = completed / total if total > 0 else 0
+                    overall_progress = 0.15 + (batch_progress * 0.15)  # 15% -> 30%
+                    self._report_progress(
+                        progress_callback, 
+                        "generating_image_prompts", 
+                        overall_progress,
+                        extra_info=message
+                    )
+                
+                image_prompts = await self.core.image_prompt_generator.generate_image_prompts(
+                    narrations=narrations,
+                    config=config,
+                    progress_callback=image_prompt_progress
+                )
+            finally:
+                # Restore original prompt_prefix
+                if original_prefix is not None:
+                    image_config["prompt_prefix"] = original_prefix
             logger.info(f"✅ Generated {len(image_prompts)} image prompts")
             
             # Step 3: Create frames
