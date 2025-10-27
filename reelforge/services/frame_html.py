@@ -193,7 +193,7 @@ class HTMLFrameGenerator:
     
     async def generate_frame(
         self,
-        topic: str,
+        title: str,
         text: str,
         image: str,
         ext: Optional[Dict[str, Any]] = None,
@@ -204,7 +204,7 @@ class HTMLFrameGenerator:
         Generate frame from HTML template
         
         Args:
-            topic: Video topic/theme
+            title: Video title
             text: Narration text for this frame
             image: Path to AI-generated image
             ext: Additional data (content_title, content_author, etc.)
@@ -217,7 +217,7 @@ class HTMLFrameGenerator:
         # Build variable context
         context = {
             # Required variables
-            "topic": topic,
+            "title": title,
             "text": text,
             "image": image,
         }

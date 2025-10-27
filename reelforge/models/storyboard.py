@@ -30,7 +30,7 @@ class StoryboardConfig:
     image_workflow: Optional[str] = None       # Image workflow filename (None = use default)
     
     # Frame template
-    frame_template: Optional[str] = None       # HTML template name or path (None = use PIL)
+    frame_template: str = "default.html"       # HTML template name or path (e.g., "default.html", "modern.html")
 
 
 @dataclass
@@ -70,7 +70,7 @@ class ContentMetadata:
 @dataclass
 class Storyboard:
     """Complete storyboard"""
-    topic: str                                 # Topic or content title
+    title: str                                 # Video title
     config: StoryboardConfig                   # Configuration
     frames: List[StoryboardFrame] = field(default_factory=list)
     

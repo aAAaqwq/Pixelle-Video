@@ -127,7 +127,7 @@ class VideoGeneratorService:
             video_height: Final video height (default 1920)
             video_fps: Video frame rate (default 30)
             
-            frame_template: HTML template filename or path (None = use PIL)
+            frame_template: HTML template filename or path (None = use default template)
                            e.g., "default.html", "modern.html", "neon.html", or custom path
             
             prompt_prefix: Image prompt prefix (overrides config.yaml if provided)
@@ -181,15 +181,15 @@ class VideoGeneratorService:
             final_title = title
             logger.info(f"   Title: '{title}' (user-specified)")
         else:
-            # Auto-generate title based on mode
+            # Auto-generate title using title_generator service
+            self._report_progress(progress_callback, "generating_title", 0.01)
             if mode == "generate":
-                # Use text as title (it's a topic/theme)
-                final_title = text[:20] if len(text) > 20 else text
-                logger.info(f"   Title: '{final_title}' (from text)")
+                # Auto strategy: decide based on content length
+                final_title = await self.core.title_generator(text, strategy="auto")
+                logger.info(f"   Title: '{final_title}' (auto-generated)")
             else:  # fixed
-                # Generate title from script using LLM
-                self._report_progress(progress_callback, "generating_title", 0.01)
-                final_title = await self._generate_title_from_content(text)
+                # Force LLM strategy: always use LLM for script
+                final_title = await self.core.title_generator(text, strategy="llm")
                 logger.info(f"   Title: '{final_title}' (LLM-generated)")
         
         # Auto-generate output path if not provided
@@ -216,12 +216,12 @@ class VideoGeneratorService:
             image_width=image_width,
             image_height=image_height,
             image_workflow=image_workflow,
-            frame_template=frame_template
+            frame_template=frame_template or "default.html"
         )
         
         # Create storyboard
         storyboard = Storyboard(
-            topic=final_title,  # Use final_title as video title
+            title=final_title,  # Use final_title as video title
             config=config,
             content_metadata=content_metadata,
             created_at=datetime.now()
@@ -564,41 +564,4 @@ class VideoGeneratorService:
                 logger.info(f"  Too long (> {max_len}): {too_long}/{len(result)} ({too_long*100//len(result)}%)")
         
         return result
-    
-    async def _generate_title_from_content(self, content: str) -> str:
-        """
-        Generate a short, attractive title from user content using LLM
-        
-        Args:
-            content: User-provided content
-            
-        Returns:
-            Generated title (10 characters or less)
-        """
-        from reelforge.prompts import build_title_generation_prompt
-        
-        # Build prompt using template
-        prompt = build_title_generation_prompt(content, max_length=500)
-        
-        # Call LLM to generate title
-        response = await self.core.llm(
-            prompt=prompt,
-            temperature=0.7,
-            max_tokens=50
-        )
-        
-        # Clean up response
-        title = response.strip()
-        
-        # Remove quotes if present
-        if title.startswith('"') and title.endswith('"'):
-            title = title[1:-1]
-        if title.startswith("'") and title.endswith("'"):
-            title = title[1:-1]
-        
-        # Limit to 20 chars max (safety)
-        if len(title) > 20:
-            title = title[:20]
-        
-        return title
 

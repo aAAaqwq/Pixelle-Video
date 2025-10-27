@@ -162,37 +162,17 @@ class StoryboardProcessorService:
         storyboard: 'Storyboard',
         config: StoryboardConfig
     ):
-        """Step 3: Compose frame with subtitle"""
+        """Step 3: Compose frame with subtitle using HTML template"""
         logger.debug(f"  3/4: Composing frame {frame.index}...")
         
         output_path = get_temp_path(f"frame_{frame.index}_composed.png")
         
-        # Choose frame generator based on template config
-        if config.frame_template:
-            # Use HTML template
-            composed_path = await self._compose_frame_html(frame, storyboard, config, output_path)
-        else:
-            # Use PIL (default)
-            composed_path = await self._compose_frame_pil(frame, config, output_path)
+        # Use HTML template to compose frame
+        composed_path = await self._compose_frame_html(frame, storyboard, config, output_path)
         
         frame.composed_image_path = composed_path
         
         logger.debug(f"  ✓ Frame composed: {composed_path}")
-    
-    async def _compose_frame_pil(
-        self,
-        frame: StoryboardFrame,
-        config: StoryboardConfig,
-        output_path: str
-    ) -> str:
-        """Compose frame using PIL (default)"""
-        composed_path = await self.core.frame_composer.compose_frame(
-            image_path=frame.image_path,
-            subtitle=frame.narration,
-            output_path=output_path,
-            config=config
-        )
-        return composed_path
     
     async def _compose_frame_html(
         self,
@@ -233,7 +213,7 @@ class StoryboardProcessorService:
         # Generate frame using HTML
         generator = HTMLFrameGenerator(str(template_path))
         composed_path = await generator.generate_frame(
-            topic=storyboard.topic,
+            title=storyboard.title,
             text=frame.narration,
             image=frame.image_path,
             ext=ext,

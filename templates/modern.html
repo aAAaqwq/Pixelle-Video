@@ -149,12 +149,12 @@
         }
         
         /* Header with icon decoration */
-        .topic-wrapper {
+        .video-title-wrapper {
             position: relative;
             text-align: center;
         }
         
-        .topic-decoration {
+        .video-title-decoration {
             position: absolute;
             top: -30px;
             left: 50%;
@@ -163,17 +163,17 @@
             gap: 8px;
         }
         
-        .topic-dot {
+        .video-title-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
         }
         
-        .topic-dot:nth-child(1) { background: #FF6B9D; }
-        .topic-dot:nth-child(2) { background: #4ECDC4; }
-        .topic-dot:nth-child(3) { background: #FFE66D; }
+        .video-title-dot:nth-child(1) { background: #FF6B9D; }
+        .video-title-dot:nth-child(2) { background: #4ECDC4; }
+        .video-title-dot:nth-child(3) { background: #FFE66D; }
         
-        .topic {
+        .video-title {
             font-size: 72px;
             font-weight: bold;
             color: white;
@@ -184,8 +184,8 @@
             display: inline-block;
         }
         
-        .topic::before,
-        .topic::after {
+        .video-title::before,
+        .video-title::after {
             content: '';
             position: absolute;
             width: 70px;
@@ -194,11 +194,11 @@
             top: 50%;
         }
         
-        .topic::before {
+        .video-title::before {
             left: -90px;
         }
         
-        .topic::after {
+        .video-title::after {
             right: -90px;
         }
         
@@ -492,11 +492,11 @@
     </div>
     
     <div class="page-container">
-        <div class="topic-wrapper">
-            <div class="topic-decoration">
-                <div class="topic-dot"></div>
-                <div class="topic-dot"></div>
-                <div class="topic-dot"></div>
+        <div class="video-title-wrapper">
+            <div class="video-title-decoration">
+                <div class="video-title-dot"></div>
+                <div class="video-title-dot"></div>
+                <div class="video-title-dot"></div>
             </div>
             
             <!-- Bookmark decoration -->
@@ -504,7 +504,7 @@
                 <path d="M2 0h20v32l-10-6-10 6V0z"/>
             </svg>
             
-            <div class="topic">{{topic}}</div>
+            <div class="video-title">{{title}}</div>
         </div>
         
         <div class="image-wrapper">
