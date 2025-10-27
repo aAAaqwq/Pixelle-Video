@@ -6,13 +6,13 @@ import asyncio
 
 from loguru import logger
 
-from reelforge.app import app
+from reelforge.service import reelforge
 
 
 async def test_llm():
     """Test LLM capability"""
-    # Initialize app
-    await app.initialize()
+    # Initialize reelforge
+    await reelforge.initialize()
     
     # Test prompt
     prompt = "Explain the concept of atomic habits in 3 sentences."
@@ -20,7 +20,7 @@ async def test_llm():
     logger.info(f"\n📝 Test Prompt: {prompt}\n")
     
     # Call LLM
-    result = await app.router.call("llm", prompt=prompt)
+    result = await reelforge.llm(prompt)
     
     logger.info(f"\n✨ Result:\n{result}\n")
 

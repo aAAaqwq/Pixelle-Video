@@ -70,10 +70,6 @@ answer = await reelforge.llm(
     temperature=0.7,  # 0.0-2.0 (lower = more deterministic)
     max_tokens=2000
 )
-
-# Check active LLM
-print(f"Using: {reelforge.llm.active}")
-print(f"Available: {reelforge.llm.available}")
 ```
 
 ### Environment Variables (Alternative)
@@ -208,8 +204,9 @@ image_url = await reelforge.image(
     prompt="a beautiful landscape"
 )
 
-# Check active generator
-print(f"Using: {reelforge.image.active}")
+# Check available workflows
+workflows = reelforge.image.list_workflows()
+print(f"Available workflows: {workflows}")
 ```
 
 ### Environment Variables (Alternative)
