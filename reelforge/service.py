@@ -8,7 +8,7 @@ from typing import Optional
 
 from loguru import logger
 
-from reelforge.config import load_config
+from reelforge.config import config_manager
 from reelforge.services.llm_service import LLMService
 from reelforge.services.tts_service import TTSService
 from reelforge.services.image import ImageService
@@ -55,7 +55,8 @@ class ReelForgeCore:
         Args:
             config_path: Path to configuration file
         """
-        self.config = load_config(config_path)
+        # Use global config manager singleton
+        self.config = config_manager.config.to_dict()
         self._initialized = False
         
         # Core services (initialized in initialize())

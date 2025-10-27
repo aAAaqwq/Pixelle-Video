@@ -14,7 +14,7 @@ from loguru import logger
 
 # Import i18n and config manager
 from reelforge.i18n import load_locales, set_language, tr, get_available_languages
-from reelforge.utils.web_config import WebConfig
+from reelforge.config import config_manager
 from reelforge.models.progress import ProgressEvent
 
 # Setup page config (must be first)
@@ -47,9 +47,7 @@ def safe_rerun():
 # Configuration & i18n Initialization
 # ============================================================================
 
-def get_config_manager():
-    """Get WebConfig instance (no caching - always fresh)"""
-    return WebConfig()
+# Config manager is already a global singleton, use it directly
 
 
 def init_i18n():
@@ -127,7 +125,7 @@ def init_session_state():
 # System Configuration (Required)
 # ============================================================================
 
-def render_advanced_settings(config_manager: WebConfig):
+def render_advanced_settings():
     """Render system configuration (required) with 2-column layout"""
     # Check if system is configured
     is_configured = config_manager.validate()
@@ -300,17 +298,9 @@ def render_advanced_settings(config_manager: WebConfig):
         
         with col2:
             if st.button(tr("btn.reset_config"), use_container_width=True, key="reset_config_btn"):
-                # Reset to default by creating new config
-                config_manager.config = {
-                    "project_name": "ReelForge",
-                    "llm": {"api_key": "", "base_url": "", "model": ""},
-                    "tts": {"default_workflow": "edge"},
-                    "image": {
-                        "comfyui_url": "http://127.0.0.1:8188",
-                        "runninghub_api_key": "",
-                        "prompt_prefix": "Pure white background, minimalist illustration, matchstick figure style, black and white line drawing, simple clean lines"
-                    }
-                }
+                # Reset to default
+                from reelforge.config.schema import ReelForgeConfig
+                config_manager.config = ReelForgeConfig()
                 config_manager.save()
                 st.success(tr("status.config_reset"))
                 safe_rerun()
@@ -351,8 +341,6 @@ def main():
     init_session_state()
     init_i18n()
     
-    config_manager = get_config_manager()
-    
     # Top bar: Title + Language selector
     col1, col2 = st.columns([4, 1])
     with col1:
@@ -367,7 +355,7 @@ def main():
     # System Configuration (Required)
     # Auto-expands if not configured, collapses if configured
     # ========================================================================
-    render_advanced_settings(config_manager)
+    render_advanced_settings()
     
     # Three-column layout
     left_col, middle_col, right_col = st.columns([1, 1, 1])

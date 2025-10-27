@@ -1,108 +1,29 @@
-# ReelForge Configuration Example
-# 复制此文件为 config.yaml 并填入你的配置
+# ReelForge Configuration
+# Copy this file to config.yaml and fill in your settings
+# ⚠️ Never commit config.yaml to Git!
 
-# Project name
 project_name: ReelForge
 
 # ==================== LLM Configuration ====================
-# Simple 3-field configuration - works with any OpenAI SDK compatible LLM
-#
-# Popular choices (copy one of these):
-#
-# Qwen Max (推荐中文):
-#   api_key: "sk-xxx"
-#   base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
-#   model: "qwen-max"
-#   # Get API key: https://dashscope.console.aliyun.com/apiKey
-#
-# OpenAI GPT-4o:
-#   api_key: "sk-xxx"
-#   base_url: "https://api.openai.com/v1"
-#   model: "gpt-4o"
-#   # Get API key: https://platform.openai.com/api-keys
-#
-# Claude Sonnet 4:
-#   api_key: "sk-ant-xxx"
-#   base_url: "https://api.anthropic.com/v1/"
-#   model: "claude-sonnet-4-5"
-#   # Get API key: https://console.anthropic.com/settings/keys
-#
-# DeepSeek (超高性价比):
-#   api_key: "sk-xxx"
-#   base_url: "https://api.deepseek.com"
-#   model: "deepseek-chat"
-#   # Get API key: https://platform.deepseek.com/api_keys
-#
-# Ollama (本地免费):
-#   api_key: "ollama"  # Any value works
-#   base_url: "http://localhost:11434/v1"
-#   model: "llama3.2"
-#   # Install: https://ollama.com/download
-#   # Then: ollama pull llama3.2
-#
+# Supports any OpenAI SDK compatible API
 llm:
-  api_key: ""  # Fill in your API key
-  base_url: ""  # LLM API endpoint
-  model: ""  # Model name
+  api_key: ""
+  base_url: ""
+  model: ""
+
+# Popular presets:
+# Qwen Max:        base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"  model: "qwen-max"
+# OpenAI GPT-4o:   base_url: "https://api.openai.com/v1"                          model: "gpt-4o"
+# DeepSeek:        base_url: "https://api.deepseek.com"                           model: "deepseek-chat"
+# Ollama (Local):  base_url: "http://localhost:11434/v1"                          model: "llama3.2"
 
 # ==================== TTS Configuration ====================
-# TTS supports two modes:
-# 1. Edge TTS (default) - Free local SDK, no setup needed
-# 2. ComfyUI Workflow - Workflow-based, requires ComfyUI
-#
-# Configuration (optional):
 tts:
-  default_workflow: "edge"  # Default: "edge" (Edge TTS) or "tts_default.json" (ComfyUI workflow)
-  # comfyui_url: http://127.0.0.1:8188  # Only needed for ComfyUI workflows
-  
-# Usage in code:
-#   await reelforge.tts(text="hello")  # Uses default (edge)
-#   await reelforge.tts(text="hello", workflow="edge")  # Explicitly use Edge TTS
-#   await reelforge.tts(text="hello", workflow="tts_custom.json")  # Use ComfyUI workflow
+  default: edge  # "edge" (free) or "tts_xxx.json" (ComfyUI workflow)
 
 # ==================== Image Generation Configuration ====================
-# Image generation uses ComfyUI workflows
-# Workflows are auto-discovered from workflows/image_*.json files
 image:
-  default: default  # Default preset name (uses workflows/image_default.json)
-  comfyui_url: http://127.0.0.1:8188  # Local ComfyUI server
-  # runninghub_api_key: ""             # Optional: RunningHub cloud API key
-  
-  # Prompt prefix - automatically added to all image prompts
-  # Leave empty ("") if you don't want any prefix
+  default: image_default.json
+  comfyui_url: http://127.0.0.1:8188
+  runninghub_api_key: ""
   prompt_prefix: "Pure white background, minimalist illustration, matchstick figure style, black and white line drawing, simple clean lines"
-  
-  # Common examples:
-  # prompt_prefix: ""  # No prefix
-  # prompt_prefix: "anime style, vibrant colors, cel shading"  # Anime style
-  # prompt_prefix: "watercolor painting, soft edges, artistic"  # Watercolor
-  # prompt_prefix: "photorealistic, 8k, professional photography"  # Realistic
-
-# ==================== Notes ====================
-# 1. LLM Configuration:
-#    - Simple 3-field config: api_key, base_url, model
-#    - Works with ANY OpenAI SDK compatible LLM
-#    - Popular choices listed in comments above
-#    - Switch LLM: just copy-paste different values from comments
-#    - WebUI provides quick preset selection
-#
-# 2. TTS Configuration:
-#    - Two modes: Edge TTS (default, free) or ComfyUI Workflow
-#    - Edge TTS: No setup needed, just use default
-#    - ComfyUI: Create workflow files in workflows/tts_*.json
-#    - Override in code: await reelforge.tts(text="...", workflow="edge" or "tts_xxx.json")
-#
-# 3. Image Generation:
-#    - Add workflow files: workflows/image_*.json
-#    - Auto-discovered presets: workflows/image_flux.json -> preset="flux"
-#    - Default preset: workflows/image_default.json
-#
-# 4. Ollama (Recommended for Privacy):
-#    - FREE: No API costs
-#    - PRIVATE: Data never leaves your machine
-#    - Install: https://ollama.com/download
-#    - Usage: ollama pull llama3.2
-#
-# 5. Security:
-#    - Never commit config.yaml to version control
-#    - All sensitive data (API keys) should stay local

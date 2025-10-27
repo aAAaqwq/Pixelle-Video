@@ -1,7 +1,7 @@
 """
-ReelForge - AI-powered video generator with pluggable capabilities
+ReelForge - AI-powered video generator
 
-Convention-based capability system using FastMCP and LiteLLM.
+Convention-based system with unified configuration management.
 
 Usage:
     from reelforge import reelforge
@@ -18,8 +18,9 @@ Usage:
 """
 
 from reelforge.service import ReelForgeCore, reelforge
+from reelforge.config import config_manager
 
 __version__ = "0.1.0"
 
-__all__ = ["ReelForgeCore", "reelforge"]
+__all__ = ["ReelForgeCore", "reelforge", "config_manager"]
 

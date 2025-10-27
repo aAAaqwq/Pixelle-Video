@@ -41,6 +41,8 @@ Thumbs.db
 
 # Config files with sensitive data
 config.yaml
+config.yaml.bak
+*.yaml.bak
 .env
 
 # Logs
