@@ -97,6 +97,59 @@ class HTMLFrameGenerator:
         logger.debug(f"Template loaded: {len(content)} chars")
         return content
     
+    def _find_chrome_executable(self) -> Optional[str]:
+        """
+        Find suitable Chrome/Chromium executable, preferring non-snap versions
+        
+        Returns:
+            Path to Chrome executable or None to use default
+        """
+        if os.name != 'posix':
+            return None
+        
+        import subprocess
+        
+        # Preferred browsers (non-snap versions)
+        candidates = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/google-chrome-stable',
+            '/usr/bin/chromium',
+            '/usr/bin/chromium-browser',
+            '/usr/local/bin/chrome',
+            '/usr/local/bin/chromium',
+        ]
+        
+        # Check each candidate
+        for path in candidates:
+            if os.path.exists(path) and os.access(path, os.X_OK):
+                try:
+                    # Verify it's not a snap by checking the path
+                    result = subprocess.run(
+                        ['readlink', '-f', path],
+                        capture_output=True,
+                        text=True,
+                        timeout=1
+                    )
+                    real_path = result.stdout.strip()
+                    
+                    if '/snap/' not in real_path:
+                        logger.info(f"✓ Found non-snap browser: {path} -> {real_path}")
+                        return path
+                    else:
+                        logger.debug(f"✗ Skipping snap browser: {path}")
+                except Exception as e:
+                    logger.debug(f"Error checking {path}: {e}")
+        
+        # Warn if no suitable browser found
+        logger.warning(
+            "⚠️  No non-snap Chrome/Chromium found. Snap browsers have AppArmor restrictions.\n"
+            "   Install system Chrome with:\n"
+            "   wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb\n"
+            "   sudo dpkg -i google-chrome-stable_current_amd64.deb\n"
+            "   Or install Chromium: sudo apt-get install -y chromium-browser"
+        )
+        return None
+    
     def _ensure_hti(self, width: int, height: int):
         """Lazily initialize Html2Image instance"""
         if self.hti is None:
@@ -120,11 +173,23 @@ class HTMLFrameGenerator:
                 '--disable-renderer-backgrounding',  # Improve performance
             ]
             
-            self.hti = Html2Image(
-                size=(width, height),
-                custom_flags=custom_flags
-            )
-            logger.debug(f"Initialized Html2Image with size ({width}, {height}) and {len(custom_flags)} custom flags")
+            # Try to find non-snap browser
+            browser_path = self._find_chrome_executable()
+            
+            kwargs = {
+                'size': (width, height),
+                'custom_flags': custom_flags
+            }
+            
+            if browser_path:
+                kwargs['browser_executable'] = browser_path
+            
+            self.hti = Html2Image(**kwargs)
+            
+            if browser_path:
+                logger.debug(f"Initialized Html2Image with size ({width}, {height}), {len(custom_flags)} custom flags, using browser: {browser_path}")
+            else:
+                logger.debug(f"Initialized Html2Image with size ({width}, {height}) and {len(custom_flags)} custom flags")
     
     async def generate_frame(
         self,
