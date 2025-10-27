@@ -12,7 +12,7 @@ from reelforge.services.video import VideoService
 from reelforge.services.narration_generator import NarrationGeneratorService
 from reelforge.services.image_prompt_generator import ImagePromptGeneratorService
 from reelforge.services.title_generator import TitleGeneratorService
-from reelforge.services.storyboard_processor import StoryboardProcessorService
+from reelforge.services.frame_processor import FrameProcessor
 from reelforge.services.video_generator import VideoGeneratorService
 
 __all__ = [
@@ -24,7 +24,7 @@ __all__ = [
     "NarrationGeneratorService",
     "ImagePromptGeneratorService",
     "TitleGeneratorService",
-    "StoryboardProcessorService",
+    "FrameProcessor",
     "VideoGeneratorService",
 ]
 

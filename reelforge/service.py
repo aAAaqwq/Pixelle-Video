@@ -15,7 +15,7 @@ from reelforge.services.image import ImageService
 from reelforge.services.narration_generator import NarrationGeneratorService
 from reelforge.services.image_prompt_generator import ImagePromptGeneratorService
 from reelforge.services.title_generator import TitleGeneratorService
-from reelforge.services.storyboard_processor import StoryboardProcessorService
+from reelforge.services.frame_processor import FrameProcessor
 from reelforge.services.video_generator import VideoGeneratorService
 
 
@@ -70,7 +70,7 @@ class ReelForgeCore:
         self.title_generator: Optional[TitleGeneratorService] = None
         
         # Frame processing services
-        self.storyboard_processor: Optional[StoryboardProcessorService] = None
+        self.frame_processor: Optional[FrameProcessor] = None
         
         # Video generation service (named as verb for direct calling)
         self.generate_video: Optional[VideoGeneratorService] = None
@@ -101,7 +101,7 @@ class ReelForgeCore:
         self.title_generator = TitleGeneratorService(self)
         
         # 3. Initialize frame processing services
-        self.storyboard_processor = StoryboardProcessorService(self)
+        self.frame_processor = FrameProcessor(self)
         
         # 4. Initialize video generation service
         self.generate_video = VideoGeneratorService(self)

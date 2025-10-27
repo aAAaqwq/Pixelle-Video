@@ -325,7 +325,7 @@ class VideoGeneratorService:
                     frame_total=len(storyboard.frames)
                 )
                 
-                processed_frame = await self.core.storyboard_processor.process_frame(
+                processed_frame = await self.core.frame_processor(
                     frame=frame,
                     storyboard=storyboard,
                     config=config,

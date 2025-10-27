@@ -1,5 +1,5 @@
 """
-Storyboard processor - Process single frame through complete pipeline
+Frame processor - Process single frame through complete pipeline
 
 Orchestrates: TTS → Image Generation → Frame Composition → Video Segment
 """
@@ -14,8 +14,8 @@ from reelforge.models.storyboard import Storyboard, StoryboardFrame, StoryboardC
 from reelforge.utils.os_util import get_temp_path
 
 
-class StoryboardProcessorService:
-    """Storyboard processor service"""
+class FrameProcessor:
+    """Frame processor"""
     
     def __init__(self, reelforge_core):
         """
@@ -26,7 +26,7 @@ class StoryboardProcessorService:
         """
         self.core = reelforge_core
     
-    async def process_frame(
+    async def __call__(
         self,
         frame: StoryboardFrame,
         storyboard: 'Storyboard',
@@ -45,6 +45,7 @@ class StoryboardProcessorService:
         
         Args:
             frame: Storyboard frame to process
+            storyboard: Storyboard instance
             config: Storyboard configuration
             total_frames: Total number of frames in storyboard
             progress_callback: Optional callback for progress updates (receives ProgressEvent)
