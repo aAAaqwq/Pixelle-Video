@@ -79,3 +79,5 @@ templates/*
 !templates/modern.html
 !templates/neon.html
 !templates/README.md
+
+*.out
