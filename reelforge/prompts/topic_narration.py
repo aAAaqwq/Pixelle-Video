@@ -70,6 +70,7 @@ TOPIC_NARRATION_PROMPT = """# 角色定位
 # 输出格式
 严格按照以下JSON格式输出，不要添加任何额外的文字说明：
 
+
 ```json
 {{
   "narrations": [
