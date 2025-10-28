@@ -95,16 +95,15 @@ async def edge_tts(
         
         # Retry loop
         for attempt in range(retry_count + 1):  # +1 because first attempt is not a retry
-            try:
-                if attempt > 0:
-                    # Exponential backoff with jitter
-                    # delay = base * (2 ^ attempt) + random jitter
-                    exponential_delay = retry_base_delay * (2 ** (attempt - 1))
-                    jitter = random.uniform(0, retry_base_delay)
-                    retry_delay = min(exponential_delay + jitter, _MAX_RETRY_DELAY)
-                    
-                    logger.info(f"🔄 Retrying Edge TTS (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
-                    await asyncio.sleep(retry_delay)
+            if attempt > 0:
+                # Exponential backoff with jitter
+                # delay = base * (2 ^ attempt) + random jitter
+                exponential_delay = retry_base_delay * (2 ** (attempt - 1))
+                jitter = random.uniform(0, retry_base_delay)
+                retry_delay = min(exponential_delay + jitter, _MAX_RETRY_DELAY)
+                
+                logger.info(f"🔄 Retrying Edge TTS (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
+                await asyncio.sleep(retry_delay)
             
             # Monkey patch ssl.create_default_context if SSL verification is disabled
             if not _SSL_VERIFY_ENABLED:
@@ -152,11 +151,6 @@ async def edge_tts(
                 
                 return audio_data
             
-            finally:
-                # Restore original function if we patched it
-                if not _SSL_VERIFY_ENABLED:
-                    ssl.create_default_context = original_create_default_context
-        
             except (WSServerHandshakeError, ClientResponseError) as e:
                 # Network/authentication errors - retry
                 last_error = e
@@ -181,6 +175,11 @@ async def edge_tts(
                 # Other errors - don't retry, raise immediately
                 logger.error(f"Edge TTS error (non-retryable): {type(e).__name__} - {e}")
                 raise
+            
+            finally:
+                # Restore original function if we patched it
+                if not _SSL_VERIFY_ENABLED:
+                    ssl.create_default_context = original_create_default_context
         
         # Should not reach here, but just in case
         if last_error:
@@ -255,15 +254,14 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
         
         # Retry loop
         for attempt in range(retry_count + 1):
-            try:
-                if attempt > 0:
-                    # Exponential backoff with jitter
-                    exponential_delay = retry_base_delay * (2 ** (attempt - 1))
-                    jitter = random.uniform(0, retry_base_delay)
-                    retry_delay = min(exponential_delay + jitter, _MAX_RETRY_DELAY)
-                    
-                    logger.info(f"🔄 Retrying list voices (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
-                    await asyncio.sleep(retry_delay)
+            if attempt > 0:
+                # Exponential backoff with jitter
+                exponential_delay = retry_base_delay * (2 ** (attempt - 1))
+                jitter = random.uniform(0, retry_base_delay)
+                retry_delay = min(exponential_delay + jitter, _MAX_RETRY_DELAY)
+                
+                logger.info(f"🔄 Retrying list voices (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
+                await asyncio.sleep(retry_delay)
             
             # Monkey patch SSL if verification is disabled
             if not _SSL_VERIFY_ENABLED:
@@ -296,11 +294,6 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
                 logger.info(f"Found {len(voice_ids)} voices" + (f" for locale '{locale}'" if locale else ""))
                 return voice_ids
             
-            finally:
-                # Restore original function if we patched it
-                if not _SSL_VERIFY_ENABLED:
-                    ssl.create_default_context = original_create_default_context
-        
             except (WSServerHandshakeError, ClientResponseError) as e:
                 # Network/authentication errors - retry
                 last_error = e
@@ -323,6 +316,11 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
                 # Other errors - don't retry, raise immediately
                 logger.error(f"List voices error (non-retryable): {type(e).__name__} - {e}")
                 raise
+            
+            finally:
+                # Restore original function if we patched it
+                if not _SSL_VERIFY_ENABLED:
+                    ssl.create_default_context = original_create_default_context
         
         # Should not reach here, but just in case
         if last_error:
