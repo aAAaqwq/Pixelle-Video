@@ -5,7 +5,8 @@
     "app.subtitle": "Forge your perfect reel engine",
     
     "section.content_input": "📖 Content Input",
-    "section.style_settings": "⚙️ Custom Settings",
+    "section.audio_settings": "🔊 Audio Settings",
+    "section.visual_settings": "🎨 Visual Settings",
     "section.video_generation": "🎬 Generate Video",
     
     "input_mode.book": "📚 Book Name",

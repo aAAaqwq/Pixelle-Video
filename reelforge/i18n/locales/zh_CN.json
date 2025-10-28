@@ -5,7 +5,8 @@
     "app.subtitle": "打造专属你的视频创作引擎",
     
     "section.content_input": "📖 内容输入",
-    "section.style_settings": "⚙️ 自定义设置",
+    "section.audio_settings": "🔊 声音设置",
+    "section.visual_settings": "🎨 画面设置",
     "section.video_generation": "🎬 生成视频",
     
     "input_mode.book": "📚 书名",

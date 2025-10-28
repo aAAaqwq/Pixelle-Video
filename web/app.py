@@ -394,12 +394,6 @@ def main():
                 placeholder=tr("input.title_placeholder"),
                 help=tr("input.title_help")
             )
-        
-        # ====================================================================
-        # Video Settings (moved from right column)
-        # ====================================================================
-        with st.container(border=True):
-            st.markdown(f"**{tr('video.title')}**")
             
             # Number of scenes (only show in generate mode)
             if mode == "generate":
@@ -412,16 +406,18 @@ def main():
                     label_visibility="collapsed"
                 )
                 st.caption(tr("video.frames_label", n=n_scenes))
-                
-                st.markdown("---")
             else:
                 # Fixed mode: n_scenes is ignored, set default value
                 n_scenes = 5
                 st.info(tr("video.frames_fixed_mode_hint"))
+        
+        # ====================================================================
+        # Audio Settings (Voice + BGM)
+        # ====================================================================
+        with st.container(border=True):
+            st.markdown(f"**{tr('section.audio_settings')}**")
             
-            st.markdown("---")
-            
-            # Voice selection (moved from middle column)
+            # Voice selection
             st.markdown(f"**{tr('voice.title')}**")
             voice_id = st.selectbox(
                 "Voice",
@@ -461,15 +457,8 @@ def main():
                     except Exception as e:
                         st.error(tr("voice.preview_failed", error=str(e)))
                         logger.exception(e)
-    
-    # ========================================================================
-    # Middle Column: Custom Settings (BGM & Visual Style & Template)
-    # ========================================================================
-    with middle_col:
-        with st.container(border=True):
-            st.markdown(f"**{tr('section.style_settings')}**")
             
-            # Background music (moved from left column)
+            # Background music
             st.markdown(f"**{tr('bgm.title')}**")
             st.caption(tr("bgm.custom_help"))
             
@@ -508,7 +497,13 @@ def main():
             
             # Use full filename for bgm_path (including extension)
             bgm_path = None if bgm_choice == tr("bgm.none") else bgm_choice
-            
+    
+    # ========================================================================
+    # Middle Column: Visual Settings (Style & Template)
+    # ========================================================================
+    with middle_col:
+        with st.container(border=True):
+            st.markdown(f"**{tr('section.visual_settings')}**")
             
             # Visual style (Workflow + Prompt Prefix)
             st.markdown(f"**{tr('style.title')}**")
