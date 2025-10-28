@@ -7,6 +7,7 @@ Currently, TTS service uses ComfyUI workflows only.
 
 import asyncio
 import ssl
+import random
 import edge_tts as edge_tts_sdk
 from loguru import logger
 from aiohttp import WSServerHandshakeError, ClientResponseError
@@ -16,8 +17,16 @@ from aiohttp import WSServerHandshakeError, ClientResponseError
 _SSL_VERIFY_ENABLED = False
 
 # Retry configuration for Edge TTS (to handle 401 errors)
-_RETRY_COUNT = 3       # Default retry count
-_RETRY_DELAY = 2.0     # Retry delay in seconds
+_RETRY_COUNT = 5       # Default retry count (increased from 3 to 5)
+_RETRY_BASE_DELAY = 1.0     # Base retry delay in seconds (for exponential backoff)
+_MAX_RETRY_DELAY = 10.0     # Maximum retry delay in seconds
+
+# Rate limiting configuration
+_REQUEST_DELAY = 0.5        # Minimum delay before each request (seconds)
+_MAX_CONCURRENT_REQUESTS = 3  # Maximum concurrent requests
+
+# Global semaphore for rate limiting
+_request_semaphore = asyncio.Semaphore(_MAX_CONCURRENT_REQUESTS)
 
 
 async def edge_tts(
@@ -28,7 +37,7 @@ async def edge_tts(
     pitch: str = "+0Hz",
     output_path: str = None,
     retry_count: int = _RETRY_COUNT,
-    retry_delay: float = _RETRY_DELAY,
+    retry_base_delay: float = _RETRY_BASE_DELAY,
 ) -> bytes:
     """
     Convert text to speech using Microsoft Edge TTS
@@ -38,8 +47,9 @@ async def edge_tts(
     
     Returns audio data as bytes (MP3 format).
     
-    Includes automatic retry mechanism to handle 401 authentication errors
-    and temporary network issues (default: 3 retries with 2s delay).
+    Includes automatic retry mechanism with exponential backoff and jitter
+    to handle 401 authentication errors and temporary network issues.
+    Also includes concurrent request limiting and rate limiting.
     
     Args:
         text: Text to convert to speech
@@ -48,8 +58,8 @@ async def edge_tts(
         volume: Speech volume (e.g., +0%, +50%, -20%)
         pitch: Speech pitch (e.g., +0Hz, +10Hz, -5Hz)
         output_path: Optional output file path to save audio
-        retry_count: Number of retries on failure (default: 3)
-        retry_delay: Delay between retries in seconds (default: 2.0)
+        retry_count: Number of retries on failure (default: 5)
+        retry_base_delay: Base delay for exponential backoff (default: 1.0s)
     
     Returns:
         Audio data as bytes (MP3 format)
@@ -74,14 +84,27 @@ async def edge_tts(
     """
     logger.debug(f"Calling Edge TTS with voice: {voice}, rate: {rate}, retry_count: {retry_count}")
     
-    last_error = None
-    
-    # Retry loop
-    for attempt in range(retry_count + 1):  # +1 because first attempt is not a retry
-        try:
-            if attempt > 0:
-                logger.info(f"🔄 Retrying Edge TTS (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay}s delay...")
-                await asyncio.sleep(retry_delay)
+    # Use semaphore to limit concurrent requests
+    async with _request_semaphore:
+        # Add a small random delay before each request to avoid rate limiting
+        pre_delay = _REQUEST_DELAY + random.uniform(0, 0.3)
+        logger.debug(f"Waiting {pre_delay:.2f}s before request (rate limiting)")
+        await asyncio.sleep(pre_delay)
+        
+        last_error = None
+        
+        # Retry loop
+        for attempt in range(retry_count + 1):  # +1 because first attempt is not a retry
+            try:
+                if attempt > 0:
+                    # Exponential backoff with jitter
+                    # delay = base * (2 ^ attempt) + random jitter
+                    exponential_delay = retry_base_delay * (2 ** (attempt - 1))
+                    jitter = random.uniform(0, retry_base_delay)
+                    retry_delay = min(exponential_delay + jitter, _MAX_RETRY_DELAY)
+                    
+                    logger.info(f"🔄 Retrying Edge TTS (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
+                    await asyncio.sleep(retry_delay)
             
             # Monkey patch ssl.create_default_context if SSL verification is disabled
             if not _SSL_VERIFY_ENABLED:
@@ -134,28 +157,36 @@ async def edge_tts(
                 if not _SSL_VERIFY_ENABLED:
                     ssl.create_default_context = original_create_default_context
         
-        except (WSServerHandshakeError, ClientResponseError) as e:
-            # Network/authentication errors - retry
-            last_error = e
-            error_code = getattr(e, 'status', 'unknown')
-            logger.warning(f"⚠️  Edge TTS error (attempt {attempt + 1}/{retry_count + 1}): {error_code} - {e}")
+            except (WSServerHandshakeError, ClientResponseError) as e:
+                # Network/authentication errors - retry
+                last_error = e
+                error_code = getattr(e, 'status', 'unknown')
+                error_msg = str(e)
+                
+                # Log more detailed information for 401 errors
+                if error_code == 401 or '401' in error_msg:
+                    logger.warning(f"⚠️  Edge TTS 401 Authentication Error (attempt {attempt + 1}/{retry_count + 1})")
+                    logger.debug(f"Error details: {error_msg}")
+                    logger.debug(f"This is usually caused by rate limiting. Will retry with exponential backoff...")
+                else:
+                    logger.warning(f"⚠️  Edge TTS error (attempt {attempt + 1}/{retry_count + 1}): {error_code} - {e}")
+                
+                if attempt >= retry_count:
+                    # Last attempt failed
+                    logger.error(f"❌ All {retry_count + 1} attempts failed. Last error: {error_code}")
+                    raise
+                # Otherwise, continue to next retry
             
-            if attempt >= retry_count:
-                # Last attempt failed
-                logger.error(f"❌ All {retry_count + 1} attempts failed. Giving up.")
+            except Exception as e:
+                # Other errors - don't retry, raise immediately
+                logger.error(f"Edge TTS error (non-retryable): {type(e).__name__} - {e}")
                 raise
-            # Otherwise, continue to next retry
         
-        except Exception as e:
-            # Other errors - don't retry, raise immediately
-            logger.error(f"Edge TTS error (non-retryable): {e}")
-            raise
-    
-    # Should not reach here, but just in case
-    if last_error:
-        raise last_error
-    else:
-        raise RuntimeError("Edge TTS failed without error (unexpected)")
+        # Should not reach here, but just in case
+        if last_error:
+            raise last_error
+        else:
+            raise RuntimeError("Edge TTS failed without error (unexpected)")
 
 
 def get_audio_duration(audio_path: str) -> float:
@@ -184,20 +215,20 @@ def get_audio_duration(audio_path: str) -> float:
         return max(1.0, estimated_duration)  # At least 1 second
 
 
-async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry_delay: float = _RETRY_DELAY) -> list[str]:
+async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry_base_delay: float = _RETRY_BASE_DELAY) -> list[str]:
     """
     List all available voices for Edge TTS
     
     Returns a list of voice IDs (ShortName).
     Optionally filter by locale.
     
-    Includes automatic retry mechanism to handle network errors
-    (default: 3 retries with 2s delay).
+    Includes automatic retry mechanism with exponential backoff and jitter
+    to handle network errors and rate limiting.
     
     Args:
         locale: Filter by locale (e.g., zh-CN, en-US, ja-JP)
-        retry_count: Number of retries on failure (default: 3)
-        retry_delay: Delay between retries in seconds (default: 2.0)
+        retry_count: Number of retries on failure (default: 5)
+        retry_base_delay: Base delay for exponential backoff (default: 1.0s)
     
     Returns:
         List of voice IDs
@@ -213,14 +244,26 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
     """
     logger.debug(f"Fetching Edge TTS voices, locale filter: {locale}, retry_count: {retry_count}")
     
-    last_error = None
-    
-    # Retry loop
-    for attempt in range(retry_count + 1):
-        try:
-            if attempt > 0:
-                logger.info(f"🔄 Retrying list voices (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay}s delay...")
-                await asyncio.sleep(retry_delay)
+    # Use semaphore to limit concurrent requests
+    async with _request_semaphore:
+        # Add a small random delay before each request to avoid rate limiting
+        pre_delay = _REQUEST_DELAY + random.uniform(0, 0.3)
+        logger.debug(f"Waiting {pre_delay:.2f}s before request (rate limiting)")
+        await asyncio.sleep(pre_delay)
+        
+        last_error = None
+        
+        # Retry loop
+        for attempt in range(retry_count + 1):
+            try:
+                if attempt > 0:
+                    # Exponential backoff with jitter
+                    exponential_delay = retry_base_delay * (2 ** (attempt - 1))
+                    jitter = random.uniform(0, retry_base_delay)
+                    retry_delay = min(exponential_delay + jitter, _MAX_RETRY_DELAY)
+                    
+                    logger.info(f"🔄 Retrying list voices (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
+                    await asyncio.sleep(retry_delay)
             
             # Monkey patch SSL if verification is disabled
             if not _SSL_VERIFY_ENABLED:
@@ -258,24 +301,32 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
                 if not _SSL_VERIFY_ENABLED:
                     ssl.create_default_context = original_create_default_context
         
-        except (WSServerHandshakeError, ClientResponseError) as e:
-            # Network/authentication errors - retry
-            last_error = e
-            error_code = getattr(e, 'status', 'unknown')
-            logger.warning(f"⚠️  List voices error (attempt {attempt + 1}/{retry_count + 1}): {error_code} - {e}")
+            except (WSServerHandshakeError, ClientResponseError) as e:
+                # Network/authentication errors - retry
+                last_error = e
+                error_code = getattr(e, 'status', 'unknown')
+                error_msg = str(e)
+                
+                # Log more detailed information for 401 errors
+                if error_code == 401 or '401' in error_msg:
+                    logger.warning(f"⚠️  Edge TTS 401 Authentication Error (list_voices attempt {attempt + 1}/{retry_count + 1})")
+                    logger.debug(f"Error details: {error_msg}")
+                    logger.debug(f"This is usually caused by rate limiting. Will retry with exponential backoff...")
+                else:
+                    logger.warning(f"⚠️  List voices error (attempt {attempt + 1}/{retry_count + 1}): {error_code} - {e}")
+                
+                if attempt >= retry_count:
+                    logger.error(f"❌ All {retry_count + 1} attempts failed. Last error: {error_code}")
+                    raise
             
-            if attempt >= retry_count:
-                logger.error(f"❌ All {retry_count + 1} attempts failed. Giving up.")
+            except Exception as e:
+                # Other errors - don't retry, raise immediately
+                logger.error(f"List voices error (non-retryable): {type(e).__name__} - {e}")
                 raise
         
-        except Exception as e:
-            # Other errors - don't retry, raise immediately
-            logger.error(f"List voices error (non-retryable): {e}")
-            raise
-    
-    # Should not reach here, but just in case
-    if last_error:
-        raise last_error
-    else:
-        raise RuntimeError("List voices failed without error (unexpected)")
+        # Should not reach here, but just in case
+        if last_error:
+            raise last_error
+        else:
+            raise RuntimeError("List voices failed without error (unexpected)")
 
