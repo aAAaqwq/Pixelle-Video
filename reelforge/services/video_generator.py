@@ -95,13 +95,13 @@ class VideoGeneratorService:
         Args:
             text: Text input (required)
                   - For generate mode: topic/theme (e.g., "如何提高学习效率")
-                  - For fixed mode: complete narration script (will be split into frames)
+                  - For fixed mode: complete narration script (each line is a narration)
             
             mode: Processing mode (default "generate")
                   - "generate": LLM generates narrations from topic/theme, creates n_scenes
-                  - "fixed": Split existing script into frames, preserves original text
+                  - "fixed": Use existing script as-is, each line becomes a narration
                   
-                  Note: In fixed mode, n_scenes is ignored (uses actual split count)
+                  Note: In fixed mode, n_scenes is ignored (uses actual line count)
             
             title: Video title (optional)
                    - If provided, use it as the video title
@@ -153,22 +153,15 @@ class VideoGeneratorService:
             ...     bgm_path="default"
             ... )
             
-            # Fixed mode: Use existing script (split by paragraphs)
+            # Fixed mode: Use existing script (each line is a narration)
             >>> script = '''大家好，今天跟你分享三个学习技巧
-            ... 
             ... 第一个技巧是专注力训练，每天冥想10分钟
-            ... 
-            ... 第二个技巧是主动回忆，学完立即复述'''
+            ... 第二个技巧是主动回忆，学完立即复述
+            ... 第三个技巧是间隔重复，学习后定期复习'''
             >>> result = await reelforge.generate_video(
             ...     text=script,
             ...     mode="fixed",
             ...     title="三个学习技巧"
-            ... )
-            
-            # Fixed mode: Use existing script (split by sentences)
-            >>> result = await reelforge.generate_video(
-            ...     text="第一点是专注。第二点是复述。第三点是重复。",
-            ...     mode="fixed"
             ... )
             >>> print(result.video_path)
         """
@@ -249,10 +242,10 @@ class VideoGeneratorService:
                 )
                 logger.info(f"✅ Generated {len(narrations)} narrations")
             else:  # fixed
-                # Split fixed script using LLM (preserves original text)
+                # Split fixed script by lines (trust user input completely)
                 self._report_progress(progress_callback, "splitting_script", 0.05)
                 narrations = await self._split_narration_script(text, config)
-                logger.info(f"✅ Split script into {len(narrations)} segments")
+                logger.info(f"✅ Split script into {len(narrations)} segments (by lines)")
                 logger.info(f"   Note: n_scenes={n_scenes} is ignored in fixed mode")
             
             # Step 2: Generate image prompts
@@ -452,124 +445,29 @@ class VideoGeneratorService:
     
     async def _split_narration_script(self, script: str, config: StoryboardConfig) -> list[str]:
         """
-        Split user-provided narration script into segments (programmatic splitting).
+        Split user-provided narration script into segments (trust user input completely).
         
-        Priority:
-        1. Split by major punctuation (newline, 。！？；)
-        2. If segment > max_len, split by comma (，)
-        3. If still > max_len, keep original (no force split)
-        4. Merge segments < min_len with next segment
+        Simply split by newline, each line becomes a narration segment.
+        Empty lines are filtered out.
         
         Args:
-            script: Fixed narration script
-            config: Storyboard configuration (for length guidelines)
+            script: Fixed narration script (each line is a narration)
+            config: Storyboard configuration (unused, kept for interface compatibility)
             
         Returns:
             List of narration segments
         """
-        import re
+        logger.info(f"Splitting script by lines (length: {len(script)} chars)")
         
-        min_len = config.min_narration_words
-        max_len = config.max_narration_words
+        # Split by newline, filter empty lines
+        narrations = [line.strip() for line in script.split('\n') if line.strip()]
         
-        logger.info(f"Splitting script (length: {len(script)} chars) with target: {min_len}-{max_len} chars")
-        
-        # Step 1: Split by major punctuation (newline, period, exclamation, question mark, semicolon)
-        major_delimiters = r'[\n。！？；]'
-        parts = re.split(f'({major_delimiters})', script)
-        
-        # Reconstruct sentences (text only, remove trailing punctuation)
-        sentences = []
-        for i in range(0, len(parts)-1, 2):
-            text = parts[i].strip()
-            if text:
-                sentences.append(text)
-        # Handle last part if no delimiter
-        if len(parts) % 2 == 1 and parts[-1].strip():
-            sentences.append(parts[-1].strip())
-        
-        logger.debug(f"After major split: {len(sentences)} sentences")
-        
-        # Step 2: For segments > max_len, try splitting by comma
-        final_segments = []
-        for sentence in sentences:
-            sent_len = len(sentence)
-            
-            # If within range or short, keep as is
-            if sent_len <= max_len:
-                final_segments.append(sentence)
-                continue
-            
-            # Too long: try splitting by comma
-            comma_parts = re.split(r'(，)', sentence)
-            sub_segments = []
-            current = ""
-            
-            for part in comma_parts:
-                if part == '，':
-                    continue
-                    
-                if not current:
-                    current = part
-                elif len(current + part) <= max_len:
-                    current += part
-                else:
-                    # Current segment is ready
-                    if current:
-                        sub_segments.append(current.strip())
-                    current = part
-            
-            # Add last segment
-            if current:
-                sub_segments.append(current.strip())
-            
-            # If comma splitting worked (resulted in multiple segments), use it
-            if sub_segments and len(sub_segments) > 1:
-                final_segments.extend(sub_segments)
-            else:
-                # Keep original sentence even if > max_len
-                logger.debug(f"Keeping long segment ({sent_len} chars): {sentence[:30]}...")
-                final_segments.append(sentence)
-        
-        # Step 3: Merge segments that are too short
-        merged_segments = []
-        i = 0
-        while i < len(final_segments):
-            segment = final_segments[i]
-            
-            # If too short and not the last one, try merging with next
-            if len(segment) < min_len and i < len(final_segments) - 1:
-                next_segment = final_segments[i + 1]
-                merged = segment + "，" + next_segment
-                
-                # If merged result is within max_len, use it
-                if len(merged) <= max_len:
-                    merged_segments.append(merged)
-                    i += 2  # Skip next segment
-                    continue
-            
-            # Otherwise keep as is
-            merged_segments.append(segment)
-            i += 1
-        
-        # Clean up
-        result = [s.strip() for s in merged_segments if s.strip()]
+        logger.info(f"✅ Split script into {len(narrations)} segments (by lines)")
         
         # Log statistics
-        lengths = [len(s) for s in result]
-        logger.info(f"Script split into {len(result)} segments")
-        if lengths:
-            logger.info(f"  Min: {min(lengths)} chars, Max: {max(lengths)} chars, Avg: {sum(lengths)//len(lengths)} chars")
-            
-            in_range = sum(1 for l in lengths if min_len <= l <= max_len)
-            too_short = sum(1 for l in lengths if l < min_len)
-            too_long = sum(1 for l in lengths if l > max_len)
-            
-            logger.info(f"  In range ({min_len}-{max_len}): {in_range}/{len(result)} ({in_range*100//len(result)}%)")
-            if too_short:
-                logger.info(f"  Too short (< {min_len}): {too_short}/{len(result)} ({too_short*100//len(result)}%)")
-            if too_long:
-                logger.info(f"  Too long (> {max_len}): {too_long}/{len(result)} ({too_long*100//len(result)}%)")
+        if narrations:
+            lengths = [len(s) for s in narrations]
+            logger.info(f"   Min: {min(lengths)} chars, Max: {max(lengths)} chars, Avg: {sum(lengths)//len(lengths)} chars")
         
-        return result
+        return narrations
 

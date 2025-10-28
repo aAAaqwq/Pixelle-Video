@@ -14,7 +14,7 @@
     
     "mode.generate": "💡 Generate Mode",
     "mode.fixed": "📄 Fixed Mode",
-    "mode.help": "Generate: AI creates narrations from topic. Fixed: Use existing script without modification.",
+    "mode.help": "Generate: AI creates narrations from topic. Fixed: Use your script directly without modification, one narration per line.",
     
     "input.book_name": "Book Name",
     "input.book_name_placeholder": "e.g., Atomic Habits, How to Win Friends",
@@ -26,10 +26,10 @@
     
     "input.text": "Text Input",
     "input.text_help_generate": "Enter topic or theme (AI will create narrations)",
-    "input.text_help_fixed": "Enter complete narration script (will be split into scenes)",
+    "input.text_help_fixed": "Enter complete narration script (used directly without modification, one narration per line)",
     
     "input.content": "Content",
-    "input.content_placeholder": "Enter your custom content here...",
+    "input.content_placeholder": "Used directly without modification, one narration per line\nExample:\nHello everyone, today I'll share three study tips\nThe first tip is focus training, meditate for 10 minutes daily\nThe second tip is active recall, review immediately after learning",
     "input.content_help": "Provide your own content for video generation",
     
     "input.title": "Title (Optional)",

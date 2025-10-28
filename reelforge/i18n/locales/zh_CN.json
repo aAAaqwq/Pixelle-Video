@@ -14,7 +14,7 @@
     
     "mode.generate": "💡 生成模式",
     "mode.fixed": "📄 固定模式",
-    "mode.help": "生成模式：AI 从主题创作旁白。固定模式：使用现成脚本，不做修改。",
+    "mode.help": "生成模式：AI 从主题创作旁白。固定模式：直接使用您的脚本，不做任何改写，每行一个旁白。",
     
     "input.book_name": "书名",
     "input.book_name_placeholder": "例如：原子习惯、人性的弱点、Atomic Habits",
@@ -26,10 +26,10 @@
     
     "input.text": "文本输入",
     "input.text_help_generate": "输入主题或话题（AI 将创作旁白）",
-    "input.text_help_fixed": "输入完整的旁白脚本（将被切分成分镜）",
+    "input.text_help_fixed": "输入完整的旁白脚本（直接使用，不做改写，每行一个旁白）",
     
     "input.content": "内容",
-    "input.content_placeholder": "在此输入您的自定义内容...",
+    "input.content_placeholder": "直接使用，不做改写，每行一个旁白\n例如：\n大家好，今天跟你分享三个学习技巧\n第一个技巧是专注力训练，每天冥想10分钟\n第二个技巧是主动回忆，学完立即复述",
     "input.content_help": "提供您自己的内容用于视频生成",
     
     "input.title": "标题（可选）",
