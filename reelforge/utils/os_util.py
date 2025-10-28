@@ -184,10 +184,10 @@ def create_task_output_dir(task_id: Optional[str] = None) -> Tuple[str, str]:
         output/{task_id}/
         ├── final.mp4           # Final video output
         ├── frames/             # All frame-related files
-        │   ├── 0_audio.mp3
-        │   ├── 0_image.png
-        │   ├── 0_composed.png
-        │   ├── 0_segment.mp4
+        │   ├── 01_audio.mp3
+        │   ├── 01_image.png
+        │   ├── 01_composed.png
+        │   ├── 01_segment.mp4
         │   └── ...
         └── metadata.json       # Optional: task metadata
     
@@ -245,7 +245,7 @@ def get_task_frame_path(
     
     Args:
         task_id: Task ID
-        frame_index: Frame index (0-based)
+        frame_index: Frame index (0-based internally, but filename starts from 01)
         file_type: File type (audio/image/composed/segment)
     
     Returns:
@@ -253,7 +253,7 @@ def get_task_frame_path(
         
     Example:
         >>> get_task_frame_path("20251028_143052_ab3d", 0, "audio")
-        >>> # Returns: ".../output/20251028_143052_ab3d/frames/0_audio.mp3"
+        >>> # Returns: ".../output/20251028_143052_ab3d/frames/01_audio.mp3"
     """
     ext_map = {
         "audio": "mp3",
@@ -262,7 +262,8 @@ def get_task_frame_path(
         "segment": "mp4"
     }
     
-    filename = f"{frame_index}_{file_type}.{ext_map[file_type]}"
+    # Frame number starts from 01 for better human readability
+    filename = f"{frame_index + 1:02d}_{file_type}.{ext_map[file_type]}"
     return get_task_path(task_id, "frames", filename)
 
 
