@@ -373,13 +373,12 @@ def main():
                 ["generate", "fixed"],
                 horizontal=True,
                 format_func=lambda x: tr(f"mode.{x}"),
-                label_visibility="collapsed",
-                help=tr("mode.help")
+                label_visibility="collapsed"
             )
             
             # Text input (unified for both modes)
             text_placeholder = tr("input.topic_placeholder") if mode == "generate" else tr("input.content_placeholder")
-            text_height = 100 if mode == "generate" else 200
+            text_height = 120 if mode == "generate" else 200
             text_help = tr("input.text_help_generate") if mode == "generate" else tr("input.text_help_fixed")
             
             text = st.text_area(

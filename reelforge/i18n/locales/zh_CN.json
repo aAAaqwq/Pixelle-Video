@@ -14,14 +14,13 @@
     
     "mode.generate": "💡 生成模式",
     "mode.fixed": "📄 固定模式",
-    "mode.help": "生成模式：AI 从主题创作旁白。固定模式：直接使用您的脚本，不做任何改写，每行一个旁白。",
     
     "input.book_name": "书名",
     "input.book_name_placeholder": "例如：原子习惯、人性的弱点、Atomic Habits",
     "input.book_name_help": "输入书名，将自动获取书籍信息并生成视频",
     
     "input.topic": "主题",
-    "input.topic_placeholder": "例如：如何增加被动收入、How to build good habits",
+    "input.topic_placeholder": "AI 自动创作指定数量的旁白\n例如：如何增加被动收入、How to build passive income",
     "input.topic_help": "输入一个主题，AI 将根据主题生成内容",
     
     "input.text": "文本输入",

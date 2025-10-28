@@ -14,14 +14,13 @@
     
     "mode.generate": "💡 Generate Mode",
     "mode.fixed": "📄 Fixed Mode",
-    "mode.help": "Generate: AI creates narrations from topic. Fixed: Use your script directly without modification, one narration per line.",
     
     "input.book_name": "Book Name",
     "input.book_name_placeholder": "e.g., Atomic Habits, How to Win Friends",
     "input.book_name_help": "Enter the book name, will fetch book info and generate video",
     
     "input.topic": "Topic",
-    "input.topic_placeholder": "e.g., How to build passive income, How to build good habits",
+    "input.topic_placeholder": "AI automatically creates specified number of narrations\nExample: How to build passive income, 如何增加被动收入",
     "input.topic_help": "Enter a topic, AI will generate content based on it",
     
     "input.text": "Text Input",
