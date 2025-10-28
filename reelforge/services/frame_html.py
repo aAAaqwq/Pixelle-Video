@@ -206,7 +206,7 @@ class HTMLFrameGenerator:
         Args:
             title: Video title
             text: Narration text for this frame
-            image: Path to AI-generated image
+            image: Path to AI-generated image (supports relative path, absolute path, or HTTP URL)
             ext: Additional data (content_title, content_author, etc.)
             width: Frame width in pixels
             height: Frame height in pixels
@@ -214,6 +214,22 @@ class HTMLFrameGenerator:
         Returns:
             Path to generated frame image
         """
+        # Convert image path to absolute path or file:// URL for html2image
+        if image and not image.startswith(('http://', 'https://', 'data:', 'file://')):
+            # Local file path - convert to absolute path and file:// URL
+            image_path = Path(image)
+            if not image_path.is_absolute():
+                # Relative to current working directory (project root)
+                image_path = Path.cwd() / image
+            
+            # Ensure the file exists
+            if not image_path.exists():
+                logger.warning(f"Image file not found: {image_path}")
+            else:
+                # Convert to file:// URL for html2image compatibility
+                image = image_path.as_uri()
+                logger.debug(f"Converted image path to: {image}")
+        
         # Build variable context
         context = {
             # Required variables

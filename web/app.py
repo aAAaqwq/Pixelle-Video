@@ -610,6 +610,93 @@ def main():
                 index=default_template_index,
                 label_visibility="collapsed"
             )
+            
+            # Template preview expander
+            with st.expander(tr("template.preview_title"), expanded=False):
+                col1, col2 = st.columns(2)
+                
+                with col1:
+                    preview_title = st.text_input(
+                        tr("template.preview_param_title"), 
+                        value=tr("template.preview_default_title"),
+                        key="preview_title"
+                    )
+                    preview_image = st.text_input(
+                        tr("template.preview_param_image"), 
+                        value="resources/example.png",
+                        help=tr("template.preview_image_help"),
+                        key="preview_image"
+                    )
+                
+                with col2:
+                    preview_text = st.text_area(
+                        tr("template.preview_param_text"), 
+                        value=tr("template.preview_default_text"),
+                        height=100,
+                        key="preview_text"
+                    )
+                
+                # Size settings in a compact row
+                col3, col4 = st.columns(2)
+                with col3:
+                    preview_width = st.number_input(
+                        tr("template.preview_param_width"), 
+                        value=1080, 
+                        min_value=100, 
+                        max_value=4096,
+                        step=10,
+                        key="preview_width"
+                    )
+                with col4:
+                    preview_height = st.number_input(
+                        tr("template.preview_param_height"), 
+                        value=1920, 
+                        min_value=100, 
+                        max_value=4096,
+                        step=10,
+                        key="preview_height"
+                    )
+                
+                # Preview button
+                if st.button(tr("template.preview_button"), key="btn_preview_template", use_container_width=True):
+                    with st.spinner(tr("template.preview_generating")):
+                        try:
+                            from reelforge.services.frame_html import HTMLFrameGenerator
+                            
+                            # Use the currently selected template
+                            template_path = f"templates/{frame_template}"
+                            generator = HTMLFrameGenerator(template_path)
+                            
+                            # Generate preview
+                            preview_path = run_async(generator.generate_frame(
+                                title=preview_title,
+                                text=preview_text,
+                                image=preview_image,
+                                width=preview_width,
+                                height=preview_height
+                            ))
+                            
+                            # Display preview
+                            if preview_path:
+                                st.success(tr("template.preview_success"))
+                                
+                                # Calculate display width (max 500px or 1/3 of original)
+                                display_width = min(500, preview_width // 3)
+                                
+                                st.image(
+                                    preview_path, 
+                                    caption=tr("template.preview_caption", template=frame_template),
+                                    # width=display_width
+                                )
+                                
+                                # Show file path
+                                st.caption(f"📁 {preview_path}")
+                            else:
+                                st.error("Failed to generate preview")
+                                
+                        except Exception as e:
+                            st.error(tr("template.preview_failed", error=str(e)))
+                            logger.exception(e)
     
     # ========================================================================
     # Right Column: Generate Button + Progress + Video Preview
