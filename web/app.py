@@ -679,14 +679,9 @@ def main():
                             # Display preview
                             if preview_path:
                                 st.success(tr("template.preview_success"))
-                                
-                                # Calculate display width (max 500px or 1/3 of original)
-                                display_width = min(500, preview_width // 3)
-                                
                                 st.image(
                                     preview_path, 
                                     caption=tr("template.preview_caption", template=frame_template),
-                                    # width=display_width
                                 )
                                 
                                 # Show file path
