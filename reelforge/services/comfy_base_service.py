@@ -126,8 +126,6 @@ class ComfyBaseService:
             # Wrapper format: {"source": "runninghub", "workflow_id": "xxx", ...}
             if "workflow_id" in content:
                 workflow_info["workflow_id"] = content["workflow_id"]
-            if "metadata" in content:
-                workflow_info["metadata"] = content["metadata"]
         
         return workflow_info
     
