@@ -31,7 +31,7 @@ class ImageService(ComfyBaseService):
     """
     
     WORKFLOW_PREFIX = "image_"
-    DEFAULT_WORKFLOW = "image_default.json"
+    DEFAULT_WORKFLOW = None  # No hardcoded default, must be configured
     WORKFLOWS_DIR = "workflows"
     
     def __init__(self, config: dict):
@@ -112,10 +112,10 @@ class ImageService(ComfyBaseService):
                 comfyui_url="http://192.168.1.100:8188"
             )
         """
-        # 1. Resolve workflow path
-        workflow_path = self._resolve_workflow(workflow=workflow)
+        # 1. Resolve workflow (returns structured info)
+        workflow_info = self._resolve_workflow(workflow=workflow)
         
-        # 2. Prepare ComfyKit config
+        # 2. Prepare ComfyKit config (supports both selfhost and runninghub)
         kit_config = self._prepare_comfykit_config(
             comfyui_url=comfyui_url,
             runninghub_api_key=runninghub_api_key
@@ -145,12 +145,21 @@ class ImageService(ComfyBaseService):
         
         logger.debug(f"Workflow parameters: {workflow_params}")
         
-        # 4. Execute workflow
+        # 4. Execute workflow (ComfyKit auto-detects based on input type)
         try:
             kit = ComfyKit(**kit_config)
             
-            logger.info(f"Executing workflow: {workflow_path}")
-            result = await kit.execute(workflow_path, workflow_params)
+            # Determine what to pass to ComfyKit based on source
+            if workflow_info["source"] == "runninghub" and "workflow_id" in workflow_info:
+                # RunningHub: pass workflow_id (ComfyKit will use runninghub backend)
+                workflow_input = workflow_info["workflow_id"]
+                logger.info(f"Executing RunningHub workflow: {workflow_input}")
+            else:
+                # Selfhost: pass file path (ComfyKit will use local ComfyUI)
+                workflow_input = workflow_info["path"]
+                logger.info(f"Executing selfhost workflow: {workflow_input}")
+            
+            result = await kit.execute(workflow_input, workflow_params)
             
             # 5. Handle result
             if result.status != "completed":

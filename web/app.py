@@ -13,7 +13,7 @@ import streamlit as st
 from loguru import logger
 
 # Import i18n and config manager
-from reelforge.i18n import load_locales, set_language, tr, get_available_languages
+from web.i18n import load_locales, set_language, tr, get_available_languages
 from reelforge.config import config_manager
 from reelforge.models.progress import ProgressEvent
 
@@ -61,38 +61,6 @@ def init_i18n():
     
     # Set current language
     set_language(st.session_state.language)
-
-
-# ============================================================================
-# Preview Cache Functions
-# ============================================================================
-
-def generate_style_preview_cached(prompt_prefix: str):
-    """
-    Generate and cache visual style preview
-    
-    Args:
-        prompt_prefix: Prompt prefix to test
-    
-    Returns:
-        Generated image path
-    """
-    from reelforge.utils.prompt_helper import build_image_prompt
-    
-    reelforge = get_reelforge()
-    
-    # Build final prompt with prefix
-    test_prompt = "A peaceful mountain landscape"
-    final_prompt = build_image_prompt(test_prompt, prompt_prefix)
-    
-    # Generate preview image (small size for speed)
-    preview_image_path = run_async(reelforge.image(
-        prompt=final_prompt,
-        width=512,
-        height=512
-    ))
-    
-    return preview_image_path
 
 
 # ============================================================================
@@ -512,24 +480,38 @@ def main():
             st.caption(tr("style.workflow"))
             st.caption(tr("style.workflow_help"))
             
-            # Dynamically scan workflows folder for image_*.json files
-            workflows_folder = Path("workflows")
-            workflow_files = []
-            if workflows_folder.exists():
-                workflow_files = sorted([f.name for f in workflows_folder.glob("image_*.json")])
+            # Get available workflows from reelforge (with source info)
+            workflows = reelforge.image.list_workflows()
             
-            # Default to "image_default.json" if exists, otherwise first option
+            # Build options for selectbox
+            # Display: "image_default.json - Runninghub"
+            # Value: "runninghub/image_default.json"
+            workflow_options = [wf["display_name"] for wf in workflows]
+            workflow_keys = [wf["key"] for wf in workflows]
+            
+            # Default to first option (should be runninghub by sorting)
             default_workflow_index = 0
-            if "image_default.json" in workflow_files:
-                default_workflow_index = workflow_files.index("image_default.json")
             
-            workflow_filename = st.selectbox(
+            # If user has a saved preference in config, try to match it
+            image_config = config_manager.get_image_config()
+            saved_workflow = image_config.get("default_workflow")
+            if saved_workflow and saved_workflow in workflow_keys:
+                default_workflow_index = workflow_keys.index(saved_workflow)
+            
+            workflow_display = st.selectbox(
                 "Workflow",
-                workflow_files if workflow_files else ["image_default.json"],
+                workflow_options if workflow_options else ["No workflows found"],
                 index=default_workflow_index,
                 label_visibility="collapsed",
                 key="image_workflow_select"
             )
+            
+            # Get the actual workflow key (e.g., "runninghub/image_default.json")
+            if workflow_options:
+                workflow_selected_index = workflow_options.index(workflow_display)
+                workflow_key = workflow_keys[workflow_selected_index]
+            else:
+                workflow_key = "runninghub/image_default.json"  # fallback
             
             
             # 2. Prompt prefix input
@@ -549,38 +531,59 @@ def main():
                 help=tr("style.prompt_prefix_help")
             )
             
-            # Visual style preview button
-            if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
-                with st.spinner(tr("style.previewing")):
-                    try:
-                        # Generate preview using cached function
-                        preview_image_path = generate_style_preview_cached(prompt_prefix)
-                        
-                        # Display preview (support both URL and local path)
-                        if preview_image_path:
-                            # Read and encode image
-                            if preview_image_path.startswith('http'):
-                                # URL - use directly
-                                img_html = f'<div class="preview-image"><img src="{preview_image_path}" alt="Style Preview"/></div>'
-                            else:
-                                # Local file - encode as base64
-                                with open(preview_image_path, 'rb') as f:
-                                    img_data = base64.b64encode(f.read()).decode()
-                                img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
-                            
-                            st.markdown(img_html, unsafe_allow_html=True)
-                            st.caption("Preview with test prompt: 'A peaceful mountain landscape'")
-                            
-                            # Show the final prompt used
+            # Style preview expander (similar to template preview)
+            with st.expander(tr("style.preview_title"), expanded=False):
+                # Test prompt input
+                test_prompt = st.text_input(
+                    tr("style.test_prompt"),
+                    value="a dog",
+                    help=tr("style.test_prompt_help"),
+                    key="style_test_prompt"
+                )
+                
+                # Preview button
+                if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
+                    with st.spinner(tr("style.previewing")):
+                        try:
                             from reelforge.utils.prompt_helper import build_image_prompt
-                            test_prompt = "A peaceful mountain landscape"
+                            
+                            # Build final prompt with prefix
                             final_prompt = build_image_prompt(test_prompt, prompt_prefix)
-                            st.info(f"Final prompt used: {final_prompt}")
-                        else:
-                            st.error("Failed to generate preview image")
-                    except Exception as e:
-                        st.error(tr("style.preview_failed", error=str(e)))
-                        logger.exception(e)
+                            
+                            # Generate preview image (small size for speed)
+                            preview_image_path = run_async(reelforge.image(
+                                prompt=final_prompt,
+                                workflow=workflow_key,
+                                width=512,
+                                height=512
+                            ))
+                            
+                            # Display preview (support both URL and local path)
+                            if preview_image_path:
+                                st.success(tr("style.preview_success"))
+                                
+                                # Read and encode image
+                                if preview_image_path.startswith('http'):
+                                    # URL - use directly
+                                    img_html = f'<div class="preview-image"><img src="{preview_image_path}" alt="Style Preview"/></div>'
+                                else:
+                                    # Local file - encode as base64
+                                    with open(preview_image_path, 'rb') as f:
+                                        img_data = base64.b64encode(f.read()).decode()
+                                    img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
+                                
+                                st.markdown(img_html, unsafe_allow_html=True)
+                                
+                                # Show the final prompt used
+                                st.info(f"**{tr('style.final_prompt_label')}**\n{final_prompt}")
+                                
+                                # Show file path
+                                st.caption(f"📁 {preview_image_path}")
+                            else:
+                                st.error(tr("style.preview_failed_general"))
+                        except Exception as e:
+                            st.error(tr("style.preview_failed", error=str(e)))
+                            logger.exception(e)
             
             
             # Frame template (moved from right column)
@@ -755,7 +758,7 @@ def main():
                         title=title if title else None,
                         n_scenes=n_scenes,
                         voice_id=voice_id,
-                        image_workflow=workflow_filename,  # Pass image workflow filename
+                        image_workflow=workflow_key,  # Pass workflow key (e.g., "runninghub/image_default.json")
                         frame_template=frame_template,
                         prompt_prefix=prompt_prefix,  # Pass prompt_prefix
                         bgm_path=bgm_path,

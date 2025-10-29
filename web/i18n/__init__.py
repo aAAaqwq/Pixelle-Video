@@ -1,5 +1,5 @@
 """
-International language support for ReelForge
+International language support for ReelForge Web UI
 """
 
 import json

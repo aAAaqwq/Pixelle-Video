@@ -96,7 +96,7 @@ class ConfigManager:
     def get_image_config(self) -> dict:
         """Get image configuration as dict"""
         return {
-            "default": self.config.image.default,
+            "default_workflow": self.config.image.default_workflow,
             "comfyui_url": self.config.image.comfyui_url,
             "runninghub_api_key": self.config.image.runninghub_api_key,
             "prompt_prefix": self.config.image.prompt_prefix,

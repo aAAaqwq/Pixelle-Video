@@ -139,11 +139,8 @@ class TTSService(ComfyBaseService):
                 workflow="/path/to/custom_tts.json"
             )
         """
-        # 1. Resolve workflow path or provider
-        workflow_or_provider = self._resolve_workflow(workflow=workflow)
-        
-        # 2. Determine execution path
-        if workflow_or_provider in self.BUILTIN_PROVIDERS:
+        # 1. Check if it's a builtin provider (edge-tts)
+        if workflow in self.BUILTIN_PROVIDERS or workflow is None and self._get_default_workflow() in self.BUILTIN_PROVIDERS:
             # Use edge-tts
             return await self._call_edge_tts(
                 text=text,
@@ -154,20 +151,22 @@ class TTSService(ComfyBaseService):
                 output_path=output_path,
                 **params
             )
-        else:
-            # Use ComfyUI workflow
-            return await self._call_comfyui_workflow(
-                workflow_path=workflow_or_provider,
-                text=text,
-                comfyui_url=comfyui_url,
-                runninghub_api_key=runninghub_api_key,
-                voice=voice,
-                rate=rate,
-                volume=volume,
-                pitch=pitch,
-                output_path=output_path,
-                **params
-            )
+        
+        # 2. Use ComfyUI workflow - resolve to structured info
+        workflow_info = self._resolve_workflow(workflow=workflow)
+        
+        return await self._call_comfyui_workflow(
+            workflow_info=workflow_info,
+            text=text,
+            comfyui_url=comfyui_url,
+            runninghub_api_key=runninghub_api_key,
+            voice=voice,
+            rate=rate,
+            volume=volume,
+            pitch=pitch,
+            output_path=output_path,
+            **params
+        )
     
     async def _call_edge_tts(
         self,
@@ -227,7 +226,7 @@ class TTSService(ComfyBaseService):
     
     async def _call_comfyui_workflow(
         self,
-        workflow_path: str,
+        workflow_info: dict,
         text: str,
         comfyui_url: Optional[str] = None,
         runninghub_api_key: Optional[str] = None,
@@ -242,7 +241,7 @@ class TTSService(ComfyBaseService):
         Generate speech using ComfyUI workflow
         
         Args:
-            workflow_path: Path to workflow file
+            workflow_info: Workflow info dict from _resolve_workflow()
             text: Text to convert to speech
             comfyui_url: ComfyUI URL
             runninghub_api_key: RunningHub API key
@@ -256,9 +255,9 @@ class TTSService(ComfyBaseService):
         Returns:
             Generated audio file path (local if output_path provided, otherwise URL)
         """
-        logger.info(f"🎙️  Using ComfyUI workflow: {workflow_path}")
+        logger.info(f"🎙️  Using workflow: {workflow_info['key']}")
         
-        # 1. Prepare ComfyKit config
+        # 1. Prepare ComfyKit config (supports both selfhost and runninghub)
         kit_config = self._prepare_comfykit_config(
             comfyui_url=comfyui_url,
             runninghub_api_key=runninghub_api_key
@@ -282,12 +281,21 @@ class TTSService(ComfyBaseService):
         
         logger.debug(f"Workflow parameters: {workflow_params}")
         
-        # 3. Execute workflow
+        # 3. Execute workflow (ComfyKit auto-detects based on input type)
         try:
             kit = ComfyKit(**kit_config)
             
-            logger.info(f"Executing TTS workflow: {workflow_path}")
-            result = await kit.execute(workflow_path, workflow_params)
+            # Determine what to pass to ComfyKit based on source
+            if workflow_info["source"] == "runninghub" and "workflow_id" in workflow_info:
+                # RunningHub: pass workflow_id
+                workflow_input = workflow_info["workflow_id"]
+                logger.info(f"Executing RunningHub TTS workflow: {workflow_input}")
+            else:
+                # Selfhost: pass file path
+                workflow_input = workflow_info["path"]
+                logger.info(f"Executing selfhost TTS workflow: {workflow_input}")
+            
+            result = await kit.execute(workflow_input, workflow_params)
             
             # 4. Handle result
             if result.status != "completed":

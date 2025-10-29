@@ -15,12 +15,16 @@ class LLMConfig(BaseModel):
 
 class TTSConfig(BaseModel):
     """TTS configuration"""
-    default: str = Field(default="edge", description="Default TTS workflow")
+    model_config = {"populate_by_name": True}  # Allow both field name and alias
+    
+    default_workflow: str = Field(default="edge", description="Default TTS workflow", alias="default")
 
 
 class ImageConfig(BaseModel):
     """Image generation configuration"""
-    default: str = Field(default="image_default.json", description="Default image workflow")
+    model_config = {"populate_by_name": True}  # Allow both field name and alias
+    
+    default_workflow: str = Field(default=None, description="Default image workflow (required, no fallback)", alias="default")
     comfyui_url: str = Field(default="http://127.0.0.1:8188", description="ComfyUI Server URL")
     runninghub_api_key: str = Field(default="", description="RunningHub API Key (optional)")
     prompt_prefix: str = Field(

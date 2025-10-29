@@ -2,6 +2,7 @@
 ComfyUI Base Service - Common logic for ComfyUI-based services
 """
 
+import json
 import os
 from pathlib import Path
 from typing import Optional, List, Dict, Any
@@ -38,13 +39,29 @@ class ComfyBaseService:
         self.service_name = service_name
         self._workflows_cache: Optional[List[str]] = None
     
-    def _scan_workflows(self) -> List[str]:
+    def _scan_workflows(self) -> List[Dict[str, Any]]:
         """
-        Scan workflows/{prefix}*.json files
+        Scan workflows/source/*.json files from all source directories
         
         Returns:
-            List of workflow filenames
-            Example: ["image_default.json", "image_flux.json"]
+            List of workflow info dicts
+            Example: [
+                {
+                    "name": "image_default.json",
+                    "display_name": "image_default.json - Selfhost",
+                    "source": "selfhost",
+                    "path": "workflows/selfhost/image_default.json",
+                    "key": "selfhost/image_default.json"
+                },
+                {
+                    "name": "image_default.json",
+                    "display_name": "image_default.json - Runninghub", 
+                    "source": "runninghub",
+                    "path": "workflows/runninghub/image_default.json",
+                    "key": "runninghub/image_default.json",
+                    "workflow_id": "123456"
+                }
+            ]
         """
         workflows = []
         workflows_dir = Path(self.WORKFLOWS_DIR)
@@ -53,67 +70,130 @@ class ComfyBaseService:
             logger.warning(f"Workflows directory not found: {workflows_dir}")
             return workflows
         
-        # Scan for {prefix}_*.json files
-        for file in workflows_dir.glob(f"{self.WORKFLOW_PREFIX}*.json"):
-            workflows.append(file.name)
-            logger.debug(f"Found {self.service_name} workflow: {file.name}")
+        # Scan subdirectories (selfhost, runninghub, etc.)
+        for source_dir in workflows_dir.iterdir():
+            if not source_dir.is_dir():
+                logger.debug(f"Skipping non-directory: {source_dir}")
+                continue
+            
+            source_name = source_dir.name
+            
+            # Scan workflow files in this source directory
+            for file_path in source_dir.glob(f"{self.WORKFLOW_PREFIX}*.json"):
+                try:
+                    workflow_info = self._parse_workflow_file(file_path, source_name)
+                    workflows.append(workflow_info)
+                    logger.debug(f"Found workflow: {workflow_info['key']}")
+                except Exception as e:
+                    logger.error(f"Failed to parse workflow {file_path}: {e}")
         
-        return sorted(workflows)
+        # Sort by key (source/name)
+        return sorted(workflows, key=lambda w: w["key"])
+    
+    def _parse_workflow_file(self, file_path: Path, source: str) -> Dict[str, Any]:
+        """
+        Parse workflow file and extract metadata
+        
+        Args:
+            file_path: Path to workflow JSON file
+            source: Source directory name (e.g., "selfhost", "runninghub")
+        
+        Returns:
+            Workflow info dict with structure:
+            {
+                "name": "image_default.json",
+                "display_name": "image_default.json - Runninghub",
+                "source": "runninghub",
+                "path": "workflows/runninghub/image_default.json",
+                "key": "runninghub/image_default.json",
+                "workflow_id": "123456"  # Only for RunningHub
+            }
+        """
+        with open(file_path, 'r', encoding='utf-8') as f:
+            content = json.load(f)
+        
+        # Build base info
+        workflow_info = {
+            "name": file_path.name,
+            "display_name": f"{file_path.name} - {source.title()}",
+            "source": source,
+            "path": str(file_path),
+            "key": f"{source}/{file_path.name}"
+        }
+        
+        # Check if it's a wrapper format (RunningHub, etc.)
+        if "source" in content:
+            # Wrapper format: {"source": "runninghub", "workflow_id": "xxx", ...}
+            if "workflow_id" in content:
+                workflow_info["workflow_id"] = content["workflow_id"]
+            if "metadata" in content:
+                workflow_info["metadata"] = content["metadata"]
+        
+        return workflow_info
     
     def _get_default_workflow(self) -> str:
         """
-        Get default workflow name from config or use DEFAULT_WORKFLOW
+        Get default workflow from config (required, no fallback)
         
         Returns:
-            Default workflow filename
+            Default workflow key (e.g., "runninghub/image_default.json")
+        
+        Raises:
+            ValueError: If default_workflow not configured
         """
-        return self.config.get("default_workflow", self.DEFAULT_WORKFLOW)
+        default_workflow = self.config.get("default_workflow")
+        
+        if not default_workflow:
+            raise ValueError(
+                f"No default workflow configured for {self.service_name}. "
+                f"Please set 'default_workflow' in config.yaml under '{self.service_name}' section. "
+                f"Available workflows: {', '.join(self.available)}"
+            )
+        
+        return default_workflow
     
-    def _resolve_workflow(self, workflow: Optional[str] = None) -> str:
+    def _resolve_workflow(self, workflow: Optional[str] = None) -> Dict[str, Any]:
         """
-        Resolve workflow to actual workflow path
+        Resolve workflow key to workflow info
         
         Args:
-            workflow: Workflow filename (e.g., "image_default.json")
-                     Can also be:
-                     - Absolute path: "/path/to/workflow.json"
-                     - Relative path: "custom/workflow.json"
-                     - URL: "http://..."
-                     - RunningHub ID: "12345"
+            workflow: Workflow key (e.g., "runninghub/image_default.json")
+                     If None, uses default from config
         
         Returns:
-            Workflow file path or identifier
+            Workflow info dict with structure:
+            {
+                "name": "image_default.json",
+                "display_name": "image_default.json - Runninghub",
+                "source": "runninghub",
+                "path": "workflows/runninghub/image_default.json",
+                "key": "runninghub/image_default.json",
+                "workflow_id": "123456"  # Only for RunningHub
+            }
         
         Raises:
             ValueError: If workflow not found
         """
-        # 1. If not specified, use default
+        # 1. If not specified, use default from config
         if workflow is None:
             workflow = self._get_default_workflow()
         
-        # 2. If it's an absolute path, URL, or looks like RunningHub ID, use as-is
-        if (workflow.startswith("/") or 
-            workflow.startswith("http://") or 
-            workflow.startswith("https://") or
-            workflow.isdigit()):
-            logger.debug(f"Using workflow identifier: {workflow}")
-            return workflow
+        # 2. Scan available workflows
+        available_workflows = self._scan_workflows()
         
-        # 3. If it's just a filename, look in workflows/ directory
-        workflow_path = Path(self.WORKFLOWS_DIR) / workflow
+        # 3. Find matching workflow by key
+        for wf_info in available_workflows:
+            if wf_info["key"] == workflow:
+                logger.info(f"🎬 Using {self.service_name} workflow: {workflow}")
+                return wf_info
         
-        if not workflow_path.exists():
-            # List available workflows for error message
-            available = self._scan_workflows()
-            available_str = ", ".join(available) if available else "none"
-            raise ValueError(
-                f"Workflow '{workflow}' not found at {workflow_path}. "
-                f"Available workflows: {available_str}\n"
-                f"Please create: {workflow_path}"
-            )
-        
-        logger.info(f"🎬 Using {self.service_name} workflow: {workflow}")
-        return str(workflow_path)
+        # 4. Not found - generate error message
+        available_keys = [wf["key"] for wf in available_workflows]
+        available_str = ", ".join(available_keys) if available_keys else "none"
+        raise ValueError(
+            f"Workflow '{workflow}' not found. "
+            f"Available workflows: {available_str}"
+        )
     
     def _prepare_comfykit_config(
         self,
@@ -153,31 +233,42 @@ class ComfyBaseService:
         logger.debug(f"ComfyKit config: {kit_config}")
         return kit_config
     
-    def list_workflows(self) -> List[str]:
+    def list_workflows(self) -> List[Dict[str, Any]]:
         """
-        List all available workflows
+        List all available workflows with full metadata
         
         Returns:
-            List of workflow filenames (sorted alphabetically)
+            List of workflow info dicts (sorted by key)
         
         Example:
             workflows = service.list_workflows()
-            # ['image_default.json', 'image_flux.json']
+            # [
+            #     {
+            #         "name": "image_default.json",
+            #         "display_name": "image_default.json - Runninghub",
+            #         "source": "runninghub",
+            #         "path": "workflows/runninghub/image_default.json",
+            #         "key": "runninghub/image_default.json",
+            #         "workflow_id": "123456"
+            #     },
+            #     ...
+            # ]
         """
         return self._scan_workflows()
     
     @property
     def available(self) -> List[str]:
         """
-        List available workflows
+        List available workflow keys
         
         Returns:
-            List of available workflow filenames
+            List of available workflow keys (e.g., ["runninghub/image_default.json", ...])
         
         Example:
             print(f"Available workflows: {service.available}")
         """
-        return self.list_workflows()
+        workflows = self.list_workflows()
+        return [wf["key"] for wf in workflows]
     
     def __repr__(self) -> str:
         """String representation"""
