@@ -70,14 +70,4 @@ plans/
 examples/
 repositories/
 
-# Workflows - ignore user customizations but keep defaults
-
-
-# Templates - ignore user customizations but keep presets
-templates/*
-!templates/default.html
-!templates/modern.html
-!templates/neon.html
-!templates/README.md
-
 *.out
