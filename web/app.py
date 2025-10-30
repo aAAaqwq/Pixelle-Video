@@ -380,14 +380,16 @@ def main():
                 st.info(tr("video.frames_fixed_mode_hint"))
         
         # ====================================================================
-        # Audio Settings (BGM + TTS)
+        # BGM Section
         # ====================================================================
         with st.container(border=True):
-            st.markdown(f"**{tr('section.audio_settings')}**")
+            st.markdown(f"**{tr('section.bgm')}**")
             
-            # Background music (moved to top)
-            st.markdown(f"**{tr('bgm.title')}**")
-            st.caption(tr("bgm.custom_help"))
+            with st.expander(tr("help.feature_description"), expanded=False):
+                st.markdown(f"**{tr('help.what')}**")
+                st.markdown(tr("bgm.what"))
+                st.markdown(f"**{tr('help.how')}**")
+                st.markdown(tr("bgm.how"))
             
             # Dynamically scan bgm folder for music files (support common audio formats)
             bgm_folder = Path("bgm")
@@ -424,11 +426,22 @@ def main():
             
             # Use full filename for bgm_path (including extension)
             bgm_path = None if bgm_choice == tr("bgm.none") else bgm_choice
+    
+    # ========================================================================
+    # Middle Column: TTS, Image Settings & Template
+    # ========================================================================
+    with middle_col:
+        # ====================================================================
+        # TTS Section (moved from left column)
+        # ====================================================================
+        with st.container(border=True):
+            st.markdown(f"**{tr('section.tts')}**")
             
-            
-            # TTS Workflow selection
-            st.markdown(f"**{tr('tts.title')}**")
-            st.caption(tr("tts.workflow_help"))
+            with st.expander(tr("help.feature_description"), expanded=False):
+                st.markdown(f"**{tr('help.what')}**")
+                st.markdown(tr("tts.what"))
+                st.markdown(f"**{tr('help.how')}**")
+                st.markdown(tr("tts.how"))
             
             # Get available TTS workflows
             tts_workflows = reelforge.tts.list_workflows()
@@ -496,20 +509,19 @@ def main():
                         except Exception as e:
                             st.error(tr("tts.preview_failed", error=str(e)))
                             logger.exception(e)
-    
-    # ========================================================================
-    # Middle Column: Visual Settings (Style & Template)
-    # ========================================================================
-    with middle_col:
+        
+        # ====================================================================
+        # Image Generation Section
+        # ====================================================================
         with st.container(border=True):
-            st.markdown(f"**{tr('section.visual_settings')}**")
-            
-            # Visual style (Workflow + Prompt Prefix)
-            st.markdown(f"**{tr('style.title')}**")
+            st.markdown(f"**{tr('section.image')}**")
             
             # 1. ComfyUI Workflow selection
-            st.caption(tr("style.workflow"))
-            st.caption(tr("style.workflow_help"))
+            with st.expander(tr("help.feature_description"), expanded=False):
+                st.markdown(f"**{tr('help.what')}**")
+                st.markdown(tr("style.workflow_what"))
+                st.markdown(f"**{tr('help.how')}**")
+                st.markdown(tr("style.workflow_how"))
             
             # Get available workflows from reelforge (with source info)
             workflows = reelforge.image.list_workflows()
@@ -546,7 +558,7 @@ def main():
             
             
             # 2. Prompt prefix input
-            st.caption(tr("style.prompt_prefix"))
+            st.markdown(f"**{tr('style.prompt_prefix')}**")
             
             # Get current prompt_prefix from config
             current_prefix = comfyui_config["image"]["prompt_prefix"]
@@ -615,10 +627,18 @@ def main():
                             st.error(tr("style.preview_failed", error=str(e)))
                             logger.exception(e)
             
+        
+        # ====================================================================
+        # Storyboard Template Section
+        # ====================================================================
+        with st.container(border=True):
+            st.markdown(f"**{tr('section.template')}**")
             
-            # Frame template (moved from right column)
-            st.markdown(f"**{tr('template.title')}**")
-            st.caption(tr("template.custom_help"))
+            with st.expander(tr("help.feature_description"), expanded=False):
+                st.markdown(f"**{tr('help.what')}**")
+                st.markdown(tr("template.what"))
+                st.markdown(f"**{tr('help.how')}**")
+                st.markdown(tr("template.how"))
             
             # Dynamically scan templates folder for HTML files
             templates_folder = Path("templates")
