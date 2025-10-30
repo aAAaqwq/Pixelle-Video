@@ -68,7 +68,7 @@ class NarrationGeneratorService:
             >>> narrations = await service.generate_narrations(
             ...     config=config,
             ...     source_type="content",
-            ...     content="昨天我读了一本书..."
+            ...     content="Today I want to share three useful tips..."
             ... )
         """
         # 1. Build prompt based on source_type

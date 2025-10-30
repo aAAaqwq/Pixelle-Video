@@ -9,16 +9,11 @@
     "section.visual_settings": "🎨 Visual Settings",
     "section.video_generation": "🎬 Generate Video",
     
-    "input_mode.book": "📚 Book Name",
     "input_mode.topic": "💡 Topic",
     "input_mode.custom": "✍️ Custom Content",
     
     "mode.generate": "💡 Generate Mode",
     "mode.fixed": "📄 Fixed Mode",
-    
-    "input.book_name": "Book Name",
-    "input.book_name_placeholder": "e.g., Atomic Habits, How to Win Friends",
-    "input.book_name_help": "Enter the book name, will fetch book info and generate video",
     
     "input.topic": "Topic",
     "input.topic_placeholder": "AI automatically creates specified number of narrations\nExample: How to build passive income, 如何增加被动收入",
@@ -35,17 +30,6 @@
     "input.title": "Title (Optional)",
     "input.title_placeholder": "Video title (auto-generated if empty)",
     "input.title_help": "Optional: Custom title for the video",
-    
-    "book.search": "🔍 Search Book",
-    "book.searching": "Searching book...",
-    "book.found": "✅ Book found!",
-    "book.not_found": "❌ Failed to fetch book: {error}",
-    "book.name_required": "Please enter a book name",
-    
-    "book.title": "Title",
-    "book.author": "Author",
-    "book.rating": "Rating",
-    "book.summary": "📝 Summary",
     
     "voice.title": "🎤 Voice Selection",
     "voice.male_professional": "🎤 Male-Professional",
@@ -138,7 +122,7 @@
     "progress.concatenating": "Concatenating video segments...",
     "progress.finalizing": "Finalizing...",
     
-    "error.input_required": "❌ Please provide book name, topic, or content",
+    "error.input_required": "❌ Please provide topic or content",
     "error.api_key_required": "❌ Please enter API Key",
     "error.missing_field": "Please enter {field}",
     
@@ -181,10 +165,6 @@
     "tts.previewing": "Generating TTS preview...",
     "tts.preview_success": "✅ Preview generated successfully!",
     "tts.preview_failed": "❌ Preview failed: {error}",
-    
-    "settings.book.title": "📚 Book Information",
-    "settings.book.provider": "Provider",
-    "settings.book.provider_help": "Select book information source",
     
     "welcome.first_time": "🎉 Welcome to ReelForge! Please complete basic configuration",
     "welcome.config_hint": "💡 First-time setup requires API Key configuration, you can modify it in advanced settings later",

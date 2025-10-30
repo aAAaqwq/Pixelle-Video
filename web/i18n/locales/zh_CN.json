@@ -9,16 +9,11 @@
     "section.visual_settings": "🎨 画面设置",
     "section.video_generation": "🎬 生成视频",
     
-    "input_mode.book": "📚 书名",
     "input_mode.topic": "💡 主题",
     "input_mode.custom": "✍️ 自定义内容",
     
     "mode.generate": "💡 生成模式",
     "mode.fixed": "📄 固定模式",
-    
-    "input.book_name": "书名",
-    "input.book_name_placeholder": "例如：原子习惯、人性的弱点、Atomic Habits",
-    "input.book_name_help": "输入书名，将自动获取书籍信息并生成视频",
     
     "input.topic": "主题",
     "input.topic_placeholder": "AI 自动创作指定数量的旁白\n例如：如何增加被动收入、How to build passive income",
@@ -35,17 +30,6 @@
     "input.title": "标题（可选）",
     "input.title_placeholder": "视频标题（留空则自动生成）",
     "input.title_help": "可选：自定义视频标题",
-    
-    "book.search": "🔍 搜索书籍",
-    "book.searching": "正在搜索书籍...",
-    "book.found": "✅ 找到书籍！",
-    "book.not_found": "❌ 获取书籍失败：{error}",
-    "book.name_required": "请输入书名",
-    
-    "book.title": "书名",
-    "book.author": "作者",
-    "book.rating": "评分",
-    "book.summary": "📝 简介",
     
     "voice.title": "🎤 语音选择",
     "voice.male_professional": "🎤 男声-专业",
@@ -138,7 +122,7 @@
     "progress.concatenating": "拼接视频片段...",
     "progress.finalizing": "完成中...",
     
-    "error.input_required": "❌ 请提供书名、主题或内容",
+    "error.input_required": "❌ 请提供主题或内容",
     "error.api_key_required": "❌ 请填写 API Key",
     "error.missing_field": "请填写 {field}",
     
@@ -181,10 +165,6 @@
     "tts.previewing": "正在生成 TTS 预览...",
     "tts.preview_success": "✅ 预览生成成功！",
     "tts.preview_failed": "❌ 预览失败：{error}",
-    
-    "settings.book.title": "📚 书籍信息",
-    "settings.book.provider": "服务商",
-    "settings.book.provider_help": "选择书籍信息来源",
     
     "welcome.first_time": "🎉 欢迎使用 ReelForge！请先完成基础配置",
     "welcome.config_hint": "💡 首次使用需要配置 API Key，后续可以在高级设置中修改",
