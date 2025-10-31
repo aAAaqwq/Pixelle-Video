@@ -7,7 +7,7 @@ from typing import Optional
 from comfykit import ComfyKit
 from loguru import logger
 
-from reelforge.services.comfy_base_service import ComfyBaseService
+from pixelle_video.services.comfy_base_service import ComfyBaseService
 
 
 class TTSService(ComfyBaseService):
@@ -18,16 +18,16 @@ class TTSService(ComfyBaseService):
     
     Usage:
         # Use default workflow
-        audio_path = await reelforge.tts(text="Hello, world!")
+        audio_path = await pixelle_video.tts(text="Hello, world!")
         
         # Use specific workflow
-        audio_path = await reelforge.tts(
+        audio_path = await pixelle_video.tts(
             text="你好，世界！",
             workflow="tts_edge.json"
         )
         
         # List available workflows
-        workflows = reelforge.tts.list_workflows()
+        workflows = pixelle_video.tts.list_workflows()
     """
     
     WORKFLOW_PREFIX = "tts_"
@@ -76,16 +76,16 @@ class TTSService(ComfyBaseService):
         
         Examples:
             # Simplest: use default workflow
-            audio_path = await reelforge.tts(text="Hello, world!")
+            audio_path = await pixelle_video.tts(text="Hello, world!")
             
             # Use specific workflow
-            audio_path = await reelforge.tts(
+            audio_path = await pixelle_video.tts(
                 text="你好，世界！",
                 workflow="tts_edge.json"
             )
             
             # With voice and speed
-            audio_path = await reelforge.tts(
+            audio_path = await pixelle_video.tts(
                 text="Hello",
                 workflow="tts_edge.json",
                 voice="[Chinese] zh-CN Xiaoxiao",
@@ -93,13 +93,13 @@ class TTSService(ComfyBaseService):
             )
             
             # With absolute path
-            audio_path = await reelforge.tts(
+            audio_path = await pixelle_video.tts(
                 text="Hello",
                 workflow="/path/to/custom_tts.json"
             )
             
             # With custom ComfyUI server
-            audio_path = await reelforge.tts(
+            audio_path = await pixelle_video.tts(
                 text="Hello",
                 comfyui_url="http://192.168.1.100:8188"
             )

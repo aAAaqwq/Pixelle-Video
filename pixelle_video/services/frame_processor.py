@@ -9,21 +9,21 @@ from typing import Callable, Optional
 import httpx
 from loguru import logger
 
-from reelforge.models.progress import ProgressEvent
-from reelforge.models.storyboard import Storyboard, StoryboardFrame, StoryboardConfig
+from pixelle_video.models.progress import ProgressEvent
+from pixelle_video.models.storyboard import Storyboard, StoryboardFrame, StoryboardConfig
 
 
 class FrameProcessor:
     """Frame processor"""
     
-    def __init__(self, reelforge_core):
+    def __init__(self, pixelle_video_core):
         """
         Initialize
         
         Args:
-            reelforge_core: ReelForgeCore instance
+            pixelle_video_core: PixelleVideoCore instance
         """
-        self.core = reelforge_core
+        self.core = pixelle_video_core
     
     async def __call__(
         self,
@@ -121,7 +121,7 @@ class FrameProcessor:
         logger.debug(f"  1/4: Generating audio for frame {frame.index}...")
         
         # Generate output path using task_id
-        from reelforge.utils.os_util import get_task_frame_path
+        from pixelle_video.utils.os_util import get_task_frame_path
         output_path = get_task_frame_path(config.task_id, frame.index, "audio")
         
         # Call TTS with specific output path and workflow
@@ -172,7 +172,7 @@ class FrameProcessor:
         logger.debug(f"  3/4: Composing frame {frame.index}...")
         
         # Generate output path using task_id
-        from reelforge.utils.os_util import get_task_frame_path
+        from pixelle_video.utils.os_util import get_task_frame_path
         output_path = get_task_frame_path(config.task_id, frame.index, "composed")
         
         # Use HTML template to compose frame
@@ -190,7 +190,7 @@ class FrameProcessor:
         output_path: str
     ) -> str:
         """Compose frame using HTML template"""
-        from reelforge.services.frame_html import HTMLFrameGenerator
+        from pixelle_video.services.frame_html import HTMLFrameGenerator
         from pathlib import Path
         
         # Resolve template path
@@ -241,11 +241,11 @@ class FrameProcessor:
         logger.debug(f"  4/4: Creating video segment for frame {frame.index}...")
         
         # Generate output path using task_id
-        from reelforge.utils.os_util import get_task_frame_path
+        from pixelle_video.utils.os_util import get_task_frame_path
         output_path = get_task_frame_path(config.task_id, frame.index, "segment")
         
         # Call video compositor to create video from image + audio
-        from reelforge.services.video import VideoService
+        from pixelle_video.services.video import VideoService
         video_service = VideoService()
         
         segment_path = video_service.create_video_from_image(
@@ -278,7 +278,7 @@ class FrameProcessor:
     
     async def _download_image(self, url: str, frame_index: int, task_id: str) -> str:
         """Download image from URL to local file"""
-        from reelforge.utils.os_util import get_task_frame_path
+        from pixelle_video.utils.os_util import get_task_frame_path
         output_path = get_task_frame_path(task_id, frame_index, "image")
         
         async with httpx.AsyncClient() as client:

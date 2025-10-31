@@ -10,8 +10,8 @@ from typing import Optional, Callable, Literal
 
 from loguru import logger
 
-from reelforge.models.progress import ProgressEvent
-from reelforge.models.storyboard import (
+from pixelle_video.models.progress import ProgressEvent
+from pixelle_video.models.storyboard import (
     Storyboard,
     StoryboardFrame,
     StoryboardConfig,
@@ -32,14 +32,14 @@ class VideoGeneratorService:
     5. Add BGM (optional)
     """
     
-    def __init__(self, reelforge_core):
+    def __init__(self, pixelle_video_core):
         """
         Initialize video generator service
         
         Args:
-            reelforge_core: ReelForgeCore instance
+            pixelle_video_core: PixelleVideoCore instance
         """
-        self.core = reelforge_core
+        self.core = pixelle_video_core
     
     async def __call__(
         self,
@@ -149,7 +149,7 @@ class VideoGeneratorService:
         
         Examples:
             # Generate mode: LLM creates narrations from topic
-            >>> result = await reelforge.generate_video(
+            >>> result = await pixelle_video.generate_video(
             ...     text="如何在信息爆炸时代保持深度思考",
             ...     mode="generate",
             ...     n_scenes=5,
@@ -161,7 +161,7 @@ class VideoGeneratorService:
             ... 第一个技巧是专注力训练，每天冥想10分钟
             ... 第二个技巧是主动回忆，学完立即复述
             ... 第三个技巧是间隔重复，学习后定期复习'''
-            >>> result = await reelforge.generate_video(
+            >>> result = await pixelle_video.generate_video(
             ...     text=script,
             ...     mode="fixed",
             ...     title="三个学习技巧"
@@ -190,7 +190,7 @@ class VideoGeneratorService:
                 logger.info(f"   Title: '{final_title}' (LLM-generated)")
         
         # ========== Step 0.5: Create isolated task directory ==========
-        from reelforge.utils.os_util import (
+        from pixelle_video.utils.os_util import (
             create_task_output_dir, 
             get_task_final_video_path
         )
@@ -352,7 +352,7 @@ class VideoGeneratorService:
             self._report_progress(progress_callback, "concatenating", 0.85)
             segment_paths = [frame.video_segment_path for frame in storyboard.frames]
             
-            from reelforge.services.video import VideoService
+            from pixelle_video.services.video import VideoService
             video_service = VideoService()
             
             final_video_path = video_service.concat_videos(

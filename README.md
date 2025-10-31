@@ -1,11 +1,11 @@
 <div align="center">
-<h1 align="center">ReelForge 🎬</h1>
+<h1 align="center">Pixelle-Video 🎬</h1>
 
 <p align="center">
-  <a href="https://github.com/JarvisAIHub/ReelForge/stargazers"><img src="https://img.shields.io/github/stars/JarvisAIHub/ReelForge.svg?style=for-the-badge" alt="Stargazers"></a>
-  <a href="https://github.com/JarvisAIHub/ReelForge/issues"><img src="https://img.shields.io/github/issues/JarvisAIHub/ReelForge.svg?style=for-the-badge" alt="Issues"></a>
-  <a href="https://github.com/JarvisAIHub/ReelForge/network/members"><img src="https://img.shields.io/github/forks/JarvisAIHub/ReelForge.svg?style=for-the-badge" alt="Forks"></a>
-  <a href="https://github.com/JarvisAIHub/ReelForge/blob/main/LICENSE"><img src="https://img.shields.io/github/license/JarvisAIHub/ReelForge.svg?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/PixelleLab/Pixelle-Video/stargazers"><img src="https://img.shields.io/github/stars/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="Stargazers"></a>
+  <a href="https://github.com/PixelleLab/Pixelle-Video/issues"><img src="https://img.shields.io/github/issues/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="Issues"></a>
+  <a href="https://github.com/PixelleLab/Pixelle-Video/network/members"><img src="https://img.shields.io/github/forks/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="Forks"></a>
+  <a href="https://github.com/PixelleLab/Pixelle-Video/blob/main/LICENSE"><img src="https://img.shields.io/github/license/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="License"></a>
 </p>
 
 <br>
@@ -14,7 +14,7 @@
 
 <br>
 
-只需输入一个 **主题**，ReelForge 就能自动完成：
+只需输入一个 **主题**，Pixelle-Video 就能自动完成：
 - ✍️ 撰写视频文案
 - 🎨 生成 AI 配图  
 - 🗣️ 合成语音解说
@@ -54,8 +54,8 @@
 ### 第一步：下载项目
 
 ```bash
-git clone https://github.com/JarvisAIHub/ReelForge.git
-cd ReelForge
+git clone https://github.com/PixelleLab/Pixelle-Video.git
+cd Pixelle-Video
 ```
 
 ### 第二步：启动 Web 界面
@@ -207,7 +207,7 @@ A: **本项目完全支持免费运行！**
 
 ## 🤝 参考项目
 
-ReelForge 的设计受到以下优秀开源项目的启发：
+Pixelle-Video 的设计受到以下优秀开源项目的启发：
 
 - [Pixelle-MCP](https://github.com/AIDC-AI/Pixelle-MCP) - ComfyUI MCP 服务器，让 AI 助手直接调用 ComfyUI
 - [MoneyPrinterTurbo](https://github.com/harry0703/MoneyPrinterTurbo) - 优秀的视频生成工具
@@ -221,8 +221,8 @@ ReelForge 的设计受到以下优秀开源项目的启发：
 
 ## 📢 反馈与支持
 
-- 🐛 **遇到问题**: 提交 [Issue](https://github.com/JarvisAIHub/ReelForge/issues)
-- 💡 **功能建议**: 提交 [Feature Request](https://github.com/JarvisAIHub/ReelForge/issues)
+- 🐛 **遇到问题**: 提交 [Issue](https://github.com/PixelleLab/Pixelle-Video/issues)
+- 💡 **功能建议**: 提交 [Feature Request](https://github.com/PixelleLab/Pixelle-Video/issues)
 - ⭐ **给个 Star**: 如果这个项目对你有帮助，欢迎给个 Star 支持一下！
 
 ---
@@ -235,12 +235,12 @@ ReelForge 的设计受到以下优秀开源项目的启发：
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=JarvisAIHub/ReelForge&type=Date)](https://star-history.com/#JarvisAIHub/ReelForge&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=PixelleLab/Pixelle-Video&type=Date)](https://star-history.com/#PixelleLab/Pixelle-Video&Date)
 
 ---
 
 <div align="center">
-  <p>Made with ❤️ by JarvisAIHub</p>
+  <p>Made with ❤️ by PixelleLab</p>
   <p>
     <a href="#top">回到顶部 ⬆️</a>
   </p>

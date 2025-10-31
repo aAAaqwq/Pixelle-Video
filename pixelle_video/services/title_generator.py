@@ -24,14 +24,14 @@ class TitleGeneratorService:
     - llm: Always use LLM to generate title
     """
     
-    def __init__(self, reelforge_core):
+    def __init__(self, pixelle_video_core):
         """
         Initialize title generator service
         
         Args:
-            reelforge_core: ReelForgeCore instance
+            pixelle_video_core: PixelleVideoCore instance
         """
-        self.core = reelforge_core
+        self.core = pixelle_video_core
     
     async def __call__(
         self,
@@ -107,7 +107,7 @@ class TitleGeneratorService:
         Returns:
             LLM-generated title
         """
-        from reelforge.prompts import build_title_generation_prompt
+        from pixelle_video.prompts import build_title_generation_prompt
         
         # Build prompt using template
         prompt = build_title_generation_prompt(content, max_length=500)

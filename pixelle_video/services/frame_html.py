@@ -253,7 +253,7 @@ class HTMLFrameGenerator:
         # Use provided output path or auto-generate
         if output_path is None:
             # Fallback: auto-generate (for backward compatibility)
-            from reelforge.utils.os_util import get_output_path
+            from pixelle_video.utils.os_util import get_output_path
             output_filename = f"frame_{uuid.uuid4().hex[:16]}.png"
             output_path = get_output_path(output_filename)
         else:

@@ -12,8 +12,8 @@ from typing import List, Optional, Literal
 
 from loguru import logger
 
-from reelforge.models.storyboard import StoryboardConfig, ContentMetadata
-from reelforge.prompts import (
+from pixelle_video.models.storyboard import StoryboardConfig, ContentMetadata
+from pixelle_video.prompts import (
     build_topic_narration_prompt,
     build_content_narration_prompt,
 )
@@ -22,14 +22,14 @@ from reelforge.prompts import (
 class NarrationGeneratorService:
     """Narration generation service"""
     
-    def __init__(self, reelforge_core):
+    def __init__(self, pixelle_video_core):
         """
         Initialize
         
         Args:
-            reelforge_core: ReelForgeCore instance (for calling llm)
+            pixelle_video_core: PixelleVideoCore instance (for calling llm)
         """
-        self.core = reelforge_core
+        self.core = pixelle_video_core
     
     async def generate_narrations(
         self,

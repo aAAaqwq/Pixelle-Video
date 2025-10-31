@@ -1,18 +1,18 @@
 """
-ReelForge CLI
+Pixelle-Video CLI
 """
 
 import asyncio
 
 from loguru import logger
 
-from reelforge.service import reelforge
+from pixelle_video.service import pixelle_video
 
 
 async def test_llm():
     """Test LLM capability"""
-    # Initialize reelforge
-    await reelforge.initialize()
+    # Initialize pixelle_video
+    await pixelle_video.initialize()
     
     # Test prompt
     prompt = "Explain the concept of atomic habits in 3 sentences."
@@ -20,14 +20,14 @@ async def test_llm():
     logger.info(f"\n📝 Test Prompt: {prompt}\n")
     
     # Call LLM
-    result = await reelforge.llm(prompt)
+    result = await pixelle_video.llm(prompt)
     
     logger.info(f"\n✨ Result:\n{result}\n")
 
 
 def main():
     """Main CLI entry point"""
-    logger.info("🚀 ReelForge CLI\n")
+    logger.info("🚀 Pixelle-Video CLI\n")
     
     # Run test
     asyncio.run(test_llm())

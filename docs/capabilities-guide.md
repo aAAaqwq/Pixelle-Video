@@ -1,10 +1,10 @@
-# ReelForge Capabilities Guide
+# Pixelle-Video Capabilities Guide
 
 > Complete guide to using LLM, TTS, and Image generation capabilities
 
 ## Overview
 
-ReelForge provides three core AI capabilities:
+Pixelle-Video provides three core AI capabilities:
 - **LLM**: Text generation using LiteLLM (supports 100+ models)
 - **TTS**: Text-to-speech using Edge TTS (free, 400+ voices)
 - **Image**: Image generation using ComfyKit (local or cloud)
@@ -12,16 +12,16 @@ ReelForge provides three core AI capabilities:
 ## Quick Start
 
 ```python
-from reelforge.service import reelforge
+from pixelle_video.service import pixelle_video
 
 # LLM - Generate text
-answer = await reelforge.llm("Summarize 'Atomic Habits' in 3 sentences")
+answer = await pixelle_video.llm("Summarize 'Atomic Habits' in 3 sentences")
 
 # TTS - Generate speech
-audio_path = await reelforge.tts("Hello, world!")
+audio_path = await pixelle_video.tts("Hello, world!")
 
 # Image - Generate images
-image_url = await reelforge.image(
+image_url = await pixelle_video.image(
     workflow="workflows/book_cover_simple.json",
     prompt="minimalist book cover design"
 )
@@ -62,10 +62,10 @@ llm:
 
 ```python
 # Basic usage
-answer = await reelforge.llm("What is machine learning?")
+answer = await pixelle_video.llm("What is machine learning?")
 
 # With parameters
-answer = await reelforge.llm(
+answer = await pixelle_video.llm(
     prompt="Explain atomic habits",
     temperature=0.7,  # 0.0-2.0 (lower = more deterministic)
     max_tokens=2000
@@ -107,18 +107,18 @@ tts:
 
 ```python
 # Basic usage (auto-generates temp path)
-audio_path = await reelforge.tts("Hello, world!")
+audio_path = await pixelle_video.tts("Hello, world!")
 # Returns: "temp/abc123def456.mp3"
 
 # With Chinese text
-audio_path = await reelforge.tts(
+audio_path = await pixelle_video.tts(
     text="你好，世界！",
     voice="zh-CN-YunjianNeural"
 )
 
 # With custom parameters
-audio_path = await reelforge.tts(
-    text="Welcome to ReelForge",
+audio_path = await pixelle_video.tts(
+    text="Welcome to Pixelle-Video",
     voice="en-US-JennyNeural",
     rate="+20%",  # Speed: +50% = faster, -20% = slower
     volume="+0%",
@@ -126,7 +126,7 @@ audio_path = await reelforge.tts(
 )
 
 # Specify output path
-audio_path = await reelforge.tts(
+audio_path = await pixelle_video.tts(
     text="Hello",
     output_path="output/greeting.mp3"
 )
@@ -149,13 +149,13 @@ audio_path = await reelforge.tts(
 
 ```python
 # Get all available voices
-voices = await reelforge.tts.list_voices()
+voices = await pixelle_video.tts.list_voices()
 
 # Get Chinese voices only
-voices = await reelforge.tts.list_voices(locale="zh-CN")
+voices = await pixelle_video.tts.list_voices(locale="zh-CN")
 
 # Get English voices only
-voices = await reelforge.tts.list_voices(locale="en-US")
+voices = await pixelle_video.tts.list_voices(locale="en-US")
 ```
 
 ---
@@ -182,13 +182,13 @@ image:
 
 ```python
 # Basic usage (local ComfyUI)
-image_url = await reelforge.image(
+image_url = await pixelle_video.image(
     workflow="workflows/book_cover_simple.json",
     prompt="minimalist book cover design, blue and white"
 )
 
 # With full parameters
-image_url = await reelforge.image(
+image_url = await pixelle_video.image(
     workflow="workflows/book_cover_simple.json",
     prompt="book cover for 'Atomic Habits', professional, minimalist",
     negative_prompt="ugly, blurry, low quality",
@@ -199,13 +199,13 @@ image_url = await reelforge.image(
 )
 
 # Using RunningHub cloud
-image_url = await reelforge.image(
+image_url = await pixelle_video.image(
     workflow="12345",  # RunningHub workflow ID
     prompt="a beautiful landscape"
 )
 
 # Check available workflows
-workflows = reelforge.image.list_workflows()
+workflows = pixelle_video.image.list_workflows()
 print(f"Available workflows: {workflows}")
 ```
 
@@ -221,7 +221,7 @@ export RUNNINGHUB_API_KEY="rh-key-xxx"
 
 ### Workflow DSL
 
-ReelForge uses ComfyKit's DSL for workflow parameters:
+Pixelle-Video uses ComfyKit's DSL for workflow parameters:
 
 ```json
 {
@@ -252,27 +252,27 @@ Generate a complete book cover with narration:
 
 ```python
 import asyncio
-from reelforge.service import reelforge
+from pixelle_video.service import pixelle_video
 
 async def create_book_content(book_title, author):
     """Generate book summary, audio, and cover image"""
     
     # 1. Generate book summary with LLM
-    summary = await reelforge.llm(
+    summary = await pixelle_video.llm(
         prompt=f"Write a compelling 2-sentence summary for a book titled '{book_title}' by {author}",
         max_tokens=100
     )
     print(f"Summary: {summary}")
     
     # 2. Generate audio narration with TTS
-    audio_path = await reelforge.tts(
+    audio_path = await pixelle_video.tts(
         text=summary,
         voice="en-US-JennyNeural"
     )
     print(f"Audio: {audio_path}")
     
     # 3. Generate book cover image
-    image_url = await reelforge.image(
+    image_url = await pixelle_video.image(
         workflow="workflows/book_cover_simple.json",
         prompt=f"book cover for '{book_title}' by {author}, professional, modern design",
         width=1024,
@@ -339,5 +339,5 @@ result = asyncio.run(create_book_content("Atomic Habits", "James Clear"))
 
 ---
 
-**Happy creating with ReelForge!** 📚🎬
+**Happy creating with Pixelle-Video!** 📚🎬
 

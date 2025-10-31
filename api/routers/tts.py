@@ -5,9 +5,9 @@ TTS (Text-to-Speech) endpoints
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 
-from api.dependencies import ReelForgeDep
+from api.dependencies import PixelleVideoDep
 from api.schemas.tts import TTSSynthesizeRequest, TTSSynthesizeResponse
-from reelforge.utils.tts_util import get_audio_duration
+from pixelle_video.utils.tts_util import get_audio_duration
 
 router = APIRouter(prefix="/tts", tags=["TTS"])
 
@@ -15,7 +15,7 @@ router = APIRouter(prefix="/tts", tags=["TTS"])
 @router.post("/synthesize", response_model=TTSSynthesizeResponse)
 async def tts_synthesize(
     request: TTSSynthesizeRequest,
-    reelforge: ReelForgeDep
+    pixelle_video: PixelleVideoDep
 ):
     """
     Text-to-Speech synthesis endpoint
@@ -31,7 +31,7 @@ async def tts_synthesize(
         logger.info(f"TTS synthesis request: {request.text[:50]}...")
         
         # Call TTS service
-        audio_path = await reelforge.tts(
+        audio_path = await pixelle_video.tts(
             text=request.text,
             voice_id=request.voice_id
         )

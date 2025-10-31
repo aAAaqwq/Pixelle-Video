@@ -1,7 +1,7 @@
 #!/bin/bash
-# Restart ReelForge Web UI on port 8502
+# Restart Pixelle-Video Web UI on port 8502
 
-echo "🔄 Restarting ReelForge Web UI on port 8502..."
+echo "🔄 Restarting Pixelle-Video Web UI on port 8502..."
 echo ""
 
 # Check if config.yaml exists
@@ -28,7 +28,7 @@ if [ ! -z "$PID" ]; then
 fi
 
 # Start Streamlit in background with nohup
-echo "🚀 Starting ReelForge Web UI in background..."
+echo "🚀 Starting Pixelle-Video Web UI in background..."
 nohup uv run streamlit run web/app.py --server.port $PORT > nohup.out 2>&1 &
 
 # Wait a moment and check if the process started
@@ -36,12 +36,12 @@ sleep 2
 NEW_PID=$(lsof -ti:$PORT)
 
 if [ ! -z "$NEW_PID" ]; then
-    echo "✅ ReelForge Web UI started successfully!"
+    echo "✅ Pixelle-Video Web UI started successfully!"
     echo "📝 Process ID: $NEW_PID"
     echo "🌐 Access at: http://localhost:$PORT"
     echo "📄 Logs: nohup.out"
 else
-    echo "❌ Failed to start ReelForge Web UI"
+    echo "❌ Failed to start Pixelle-Video Web UI"
     echo "📄 Check nohup.out for error details"
     exit 1
 fi

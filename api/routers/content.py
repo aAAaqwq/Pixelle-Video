@@ -7,7 +7,7 @@ Endpoints for generating narrations, image prompts, and titles.
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 
-from api.dependencies import ReelForgeDep
+from api.dependencies import PixelleVideoDep
 from api.schemas.content import (
     NarrationGenerateRequest,
     NarrationGenerateResponse,
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/content", tags=["Content Generation"])
 @router.post("/narration", response_model=NarrationGenerateResponse)
 async def generate_narration(
     request: NarrationGenerateRequest,
-    reelforge: ReelForgeDep
+    pixelle_video: PixelleVideoDep
 ):
     """
     Generate narrations from text
@@ -41,7 +41,7 @@ async def generate_narration(
         logger.info(f"Generating {request.n_scenes} narrations from text")
         
         # Call narration generator service
-        narrations = await reelforge.narration_generator(
+        narrations = await pixelle_video.narration_generator(
             text=request.text,
             n_scenes=request.n_scenes,
             min_words=request.min_words,
@@ -60,7 +60,7 @@ async def generate_narration(
 @router.post("/image-prompt", response_model=ImagePromptGenerateResponse)
 async def generate_image_prompt(
     request: ImagePromptGenerateRequest,
-    reelforge: ReelForgeDep
+    pixelle_video: PixelleVideoDep
 ):
     """
     Generate image prompts from narrations
@@ -77,7 +77,7 @@ async def generate_image_prompt(
         logger.info(f"Generating image prompts for {len(request.narrations)} narrations")
         
         # Call image prompt generator service
-        image_prompts = await reelforge.image_prompt_generator(
+        image_prompts = await pixelle_video.image_prompt_generator(
             narrations=request.narrations,
             min_words=request.min_words,
             max_words=request.max_words
@@ -95,7 +95,7 @@ async def generate_image_prompt(
 @router.post("/title", response_model=TitleGenerateResponse)
 async def generate_title(
     request: TitleGenerateRequest,
-    reelforge: ReelForgeDep
+    pixelle_video: PixelleVideoDep
 ):
     """
     Generate video title from text
@@ -111,7 +111,7 @@ async def generate_title(
         logger.info("Generating title from text")
         
         # Call title generator service
-        title = await reelforge.title_generator(
+        title = await pixelle_video.title_generator(
             text=request.text
         )
         

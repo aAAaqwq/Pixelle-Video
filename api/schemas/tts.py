@@ -13,7 +13,7 @@ class TTSSynthesizeRequest(BaseModel):
     class Config:
         json_schema_extra = {
             "example": {
-                "text": "Hello, welcome to ReelForge!",
+                "text": "Hello, welcome to Pixelle-Video!",
                 "voice_id": "[Chinese] zh-CN Yunjian"
             }
         }

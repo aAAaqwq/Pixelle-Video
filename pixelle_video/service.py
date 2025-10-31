@@ -1,5 +1,5 @@
 """
-ReelForge Core - Service Layer
+Pixelle-Video Core - Service Layer
 
 Provides unified access to all capabilities (LLM, TTS, Image, etc.)
 """
@@ -8,40 +8,40 @@ from typing import Optional
 
 from loguru import logger
 
-from reelforge.config import config_manager
-from reelforge.services.llm_service import LLMService
-from reelforge.services.tts_service import TTSService
-from reelforge.services.image import ImageService
-from reelforge.services.narration_generator import NarrationGeneratorService
-from reelforge.services.image_prompt_generator import ImagePromptGeneratorService
-from reelforge.services.title_generator import TitleGeneratorService
-from reelforge.services.frame_processor import FrameProcessor
-from reelforge.services.video_generator import VideoGeneratorService
+from pixelle_video.config import config_manager
+from pixelle_video.services.llm_service import LLMService
+from pixelle_video.services.tts_service import TTSService
+from pixelle_video.services.image import ImageService
+from pixelle_video.services.narration_generator import NarrationGeneratorService
+from pixelle_video.services.image_prompt_generator import ImagePromptGeneratorService
+from pixelle_video.services.title_generator import TitleGeneratorService
+from pixelle_video.services.frame_processor import FrameProcessor
+from pixelle_video.services.video_generator import VideoGeneratorService
 
 
-class ReelForgeCore:
+class PixelleVideoCore:
     """
-    ReelForge Core - Service Layer
+    Pixelle-Video Core - Service Layer
     
     Provides unified access to all capabilities.
     
     Usage:
-        from reelforge import reelforge
+        from pixelle_video import pixelle_video
         
         # Initialize
-        await reelforge.initialize()
+        await pixelle_video.initialize()
         
         # Use capabilities directly
-        answer = await reelforge.llm("Explain atomic habits")
-        audio = await reelforge.tts("Hello world")
-        image = await reelforge.image(prompt="a cat")
+        answer = await pixelle_video.llm("Explain atomic habits")
+        audio = await pixelle_video.tts("Hello world")
+        image = await pixelle_video.image(prompt="a cat")
         
         # Check active capabilities
-        print(f"Using LLM: {reelforge.llm.active}")
-        print(f"Available TTS: {reelforge.tts.available}")
+        print(f"Using LLM: {pixelle_video.llm.active}")
+        print(f"Available TTS: {pixelle_video.tts.available}")
     
     Architecture (Simplified):
-        ReelForgeCore (this class)
+        PixelleVideoCore (this class)
           ├── config (configuration)
           ├── llm (LLM service - direct OpenAI SDK)
           ├── tts (TTS service - ComfyKit workflows)
@@ -50,7 +50,7 @@ class ReelForgeCore:
     
     def __init__(self, config_path: str = "config.yaml"):
         """
-        Initialize ReelForge Core
+        Initialize Pixelle-Video Core
         
         Args:
             config_path: Path to configuration file
@@ -82,13 +82,13 @@ class ReelForgeCore:
         This initializes all services and must be called before using any capabilities.
         
         Example:
-            await reelforge.initialize()
+            await pixelle_video.initialize()
         """
         if self._initialized:
-            logger.warning("ReelForge already initialized")
+            logger.warning("Pixelle-Video already initialized")
             return
         
-        logger.info("🚀 Initializing ReelForge...")
+        logger.info("🚀 Initializing Pixelle-Video...")
         
         # 1. Initialize core services (no capability layer)
         self.llm = LLMService(self.config)
@@ -107,18 +107,18 @@ class ReelForgeCore:
         self.generate_video = VideoGeneratorService(self)
         
         self._initialized = True
-        logger.info("✅ ReelForge initialized successfully\n")
+        logger.info("✅ Pixelle-Video initialized successfully\n")
     
     @property
     def project_name(self) -> str:
         """Get project name from config"""
-        return self.config.get("project_name", "ReelForge")
+        return self.config.get("project_name", "Pixelle-Video")
     
     def __repr__(self) -> str:
         """String representation"""
         status = "initialized" if self._initialized else "not initialized"
-        return f"<ReelForgeCore project={self.project_name!r} status={status}>"
+        return f"<PixelleVideoCore project={self.project_name!r} status={status}>"
 
 
 # Global instance
-reelforge = ReelForgeCore()
+pixelle_video = PixelleVideoCore()

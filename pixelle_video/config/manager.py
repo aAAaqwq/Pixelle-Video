@@ -6,7 +6,7 @@ Provides unified access to configuration with automatic validation.
 from pathlib import Path
 from typing import Any, Optional
 from loguru import logger
-from .schema import ReelForgeConfig
+from .schema import PixelleVideoConfig
 from .loader import load_config_dict, save_config_dict
 
 
@@ -29,13 +29,13 @@ class ConfigManager:
             return
         
         self.config_path = Path(config_path)
-        self.config: ReelForgeConfig = self._load()
+        self.config: PixelleVideoConfig = self._load()
         self._initialized = True
     
-    def _load(self) -> ReelForgeConfig:
+    def _load(self) -> PixelleVideoConfig:
         """Load configuration from file"""
         data = load_config_dict(str(self.config_path))
-        return ReelForgeConfig(**data)
+        return PixelleVideoConfig(**data)
     
     def reload(self):
         """Reload configuration from file"""
@@ -65,7 +65,7 @@ class ConfigManager:
             return base
         
         merged = deep_merge(current, updates)
-        self.config = ReelForgeConfig(**merged)
+        self.config = PixelleVideoConfig(**merged)
     
     def get(self, key: str, default: Any = None) -> Any:
         """Dict-like access (for backward compatibility)"""

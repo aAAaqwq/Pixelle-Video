@@ -1,5 +1,5 @@
 """
-International language support for ReelForge Web UI
+International language support for Pixelle-Video Web UI
 """
 
 import json
@@ -64,7 +64,7 @@ def tr(key: str, fallback: Optional[str] = None, **kwargs) -> str:
         Translated text
     
     Example:
-        tr("app.title")  # => "ReelForge"
+        tr("app.title")  # => "Pixelle-Video"
         tr("error.missing_field", field="API Key")  # => "请填写 API Key"
     """
     locale = _locales.get(_current_language, {})

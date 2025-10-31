@@ -1,5 +1,5 @@
 """
-ReelForge Web UI
+Pixelle-Video Web UI
 
 A simple web interface for generating short videos from content.
 """
@@ -14,12 +14,12 @@ from loguru import logger
 
 # Import i18n and config manager
 from web.i18n import load_locales, set_language, tr, get_available_languages, get_language
-from reelforge.config import config_manager
-from reelforge.models.progress import ProgressEvent
+from pixelle_video.config import config_manager
+from pixelle_video.models.progress import ProgressEvent
 
 # Setup page config (must be first)
 st.set_page_config(
-    page_title="ReelForge - AI Video Generator",
+    page_title="Pixelle-Video - AI Video Generator",
     page_icon="🎬",
     layout="wide",
     initial_sidebar_state="collapsed",
@@ -62,19 +62,19 @@ def init_i18n():
 
 
 # ============================================================================
-# Initialize ReelForge
+# Initialize Pixelle-Video
 # ============================================================================
 
-def get_reelforge():
-    """Get initialized ReelForge instance (no caching - always fresh)"""
-    from reelforge.service import ReelForgeCore
+def get_pixelle_video():
+    """Get initialized Pixelle-Video instance (no caching - always fresh)"""
+    from pixelle_video.service import PixelleVideoCore
     
-    logger.info("Initializing ReelForge...")
-    reelforge = ReelForgeCore()
-    run_async(reelforge.initialize())
-    logger.info("ReelForge initialized")
+    logger.info("Initializing Pixelle-Video...")
+    pixelle_video = PixelleVideoCore()
+    run_async(pixelle_video.initialize())
+    logger.info("Pixelle-Video initialized")
     
-    return reelforge
+    return pixelle_video
 
 
 # ============================================================================
@@ -110,7 +110,7 @@ def render_advanced_settings():
                 st.markdown(f"**{tr('settings.llm.title')}**")
                 
                 # Quick preset selection
-                from reelforge.llm_presets import get_preset_names, get_preset, find_preset_by_base_url_and_model
+                from pixelle_video.llm_presets import get_preset_names, get_preset, find_preset_by_base_url_and_model
                 
                 # Custom at the end
                 preset_names = get_preset_names() + ["Custom"]
@@ -266,8 +266,8 @@ def render_advanced_settings():
         with col2:
             if st.button(tr("btn.reset_config"), use_container_width=True, key="reset_config_btn"):
                 # Reset to default
-                from reelforge.config.schema import ReelForgeConfig
-                config_manager.config = ReelForgeConfig()
+                from pixelle_video.config.schema import PixelleVideoConfig
+                config_manager.config = PixelleVideoConfig()
                 config_manager.save()
                 st.success(tr("status.config_reset"))
                 safe_rerun()
@@ -315,8 +315,8 @@ def main():
     with col2:
         render_language_selector()
     
-    # Initialize ReelForge
-    reelforge = get_reelforge()
+    # Initialize Pixelle-Video
+    pixelle_video = get_pixelle_video()
     
     # ========================================================================
     # System Configuration (Required)
@@ -443,7 +443,7 @@ def main():
                 st.markdown(tr("tts.how"))
             
             # Get available TTS workflows
-            tts_workflows = reelforge.tts.list_workflows()
+            tts_workflows = pixelle_video.tts.list_workflows()
             
             # Build options for selectbox
             tts_workflow_options = [wf["display_name"] for wf in tts_workflows]
@@ -486,7 +486,7 @@ def main():
                     with st.spinner(tr("tts.previewing")):
                         try:
                             # Generate preview audio using selected workflow (use default voice and speed)
-                            audio_path = run_async(reelforge.tts(
+                            audio_path = run_async(pixelle_video.tts(
                                 text=preview_text,
                                 workflow=tts_workflow_key
                             ))
@@ -522,8 +522,8 @@ def main():
                 st.markdown(f"**{tr('help.how')}**")
                 st.markdown(tr("style.workflow_how"))
             
-            # Get available workflows from reelforge (with source info)
-            workflows = reelforge.image.list_workflows()
+            # Get available workflows from pixelle_video (with source info)
+            workflows = pixelle_video.image.list_workflows()
             
             # Build options for selectbox
             # Display: "image_flux.json - Runninghub"
@@ -586,13 +586,13 @@ def main():
                 if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
                     with st.spinner(tr("style.previewing")):
                         try:
-                            from reelforge.utils.prompt_helper import build_image_prompt
+                            from pixelle_video.utils.prompt_helper import build_image_prompt
                             
                             # Build final prompt with prefix
                             final_prompt = build_image_prompt(test_prompt, prompt_prefix)
                             
                             # Generate preview image (small size for speed)
-                            preview_image_path = run_async(reelforge.image(
+                            preview_image_path = run_async(pixelle_video.image(
                                 prompt=final_prompt,
                                 workflow=workflow_key,
                                 width=512,
@@ -707,7 +707,7 @@ def main():
                 if st.button(tr("template.preview_button"), key="btn_preview_template", use_container_width=True):
                     with st.spinner(tr("template.preview_generating")):
                         try:
-                            from reelforge.services.frame_html import HTMLFrameGenerator
+                            from pixelle_video.services.frame_html import HTMLFrameGenerator
                             
                             # Use the currently selected template
                             template_path = f"templates/{frame_template}"
@@ -801,7 +801,7 @@ def main():
                         progress_bar.progress(min(int(event.progress * 100), 99))  # Cap at 99% until complete
                     
                     # Generate video (directly pass parameters)
-                    result = run_async(reelforge.generate_video(
+                    result = run_async(pixelle_video.generate_video(
                         text=text,
                         mode=mode,
                         title=title if title else None,

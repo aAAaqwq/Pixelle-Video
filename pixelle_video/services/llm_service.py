@@ -26,10 +26,10 @@ class LLMService:
     
     Usage:
         # Direct call
-        answer = await reelforge.llm("Explain atomic habits")
+        answer = await pixelle_video.llm("Explain atomic habits")
         
         # With parameters
-        answer = await reelforge.llm(
+        answer = await pixelle_video.llm(
             prompt="Explain atomic habits in 3 sentences",
             temperature=0.7,
             max_tokens=2000
@@ -121,10 +121,10 @@ class LLMService:
         
         Examples:
             # Use config from config.yaml
-            answer = await reelforge.llm("Explain atomic habits")
+            answer = await pixelle_video.llm("Explain atomic habits")
             
             # Override with custom parameters
-            answer = await reelforge.llm(
+            answer = await pixelle_video.llm(
                 prompt="Explain atomic habits in 3 sentences",
                 api_key="sk-custom-key",
                 base_url="https://api.custom.com/v1",
@@ -172,7 +172,7 @@ class LLMService:
             Active model name
         
         Example:
-            print(f"Using model: {reelforge.llm.active}")
+            print(f"Using model: {pixelle_video.llm.active}")
         """
         return self._get_config_value("model", "gpt-3.5-turbo")
     

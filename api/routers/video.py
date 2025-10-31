@@ -8,7 +8,7 @@ import os
 from fastapi import APIRouter, HTTPException, Request
 from loguru import logger
 
-from api.dependencies import ReelForgeDep
+from api.dependencies import PixelleVideoDep
 from api.schemas.video import (
     VideoGenerateRequest,
     VideoGenerateResponse,
@@ -32,7 +32,7 @@ def path_to_url(request: Request, file_path: str) -> str:
 @router.post("/generate/sync", response_model=VideoGenerateResponse)
 async def generate_video_sync(
     request_body: VideoGenerateRequest,
-    reelforge: ReelForgeDep,
+    pixelle_video: PixelleVideoDep,
     request: Request
 ):
     """
@@ -52,7 +52,7 @@ async def generate_video_sync(
         logger.info(f"Sync video generation: {request_body.text[:50]}...")
         
         # Call video generator service
-        result = await reelforge.generate_video(
+        result = await pixelle_video.generate_video(
             text=request_body.text,
             mode=request_body.mode,
             title=request_body.title,
@@ -94,7 +94,7 @@ async def generate_video_sync(
 @router.post("/generate/async", response_model=VideoGenerateAsyncResponse)
 async def generate_video_async(
     request_body: VideoGenerateRequest,
-    reelforge: ReelForgeDep,
+    pixelle_video: PixelleVideoDep,
     request: Request
 ):
     """
@@ -126,7 +126,7 @@ async def generate_video_async(
         # Define async execution function
         async def execute_video_generation():
             """Execute video generation in background"""
-            result = await reelforge.generate_video(
+            result = await pixelle_video.generate_video(
                 text=request_body.text,
                 mode=request_body.mode,
                 title=request_body.title,

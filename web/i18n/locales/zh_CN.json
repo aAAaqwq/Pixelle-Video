@@ -1,7 +1,7 @@
 {
   "language_name": "简体中文",
   "t": {
-    "app.title": "⚡ ReelForge - AI 全自动短视频引擎",
+    "app.title": "⚡ Pixelle-Video - AI 全自动短视频引擎",
     "app.subtitle": "打造专属你的视频创作引擎",
     
     "section.content_input": "📖 内容输入",
@@ -172,7 +172,7 @@
     "tts.preview_success": "✅ 预览生成成功！",
     "tts.preview_failed": "❌ 预览失败：{error}",
     
-    "welcome.first_time": "🎉 欢迎使用 ReelForge！请先完成基础配置",
+    "welcome.first_time": "🎉 欢迎使用 Pixelle-Video！请先完成基础配置",
     "welcome.config_hint": "💡 首次使用需要配置 API Key，后续可以在高级设置中修改",
     
     "wizard.llm_required": "🤖 大语言模型配置（必需）",

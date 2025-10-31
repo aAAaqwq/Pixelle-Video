@@ -1,9 +1,9 @@
 [project]
-name = "reelforge"
+name = "pixelle-video"
 version = "0.1.0"
-description = "The modular video creation platform - Forge your perfect reel engine"
+description = "AI-powered video creation platform - Part of Pixelle ecosystem"
 authors = [
-    {name = "ReelForge Team"}
+    {name = "PixelleLab"}
 ]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -34,7 +34,8 @@ dev = [
 ]
 
 [project.scripts]
-reelforge = "reelforge.cli:main"
+pixelle-video = "pixelle_video.cli:main"
+pvideo = "pixelle_video.cli:main"
 
 [build-system]
 requires = ["hatchling"]

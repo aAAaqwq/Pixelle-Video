@@ -1,5 +1,5 @@
 """
-ReelForge API Layer
+Pixelle-Video API Layer
 
 FastAPI-based REST API for video generation services.
 """

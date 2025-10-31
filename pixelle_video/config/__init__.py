@@ -1,10 +1,10 @@
 """
-ReelForge Configuration System
+Pixelle-Video Configuration System
 
 Unified configuration management with Pydantic validation.
 
 Usage:
-    from reelforge.config import config_manager
+    from pixelle_video.config import config_manager
     
     # Access config (type-safe)
     api_key = config_manager.config.llm.api_key
@@ -17,7 +17,7 @@ Usage:
     if config_manager.validate():
         print("Config is valid!")
 """
-from .schema import ReelForgeConfig, LLMConfig, ComfyUIConfig, TTSSubConfig, ImageSubConfig
+from .schema import PixelleVideoConfig, LLMConfig, ComfyUIConfig, TTSSubConfig, ImageSubConfig
 from .manager import ConfigManager
 from .loader import load_config_dict, save_config_dict
 
@@ -25,7 +25,7 @@ from .loader import load_config_dict, save_config_dict
 config_manager = ConfigManager()
 
 __all__ = [
-    "ReelForgeConfig",
+    "PixelleVideoConfig",
     "LLMConfig", 
     "ComfyUIConfig",
     "TTSSubConfig",

@@ -35,9 +35,9 @@ class ComfyUIConfig(BaseModel):
     image: ImageSubConfig = Field(default_factory=ImageSubConfig, description="Image-specific configuration")
 
 
-class ReelForgeConfig(BaseModel):
-    """ReelForge main configuration"""
-    project_name: str = Field(default="ReelForge", description="Project name")
+class PixelleVideoConfig(BaseModel):
+    """Pixelle-Video main configuration"""
+    project_name: str = Field(default="Pixelle-Video", description="Project name")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     comfyui: ComfyUIConfig = Field(default_factory=ComfyUIConfig)
     

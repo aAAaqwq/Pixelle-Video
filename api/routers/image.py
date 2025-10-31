@@ -5,7 +5,7 @@ Image generation endpoints
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 
-from api.dependencies import ReelForgeDep
+from api.dependencies import PixelleVideoDep
 from api.schemas.image import ImageGenerateRequest, ImageGenerateResponse
 
 router = APIRouter(prefix="/image", tags=["Image"])
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/image", tags=["Image"])
 @router.post("/generate", response_model=ImageGenerateResponse)
 async def image_generate(
     request: ImageGenerateRequest,
-    reelforge: ReelForgeDep
+    pixelle_video: PixelleVideoDep
 ):
     """
     Image generation endpoint
@@ -32,7 +32,7 @@ async def image_generate(
         logger.info(f"Image generation request: {request.prompt[:50]}...")
         
         # Call image service
-        image_path = await reelforge.image(
+        image_path = await pixelle_video.image(
             prompt=request.prompt,
             width=request.width,
             height=request.height,

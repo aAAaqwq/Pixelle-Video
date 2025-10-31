@@ -1,6 +1,6 @@
 # Prompts Directory
 
-Centralized prompt management for all LLM interactions in ReelForge.
+Centralized prompt management for all LLM interactions in Pixelle-Video.
 
 ## Structure
 
@@ -22,7 +22,7 @@ prompts/
 All builder functions are exported from the package root:
 
 ```python
-from reelforge.prompts import (
+from pixelle_video.prompts import (
     build_topic_narration_prompt,
     build_content_narration_prompt,
     build_script_split_prompt,
@@ -86,7 +86,7 @@ To add a new prompt:
 3. Export the builder function in `__init__.py`
 4. Use it in service code:
    ```python
-   from reelforge.prompts import build_my_new_prompt
+   from pixelle_video.prompts import build_my_new_prompt
    ```
 
 ## Design Principles

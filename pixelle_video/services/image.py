@@ -7,7 +7,7 @@ from typing import Optional
 from comfykit import ComfyKit
 from loguru import logger
 
-from reelforge.services.comfy_base_service import ComfyBaseService
+from pixelle_video.services.comfy_base_service import ComfyBaseService
 
 
 class ImageService(ComfyBaseService):
@@ -18,16 +18,16 @@ class ImageService(ComfyBaseService):
     
     Usage:
         # Use default workflow (workflows/image_flux.json)
-        image_url = await reelforge.image(prompt="a cat")
+        image_url = await pixelle_video.image(prompt="a cat")
         
         # Use specific workflow
-        image_url = await reelforge.image(
+        image_url = await pixelle_video.image(
             prompt="a cat",
             workflow="image_flux.json"
         )
         
         # List available workflows
-        workflows = reelforge.image.list_workflows()
+        workflows = pixelle_video.image.list_workflows()
     """
     
     WORKFLOW_PREFIX = "image_"
@@ -82,16 +82,16 @@ class ImageService(ComfyBaseService):
         
         Examples:
             # Simplest: use default workflow (workflows/image_flux.json)
-            image_url = await reelforge.image(prompt="a beautiful cat")
+            image_url = await pixelle_video.image(prompt="a beautiful cat")
             
             # Use specific workflow
-            image_url = await reelforge.image(
+            image_url = await pixelle_video.image(
                 prompt="a cat",
                 workflow="image_flux.json"
             )
             
             # With additional parameters
-            image_url = await reelforge.image(
+            image_url = await pixelle_video.image(
                 prompt="a cat",
                 workflow="image_flux.json",
                 width=1024,
@@ -101,13 +101,13 @@ class ImageService(ComfyBaseService):
             )
             
             # With absolute path
-            image_url = await reelforge.image(
+            image_url = await pixelle_video.image(
                 prompt="a cat",
                 workflow="/path/to/custom.json"
             )
             
             # With custom ComfyUI server
-            image_url = await reelforge.image(
+            image_url = await pixelle_video.image(
                 prompt="a cat",
                 comfyui_url="http://192.168.1.100:8188"
             )

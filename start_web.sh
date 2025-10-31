@@ -1,7 +1,7 @@
 #!/bin/bash
-# Start ReelForge Web UI
+# Start Pixelle-Video Web UI
 
-echo "🚀 Starting ReelForge Web UI..."
+echo "🚀 Starting Pixelle-Video Web UI..."
 echo ""
 
 # Check if config.yaml exists

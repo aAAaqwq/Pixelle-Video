@@ -8,21 +8,21 @@ from typing import List, Optional, Callable
 
 from loguru import logger
 
-from reelforge.models.storyboard import StoryboardConfig
-from reelforge.prompts import build_image_prompt_prompt
+from pixelle_video.models.storyboard import StoryboardConfig
+from pixelle_video.prompts import build_image_prompt_prompt
 
 
 class ImagePromptGeneratorService:
     """Image prompt generation service"""
     
-    def __init__(self, reelforge_core):
+    def __init__(self, pixelle_video_core):
         """
         Initialize
         
         Args:
-            reelforge_core: ReelForgeCore instance
+            pixelle_video_core: PixelleVideoCore instance
         """
-        self.core = reelforge_core
+        self.core = pixelle_video_core
     
     async def generate_image_prompts(
         self,
@@ -114,7 +114,7 @@ class ImagePromptGeneratorService:
         logger.info(f"✅ All batches completed. Total prompts: {len(base_prompts)}")
         
         # 5. Apply prompt prefix to each prompt
-        from reelforge.utils.prompt_helper import build_image_prompt
+        from pixelle_video.utils.prompt_helper import build_image_prompt
         
         # Get prompt prefix from config (fix: correct path is comfyui.image.prompt_prefix)
         image_config = self.core.config.get("comfyui", {}).get("image", {})

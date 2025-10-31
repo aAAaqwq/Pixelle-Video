@@ -1,7 +1,7 @@
 """
 OS utilities for file and path management
 
-Provides utilities for managing paths and files in ReelForge.
+Provides utilities for managing paths and files in Pixelle-Video.
 Inspired by Pixelle-MCP's os_util.py.
 """
 
@@ -12,9 +12,9 @@ from pathlib import Path
 from typing import Optional, Tuple, Literal
 
 
-def get_reelforge_root_path() -> str:
+def get_pixelle_video_root_path() -> str:
     """
-    Get ReelForge root path - current working directory
+    Get Pixelle-Video root path - current working directory
     
     Returns:
         Current working directory as string
@@ -22,14 +22,14 @@ def get_reelforge_root_path() -> str:
     return str(Path.cwd())
 
 
-def ensure_reelforge_root_path() -> str:
+def ensure_pixelle_video_root_path() -> str:
     """
-    Ensure ReelForge root path exists and return the path
+    Ensure Pixelle-Video root path exists and return the path
     
     Returns:
         Root path as string
     """
-    root_path = get_reelforge_root_path()
+    root_path = get_pixelle_video_root_path()
     root_path_obj = Path(root_path)
     output_dir = root_path_obj / 'output'
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -39,7 +39,7 @@ def ensure_reelforge_root_path() -> str:
 
 def get_root_path(*paths: str) -> str:
     """
-    Get path relative to ReelForge root path
+    Get path relative to Pixelle-Video root path
     
     Args:
         *paths: Path components to join
@@ -51,7 +51,7 @@ def get_root_path(*paths: str) -> str:
         get_root_path("temp", "audio.mp3")
         # Returns: "/path/to/project/temp/audio.mp3"
     """
-    root_path = ensure_reelforge_root_path()
+    root_path = ensure_pixelle_video_root_path()
     if paths:
         return os.path.join(root_path, *paths)
     return root_path
@@ -59,7 +59,7 @@ def get_root_path(*paths: str) -> str:
 
 def get_temp_path(*paths: str) -> str:
     """
-    Get path relative to ReelForge temp folder
+    Get path relative to Pixelle-Video temp folder
     
     Args:
         *paths: Path components to join
@@ -79,7 +79,7 @@ def get_temp_path(*paths: str) -> str:
 
 def get_data_path(*paths: str) -> str:
     """
-    Get path relative to ReelForge data folder
+    Get path relative to Pixelle-Video data folder
     
     Args:
         *paths: Path components to join
@@ -99,7 +99,7 @@ def get_data_path(*paths: str) -> str:
 
 def get_output_path(*paths: str) -> str:
     """
-    Get path relative to ReelForge output folder
+    Get path relative to Pixelle-Video output folder
     
     Args:
         *paths: Path components to join

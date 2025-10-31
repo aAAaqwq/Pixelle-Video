@@ -5,7 +5,7 @@ LLM (Large Language Model) endpoints
 from fastapi import APIRouter, HTTPException
 from loguru import logger
 
-from api.dependencies import ReelForgeDep
+from api.dependencies import PixelleVideoDep
 from api.schemas.llm import LLMChatRequest, LLMChatResponse
 
 router = APIRouter(prefix="/llm", tags=["LLM"])
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/llm", tags=["LLM"])
 @router.post("/chat", response_model=LLMChatResponse)
 async def llm_chat(
     request: LLMChatRequest,
-    reelforge: ReelForgeDep
+    pixelle_video: PixelleVideoDep
 ):
     """
     LLM chat endpoint
@@ -31,7 +31,7 @@ async def llm_chat(
         logger.info(f"LLM chat request: {request.prompt[:50]}...")
         
         # Call LLM service
-        response = await reelforge.llm(
+        response = await pixelle_video.llm(
             prompt=request.prompt,
             temperature=request.temperature,
             max_tokens=request.max_tokens
