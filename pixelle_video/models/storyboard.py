@@ -29,6 +29,7 @@ class StoryboardConfig:
     voice_id: str = "[Chinese] zh-CN Yunjian"     # Default voice
     tts_workflow: Optional[str] = None         # TTS workflow filename (None = use default)
     tts_speed: float = 1.2                     # TTS speed multiplier (1.0 = normal, >1.0 = faster)
+    ref_audio: Optional[str] = None            # Reference audio for voice cloning (only some workflows support this)
     
     # Image parameters
     image_width: int = 1024

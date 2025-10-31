@@ -164,8 +164,10 @@
     "settings.comfyui.runninghub_api_key_help": "Visit https://runninghub.ai to register and get API Key",
     
     "tts.selector": "Workflow Selection",
-    "tts.what": "Converts narration text to natural human-like speech",
+    "tts.what": "Converts narration text to natural human-like speech (some workflows support reference audio for voice cloning)",
     "tts.how": "Place tts_xxx.json workflow files in workflows/selfhost/ (local ComfyUI) or workflows/runninghub/ (cloud) folder",
+    "tts.ref_audio": "Reference Audio",
+    "tts.ref_audio_help": "Upload audio file for voice cloning (only supported by some workflows)",
     "tts.preview_title": "Preview TTS",
     "tts.preview_text": "Preview Text",
     "tts.preview_text_placeholder": "Enter text to preview...",

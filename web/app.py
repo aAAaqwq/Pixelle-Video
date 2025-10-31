@@ -471,6 +471,28 @@ def main():
             else:
                 tts_workflow_key = "selfhost/tts_edge.json"  # fallback
             
+            # Reference audio upload (optional, for voice cloning)
+            ref_audio_file = st.file_uploader(
+                tr("tts.ref_audio"),
+                type=["mp3", "wav", "flac", "m4a", "aac", "ogg"],
+                help=tr("tts.ref_audio_help"),
+                key="ref_audio_upload"
+            )
+            
+            # Save uploaded ref_audio to temp file if provided
+            ref_audio_path = None
+            if ref_audio_file is not None:
+                # Audio preview player (directly play uploaded file)
+                st.audio(ref_audio_file)
+                
+                # Save to temp directory
+                import tempfile
+                temp_dir = Path("temp")
+                temp_dir.mkdir(exist_ok=True)
+                ref_audio_path = temp_dir / f"ref_audio_{ref_audio_file.name}"
+                with open(ref_audio_path, "wb") as f:
+                    f.write(ref_audio_file.getbuffer())
+            
             # TTS preview expander (simplified, uses default voice and speed)
             with st.expander(tr("tts.preview_title"), expanded=False):
                 # Preview text input
@@ -486,10 +508,15 @@ def main():
                     with st.spinner(tr("tts.previewing")):
                         try:
                             # Generate preview audio using selected workflow (use default voice and speed)
-                            audio_path = run_async(pixelle_video.tts(
-                                text=preview_text,
-                                workflow=tts_workflow_key
-                            ))
+                            # Pass ref_audio if uploaded
+                            tts_params = {
+                                "text": preview_text,
+                                "workflow": tts_workflow_key
+                            }
+                            if ref_audio_path:
+                                tts_params["ref_audio"] = str(ref_audio_path)
+                            
+                            audio_path = run_async(pixelle_video.tts(**tts_params))
                             
                             # Play the audio
                             if audio_path:
@@ -801,18 +828,24 @@ def main():
                         progress_bar.progress(min(int(event.progress * 100), 99))  # Cap at 99% until complete
                     
                     # Generate video (directly pass parameters)
-                    result = run_async(pixelle_video.generate_video(
-                        text=text,
-                        mode=mode,
-                        title=title if title else None,
-                        n_scenes=n_scenes,
-                        tts_workflow=tts_workflow_key,  # Pass TTS workflow key
-                        image_workflow=workflow_key,  # Pass workflow key (e.g., "runninghub/image_flux.json")
-                        frame_template=frame_template,
-                        prompt_prefix=prompt_prefix,  # Pass prompt_prefix
-                        bgm_path=bgm_path,
-                        progress_callback=update_progress,
-                    ))
+                    video_params = {
+                        "text": text,
+                        "mode": mode,
+                        "title": title if title else None,
+                        "n_scenes": n_scenes,
+                        "tts_workflow": tts_workflow_key,
+                        "image_workflow": workflow_key,
+                        "frame_template": frame_template,
+                        "prompt_prefix": prompt_prefix,
+                        "bgm_path": bgm_path,
+                        "progress_callback": update_progress,
+                    }
+                    
+                    # Add ref_audio if uploaded
+                    if ref_audio_path:
+                        video_params["ref_audio"] = str(ref_audio_path)
+                    
+                    result = run_async(pixelle_video.generate_video(**video_params))
                     
                     progress_bar.progress(100)
                     status_text.text(tr("status.success"))

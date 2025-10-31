@@ -164,8 +164,10 @@
     "settings.comfyui.runninghub_api_key_help": "访问 https://runninghub.ai 注册并获取 API Key",
     
     "tts.selector": "工作流选择",
-    "tts.what": "将旁白文本转换为真人般的自然语音",
+    "tts.what": "将旁白文本转换为真人般的自然语音（部分工作流支持参考音频克隆声音）",
     "tts.how": "将 tts_xxx.json 工作流文件放入 workflows/selfhost/（本地 ComfyUI）或 workflows/runninghub/（云端）文件夹",
+    "tts.ref_audio": "参考音频",
+    "tts.ref_audio_help": "上传音频文件用于声音克隆（仅部分工作流支持）",
     "tts.preview_title": "预览 TTS",
     "tts.preview_text": "预览文本",
     "tts.preview_text_placeholder": "输入要试听的文本...",

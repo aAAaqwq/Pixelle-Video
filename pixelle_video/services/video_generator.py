@@ -57,6 +57,7 @@ class VideoGeneratorService:
         voice_id: str = "[Chinese] zh-CN Yunjian",
         tts_workflow: Optional[str] = None,
         tts_speed: float = 1.2,
+        ref_audio: Optional[str] = None,  # Reference audio for voice cloning
         output_path: Optional[str] = None,
         
         # === LLM Parameters ===
@@ -225,6 +226,7 @@ class VideoGeneratorService:
             voice_id=voice_id,
             tts_workflow=tts_workflow,
             tts_speed=tts_speed,
+            ref_audio=ref_audio,
             image_width=image_width,
             image_height=image_height,
             image_workflow=image_workflow,

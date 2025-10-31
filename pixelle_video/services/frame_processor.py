@@ -125,13 +125,19 @@ class FrameProcessor:
         output_path = get_task_frame_path(config.task_id, frame.index, "audio")
         
         # Call TTS with specific output path and workflow
-        audio_path = await self.core.tts(
-            text=frame.narration,
-            workflow=config.tts_workflow,  # Use workflow from config
-            voice=config.voice_id,
-            speed=config.tts_speed,  # Use speed (not rate) from config
-            output_path=output_path,
-        )
+        tts_params = {
+            "text": frame.narration,
+            "workflow": config.tts_workflow,
+            "voice": config.voice_id,
+            "speed": config.tts_speed,
+            "output_path": output_path,
+        }
+        
+        # Add ref_audio if provided
+        if config.ref_audio:
+            tts_params["ref_audio"] = config.ref_audio
+        
+        audio_path = await self.core.tts(**tts_params)
         
         frame.audio_path = audio_path
         
