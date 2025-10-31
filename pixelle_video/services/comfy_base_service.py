@@ -10,7 +10,6 @@ from typing import Optional, List, Dict, Any
 from comfykit import ComfyKit
 from loguru import logger
 
-os.environ["RUNNINGHUB_BASE_URL"] = "https://www.runninghub.cn"
 
 class ComfyBaseService:
     """
