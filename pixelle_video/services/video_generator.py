@@ -379,7 +379,7 @@ class VideoGeneratorService:
             logger.success(f"🎬 Video generation completed: {final_video_path}")
             
             # Step 6: Create result
-            self._report_progress(progress_callback, "finalizing", 1.0)
+            self._report_progress(progress_callback, "completed", 1.0)
             
             video_path_obj = Path(final_video_path)
             file_size = video_path_obj.stat().st_size

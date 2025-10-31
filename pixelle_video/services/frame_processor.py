@@ -58,52 +58,52 @@ class FrameProcessor:
         
         try:
             # Step 1: Generate audio (TTS)
+            if progress_callback:
+                progress_callback(ProgressEvent(
+                    event_type="frame_step",
+                    progress=0.0,
+                    frame_current=frame_num,
+                    frame_total=total_frames,
+                    step=1,
+                    action="audio"
+                ))
             await self._step_generate_audio(frame, config)
+            
+            # Step 2: Generate image (ComfyKit)
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
                     progress=0.25,
                     frame_current=frame_num,
                     frame_total=total_frames,
-                    step=1,
-                    action="audio"
+                    step=2,
+                    action="image"
                 ))
-            
-            # Step 2: Generate image (ComfyKit)
             await self._step_generate_image(frame, config)
+            
+            # Step 3: Compose frame (add subtitle)
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
                     progress=0.50,
                     frame_current=frame_num,
                     frame_total=total_frames,
-                    step=2,
-                    action="image"
+                    step=3,
+                    action="compose"
                 ))
-            
-            # Step 3: Compose frame (add subtitle)
             await self._step_compose_frame(frame, storyboard, config)
+            
+            # Step 4: Create video segment
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
                     progress=0.75,
                     frame_current=frame_num,
                     frame_total=total_frames,
-                    step=3,
-                    action="compose"
-                ))
-            
-            # Step 4: Create video segment
-            await self._step_create_video_segment(frame, config)
-            if progress_callback:
-                progress_callback(ProgressEvent(
-                    event_type="frame_step",
-                    progress=1.0,
-                    frame_current=frame_num,
-                    frame_total=total_frames,
                     step=4,
                     action="video"
                 ))
+            await self._step_create_video_segment(frame, config)
             
             logger.info(f"✅ Frame {frame.index} completed")
             return frame
