@@ -3,6 +3,7 @@ Configuration schema with Pydantic models
 
 Single source of truth for all configuration defaults and validation.
 """
+from typing import Optional
 from pydantic import BaseModel, Field
 
 
@@ -15,12 +16,12 @@ class LLMConfig(BaseModel):
 
 class TTSSubConfig(BaseModel):
     """TTS-specific configuration (under comfyui.tts)"""
-    default_workflow: str = Field(default=None, description="Default TTS workflow (required, no fallback)")
+    default_workflow: Optional[str] = Field(default=None, description="Default TTS workflow (optional)")
 
 
 class ImageSubConfig(BaseModel):
     """Image-specific configuration (under comfyui.image)"""
-    default_workflow: str = Field(default=None, description="Default image workflow (required, no fallback)")
+    default_workflow: Optional[str] = Field(default=None, description="Default image workflow (optional)")
     prompt_prefix: str = Field(
         default="Pure white background, minimalist illustration, matchstick figure style, black and white line drawing, simple clean lines",
         description="Prompt prefix for all image generation"
