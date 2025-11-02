@@ -274,8 +274,7 @@ class HTMLFrameGenerator:
         try:
             self.hti.screenshot(
                 html_str=html,
-                save_as=output_filename,
-                size=(width, height)
+                save_as=output_filename
             )
             
             # html2image saves to current directory by default, move to target directory

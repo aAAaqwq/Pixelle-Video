@@ -32,13 +32,13 @@ class VideoGenerateRequest(BaseModel):
     max_image_prompt_words: int = Field(60, ge=10, le=200, description="Max image prompt words")
     
     # === Image Parameters ===
-    image_width: int = Field(1024, ge=512, le=2048, description="Image width")
-    image_height: int = Field(1024, ge=512, le=2048, description="Image height")
+    image_width: int = Field(1024, description="Image width")
+    image_height: int = Field(1024, description="Image height")
     image_workflow: Optional[str] = Field(None, description="Custom image workflow")
     
     # === Video Parameters ===
-    video_width: int = Field(1080, ge=512, le=3840, description="Video width")
-    video_height: int = Field(1920, ge=512, le=3840, description="Video height")
+    video_width: int = Field(1080, description="Video width")
+    video_height: int = Field(1920, description="Video height")
     video_fps: int = Field(30, ge=15, le=60, description="Video FPS")
     
     # === Frame Template ===
