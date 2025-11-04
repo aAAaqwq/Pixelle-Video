@@ -1,3 +1,5 @@
 """
-Pixelle-Video utilities
+Pixelle-Video Utilities
+
+Utility functions and helpers.
 """

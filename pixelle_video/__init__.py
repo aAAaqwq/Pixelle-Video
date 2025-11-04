@@ -13,8 +13,22 @@ Usage:
     answer = await pixelle_video.llm("Explain atomic habits")
     audio = await pixelle_video.tts("Hello world")
     
-    # Generate video
-    result = await pixelle_video.generate_video(topic="AI in 2024")
+    # Generate video with different pipelines
+    # Standard pipeline (default)
+    result = await pixelle_video.generate_video(
+        text="如何提高学习效率",
+        n_scenes=5
+    )
+    
+    # Custom pipeline (template for your own logic)
+    result = await pixelle_video.generate_video(
+        text=your_content,
+        pipeline="custom",
+        custom_param_example="custom_value"
+    )
+    
+    # Check available pipelines
+    print(pixelle_video.pipelines.keys())  # dict_keys(['standard', 'custom'])
 """
 
 from pixelle_video.service import PixelleVideoCore, pixelle_video
