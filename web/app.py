@@ -390,14 +390,17 @@ def main():
                 st.markdown(f"**{tr('help.how')}**")
                 st.markdown(tr("bgm.how"))
             
-            # Dynamically scan bgm folder for music files (support common audio formats)
-            bgm_folder = Path("bgm")
-            bgm_files = []
-            if bgm_folder.exists():
-                audio_extensions = ["*.mp3", "*.wav", "*.flac", "*.m4a", "*.aac", "*.ogg"]
-                for ext in audio_extensions:
-                    bgm_files.extend([f.name for f in bgm_folder.glob(ext)])
-                bgm_files.sort()
+            # Dynamically scan bgm folder for music files (merged from bgm/ and data/bgm/)
+            from pixelle_video.utils.os_util import list_resource_files
+            
+            try:
+                all_files = list_resource_files("bgm")
+                # Filter to audio files only
+                audio_extensions = ('.mp3', '.wav', '.flac', '.m4a', '.aac', '.ogg')
+                bgm_files = sorted([f for f in all_files if f.lower().endswith(audio_extensions)])
+            except Exception as e:
+                st.warning(f"Failed to load BGM files: {e}")
+                bgm_files = []
             
             # Add special "None" option
             bgm_options = [tr("bgm.none")] + bgm_files
@@ -417,11 +420,15 @@ def main():
             # BGM preview button (only if BGM is not "None")
             if bgm_choice != tr("bgm.none"):
                 if st.button(tr("bgm.preview"), key="preview_bgm", use_container_width=True):
-                    bgm_file_path = f"bgm/{bgm_choice}"
-                    if os.path.exists(bgm_file_path):
-                        st.audio(bgm_file_path)
-                    else:
-                        st.error(tr("bgm.preview_failed", file=bgm_choice))
+                    from pixelle_video.utils.os_util import get_resource_path, resource_exists
+                    try:
+                        if resource_exists("bgm", bgm_choice):
+                            bgm_file_path = get_resource_path("bgm", bgm_choice)
+                            st.audio(bgm_file_path)
+                        else:
+                            st.error(tr("bgm.preview_failed", file=bgm_choice))
+                    except Exception as e:
+                        st.error(f"{tr('bgm.preview_failed', file=bgm_choice)}: {e}")
             
             # Use full filename for bgm_path (including extension)
             bgm_path = None if bgm_choice == tr("bgm.none") else bgm_choice

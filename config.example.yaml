@@ -21,6 +21,7 @@ llm:
 comfyui:
   # Global ComfyUI settings
   comfyui_url: http://127.0.0.1:8188  # ComfyUI server URL (required for selfhost workflows)
+  # Note for Docker users: Use host.docker.internal:8188 (Mac/Windows) or host IP address (Linux)
   runninghub_api_key: ""  # RunningHub API key (required for runninghub workflows)
   
   # TTS-specific configuration

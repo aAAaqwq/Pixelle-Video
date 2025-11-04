@@ -10,6 +10,12 @@ from typing import Optional, List, Dict, Any
 from comfykit import ComfyKit
 from loguru import logger
 
+from pixelle_video.utils.os_util import (
+    get_resource_path,
+    list_resource_files,
+    list_resource_dirs
+)
+
 
 class ComfyBaseService:
     """
@@ -47,7 +53,7 @@ class ComfyBaseService:
     
     def _scan_workflows(self) -> List[Dict[str, Any]]:
         """
-        Scan workflows/source/*.json files from all source directories
+        Scan workflows/source/*.json files from all source directories (merged from workflows/ and data/workflows/)
         
         Returns:
             List of workflow info dicts
@@ -70,28 +76,34 @@ class ComfyBaseService:
             ]
         """
         workflows = []
-        workflows_dir = Path(self.WORKFLOWS_DIR)
         
-        if not workflows_dir.exists():
-            logger.warning(f"Workflows directory not found: {workflows_dir}")
+        # Get all workflow source directories (merged from workflows/ and data/workflows/)
+        source_dirs = list_resource_dirs("workflows")
+        
+        if not source_dirs:
+            logger.warning("No workflow source directories found")
             return workflows
         
-        # Scan subdirectories (selfhost, runninghub, etc.)
-        for source_dir in workflows_dir.iterdir():
-            if not source_dir.is_dir():
-                logger.debug(f"Skipping non-directory: {source_dir}")
-                continue
+        # Scan each source directory for workflow files
+        for source_name in source_dirs:
+            # Get all JSON files for this source (merged from both locations)
+            workflow_files = list_resource_files("workflows", source_name)
             
-            source_name = source_dir.name
+            # Filter to only files matching the prefix
+            matching_files = [
+                f for f in workflow_files 
+                if f.startswith(self.WORKFLOW_PREFIX) and f.endswith('.json')
+            ]
             
-            # Scan workflow files in this source directory
-            for file_path in source_dir.glob(f"{self.WORKFLOW_PREFIX}*.json"):
+            for filename in matching_files:
                 try:
+                    # Get actual file path (custom > default)
+                    file_path = Path(get_resource_path("workflows", source_name, filename))
                     workflow_info = self._parse_workflow_file(file_path, source_name)
                     workflows.append(workflow_info)
                     logger.debug(f"Found workflow: {workflow_info['key']}")
                 except Exception as e:
-                    logger.error(f"Failed to parse workflow {file_path}: {e}")
+                    logger.error(f"Failed to parse workflow {source_name}/{filename}: {e}")
         
         # Sort by key (source/name)
         return sorted(workflows, key=lambda w: w["key"])

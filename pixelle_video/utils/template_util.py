@@ -7,6 +7,13 @@ from pathlib import Path
 from typing import List, Tuple, Optional, Literal
 from pydantic import BaseModel, Field
 
+from pixelle_video.utils.os_util import (
+    get_resource_path,
+    list_resource_files,
+    list_resource_dirs,
+    resource_exists
+)
+
 
 def parse_template_size(template_path: str) -> Tuple[int, int]:
     """
@@ -68,7 +75,7 @@ def parse_template_size(template_path: str) -> Tuple[int, int]:
 
 def list_available_sizes() -> List[str]:
     """
-    List all available video sizes
+    List all available video sizes (merged from templates/ and data/templates/)
     
     Returns:
         List of size strings like ["1080x1920", "1920x1080", "1080x1080"]
@@ -77,20 +84,18 @@ def list_available_sizes() -> List[str]:
         >>> list_available_sizes()
         ['1080x1920', '1920x1080', '1080x1080']
     """
-    templates_dir = Path("templates")
+    # Use new resource API to merge default and custom directories
+    all_dirs = list_resource_dirs("templates")
     
-    if not templates_dir.exists():
-        return []
-    
+    # Filter to only valid size formats (WIDTHxHEIGHT)
     sizes = []
-    for item in templates_dir.iterdir():
-        if item.is_dir() and 'x' in item.name:
-            # Validate it's a proper size format
+    for dir_name in all_dirs:
+        if 'x' in dir_name:
             try:
-                width, height = item.name.split('x')
+                width, height = dir_name.split('x')
                 int(width)
                 int(height)
-                sizes.append(item.name)
+                sizes.append(dir_name)
             except (ValueError, AttributeError):
                 # Skip invalid directories
                 continue
@@ -100,7 +105,7 @@ def list_available_sizes() -> List[str]:
 
 def list_templates_for_size(size: str) -> List[str]:
     """
-    List all templates available for a given size
+    List all templates available for a given size (merged from templates/ and data/templates/)
     
     Args:
         size: Size string like "1080x1920"
@@ -112,47 +117,42 @@ def list_templates_for_size(size: str) -> List[str]:
         >>> list_templates_for_size("1080x1920")
         ['cartoon.html', 'default.html', 'elegant.html', 'modern.html', ...]
     """
-    size_dir = Path("templates") / size
+    # Use new resource API to merge default and custom templates
+    all_files = list_resource_files("templates", size)
     
-    if not size_dir.exists() or not size_dir.is_dir():
-        return []
-    
-    templates = []
-    for item in size_dir.iterdir():
-        if item.is_file() and item.suffix == '.html':
-            templates.append(item.name)
+    # Filter to only HTML files
+    templates = [f for f in all_files if f.endswith('.html')]
     
     return sorted(templates)
 
 
 def get_template_full_path(size: str, template_name: str) -> str:
     """
-    Get full template path from size and template name
+    Get full template path from size and template name (checks data/templates/ first, then templates/)
     
     Args:
         size: Size string like "1080x1920"
         template_name: Template filename like "default.html"
     
     Returns:
-        Full path like "templates/1080x1920/default.html"
+        Full path like "templates/1080x1920/default.html" or "data/templates/1080x1920/default.html"
     
     Raises:
-        FileNotFoundError: If template file doesn't exist
+        FileNotFoundError: If template file doesn't exist in either location
     
     Examples:
         >>> get_template_full_path("1080x1920", "default.html")
         'templates/1080x1920/default.html'
     """
-    template_path = Path("templates") / size / template_name
-    
-    if not template_path.exists():
+    # Use new resource API to search custom first, then default
+    try:
+        return get_resource_path("templates", size, template_name)
+    except FileNotFoundError:
         available_templates = list_templates_for_size(size)
         raise FileNotFoundError(
-            f"Template not found: {template_path}\n"
+            f"Template not found: {size}/{template_name}\n"
             f"Available templates for size {size}: {available_templates}"
         )
-    
-    return str(template_path)
 
 
 class TemplateDisplayInfo(BaseModel):
@@ -300,20 +300,21 @@ def get_templates_grouped_by_size() -> dict:
 
 def resolve_template_path(template_input: Optional[str]) -> str:
     """
-    Resolve template input to full path with validation
+    Resolve template input to full path with validation (checks data/templates/ first, then templates/)
     
     Args:
         template_input: Can be:
             - None: Use default "1080x1920/default.html"
             - "template.html": Use default size + this template
             - "1080x1920/template.html": Full relative path
-            - "templates/1080x1920/template.html": Absolute-ish path
+            - "templates/1080x1920/template.html": Absolute-ish path (legacy)
+            - "data/templates/1080x1920/template.html": Custom path (legacy)
     
     Returns:
-        Resolved full path like "templates/1080x1920/default.html"
+        Resolved full path (custom if exists, otherwise default)
     
     Raises:
-        FileNotFoundError: If template doesn't exist
+        FileNotFoundError: If template doesn't exist in either location
     
     Examples:
         >>> resolve_template_path(None)
@@ -327,25 +328,33 @@ def resolve_template_path(template_input: Optional[str]) -> str:
     if template_input is None:
         template_input = "1080x1920/default.html"
     
-    # If already starts with "templates/", use as-is
-    if template_input.startswith("templates/"):
-        template_path = Path(template_input)
-    # If contains size directory (e.g., "1080x1920/default.html")
-    elif '/' in template_input and 'x' in template_input.split('/')[0]:
-        template_path = Path("templates") / template_input
-    # Just template name (e.g., "default.html")
-    else:
-        # Use default size
-        template_path = Path("templates") / "1080x1920" / template_input
+    # Parse input to extract size and template name
+    size = None
+    template_name = None
     
-    # Validate existence
-    if not template_path.exists():
+    # Handle different input formats
+    if template_input.startswith("templates/") or template_input.startswith("data/templates/"):
+        # Legacy full path format - extract size and name
+        parts = Path(template_input).parts
+        if len(parts) >= 3:
+            size = parts[-2]
+            template_name = parts[-1]
+    elif '/' in template_input and 'x' in template_input.split('/')[0]:
+        # "1080x1920/template.html" format
+        size, template_name = template_input.split('/', 1)
+    else:
+        # Just template name - use default size
+        size = "1080x1920"
+        template_name = template_input
+    
+    # Use resource API to resolve path (custom > default)
+    try:
+        return get_resource_path("templates", size, template_name)
+    except FileNotFoundError:
         available_sizes = list_available_sizes()
         raise FileNotFoundError(
-            f"Template not found: {template_path}\n"
+            f"Template not found: {size}/{template_name}\n"
             f"Available sizes: {available_sizes}\n"
             f"Hint: Use format 'SIZExSIZE/template.html' (e.g., '1080x1920/default.html')"
         )
-    
-    return str(template_path)
 

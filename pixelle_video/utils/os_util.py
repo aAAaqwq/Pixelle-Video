@@ -283,3 +283,170 @@ def get_task_final_video_path(task_id: str) -> str:
     """
     return get_task_path(task_id, "final.mp4")
 
+
+# ========== Resource Management (Templates/BGM/Workflows) ==========
+
+def get_resource_path(resource_type: Literal["bgm", "templates", "workflows"], *paths: str) -> str:
+    """
+    Get resource file path with custom override support
+    
+    Search priority:
+        1. data/{resource_type}/*paths  (custom, higher priority)
+        2. {resource_type}/*paths       (default, fallback)
+    
+    Args:
+        resource_type: Resource type ("bgm", "templates", "workflows")
+        *paths: Path components relative to resource directory
+    
+    Returns:
+        Absolute path to resource file (custom if exists, otherwise default)
+    
+    Raises:
+        FileNotFoundError: If file not found in either location
+        
+    Examples:
+        >>> get_resource_path("bgm", "happy.mp3")
+        # Returns: "data/bgm/happy.mp3" (if exists) or "bgm/happy.mp3"
+        
+        >>> get_resource_path("templates", "1080x1920", "default.html")
+        # Returns: "data/templates/1080x1920/default.html" or "templates/1080x1920/default.html"
+        
+        >>> get_resource_path("workflows", "selfhost", "image_flux.json")
+        # Returns: "data/workflows/selfhost/image_flux.json" or "workflows/selfhost/image_flux.json"
+    """
+    # Build custom path (data/*)
+    custom_path = get_data_path(resource_type, *paths)
+    
+    # Build default path (root/*)
+    default_path = get_root_path(resource_type, *paths)
+    
+    # Priority: custom > default
+    if os.path.exists(custom_path):
+        return custom_path
+    
+    if os.path.exists(default_path):
+        return default_path
+    
+    # Not found in either location
+    raise FileNotFoundError(
+        f"Resource not found: {os.path.join(resource_type, *paths)}\n"
+        f"  Searched locations:\n"
+        f"    1. {custom_path} (custom)\n"
+        f"    2. {default_path} (default)"
+    )
+
+
+def list_resource_files(
+    resource_type: Literal["bgm", "templates", "workflows"],
+    subdir: str = ""
+) -> list[str]:
+    """
+    List resource files with custom override support
+    
+    Merges files from both default and custom locations:
+        - Files from data/{resource_type}/* (custom, higher priority)
+        - Files from {resource_type}/* (default)
+        - Duplicate names are deduplicated (custom takes precedence)
+    
+    Args:
+        resource_type: Resource type ("bgm", "templates", "workflows")
+        subdir: Optional subdirectory (e.g., "1080x1920" for templates)
+    
+    Returns:
+        Sorted list of filenames (deduplicated, custom overrides default)
+        
+    Examples:
+        >>> list_resource_files("bgm")
+        # Returns: ["custom.mp3", "default.mp3", "happy.mp3"]
+        # (merged from bgm/ and data/bgm/)
+        
+        >>> list_resource_files("templates", "1080x1920")
+        # Returns: ["custom.html", "default.html", "modern.html"]
+        # (merged from templates/1080x1920/ and data/templates/1080x1920/)
+    """
+    files = {}  # Use dict to track source priority: {filename: path}
+    
+    # Build directory paths
+    default_dir = Path(get_root_path(resource_type, subdir)) if subdir else Path(get_root_path(resource_type))
+    custom_dir = Path(get_data_path(resource_type, subdir)) if subdir else Path(get_data_path(resource_type))
+    
+    # Scan default directory first (lower priority)
+    if default_dir.exists() and default_dir.is_dir():
+        for item in default_dir.iterdir():
+            if item.is_file():
+                files[item.name] = str(item)
+    
+    # Scan custom directory (higher priority, overwrites)
+    if custom_dir.exists() and custom_dir.is_dir():
+        for item in custom_dir.iterdir():
+            if item.is_file():
+                files[item.name] = str(item)  # Overwrite if exists
+    
+    return sorted(files.keys())
+
+
+def list_resource_dirs(
+    resource_type: Literal["bgm", "templates", "workflows"]
+) -> list[str]:
+    """
+    List subdirectories in resource directory
+    
+    Merges directories from both default and custom locations.
+    
+    Args:
+        resource_type: Resource type ("bgm", "templates", "workflows")
+    
+    Returns:
+        Sorted list of directory names (deduplicated)
+        
+    Examples:
+        >>> list_resource_dirs("templates")
+        # Returns: ["1080x1080", "1080x1920", "1920x1080"]
+        
+        >>> list_resource_dirs("workflows")
+        # Returns: ["runninghub", "selfhost"]
+    """
+    dirs = set()
+    
+    # Build directory paths
+    default_dir = Path(get_root_path(resource_type))
+    custom_dir = Path(get_data_path(resource_type))
+    
+    # Scan default directory
+    if default_dir.exists() and default_dir.is_dir():
+        for item in default_dir.iterdir():
+            if item.is_dir():
+                dirs.add(item.name)
+    
+    # Scan custom directory
+    if custom_dir.exists() and custom_dir.is_dir():
+        for item in custom_dir.iterdir():
+            if item.is_dir():
+                dirs.add(item.name)
+    
+    return sorted(dirs)
+
+
+def resource_exists(resource_type: Literal["bgm", "templates", "workflows"], *paths: str) -> bool:
+    """
+    Check if resource file exists (in custom or default location)
+    
+    Args:
+        resource_type: Resource type ("bgm", "templates", "workflows")
+        *paths: Path components relative to resource directory
+    
+    Returns:
+        True if exists in either location, False otherwise
+        
+    Examples:
+        >>> resource_exists("bgm", "happy.mp3")
+        True
+        
+        >>> resource_exists("templates", "1080x1920", "default.html")
+        True
+    """
+    custom_path = get_data_path(resource_type, *paths)
+    default_path = get_root_path(resource_type, *paths)
+    
+    return os.path.exists(custom_path) or os.path.exists(default_path)
+

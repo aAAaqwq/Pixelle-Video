@@ -21,6 +21,12 @@ from typing import List, Literal, Optional
 import ffmpeg
 from loguru import logger
 
+from pixelle_video.utils.os_util import (
+    get_resource_path,
+    list_resource_files,
+    resource_exists
+)
+
 
 def check_ffmpeg() -> None:
     """
@@ -509,11 +515,16 @@ class VideoService:
     
     def _resolve_bgm_path(self, bgm_path: str) -> str:
         """
-        Resolve BGM path (filename or custom path)
+        Resolve BGM path (filename or custom path) with custom override support
+        
+        Search priority:
+            1. Direct path (absolute or relative)
+            2. data/bgm/{filename} (custom)
+            3. bgm/{filename} (default)
         
         Args:
             bgm_path: Can be:
-                - Filename with extension (e.g., "default.mp3", "happy.mp3"): auto-resolved from bgm/ directory
+                - Filename with extension (e.g., "default.mp3", "happy.mp3"): auto-resolved from bgm/ or data/bgm/
                 - Custom file path (absolute or relative)
         
         Returns:
@@ -526,15 +537,14 @@ class VideoService:
         if os.path.exists(bgm_path):
             return os.path.abspath(bgm_path)
         
-        # Try as filename in bgm/ directory
-        preset_path = f"bgm/{bgm_path}"
-        if os.path.exists(preset_path):
-            return os.path.abspath(preset_path)
+        # Try as filename in resource directories (custom > default)
+        if resource_exists("bgm", bgm_path):
+            return get_resource_path("bgm", bgm_path)
         
         # Not found - provide helpful error message
         tried_paths = [
             os.path.abspath(bgm_path),
-            os.path.abspath(preset_path)
+            f"data/bgm/{bgm_path} or bgm/{bgm_path}"
         ]
         
         # List available BGM files
@@ -551,20 +561,19 @@ class VideoService:
     
     def _list_available_bgm(self) -> list[str]:
         """
-        List available BGM files in bgm/ directory
+        List available BGM files (merged from bgm/ and data/bgm/)
         
         Returns:
-            List of filenames (with extensions)
+            List of filenames (with extensions), sorted
         """
-        bgm_dir = "bgm"
-        if not os.path.exists(bgm_dir):
-            return []
-        
         try:
-            files = os.listdir(bgm_dir)
-            # Return all audio files (mp3, wav, ogg, flac, etc.)
+            # Use resource API to get merged list
+            all_files = list_resource_files("bgm")
+            
+            # Filter to audio files only
             audio_extensions = ('.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac')
-            return [f for f in files if f.lower().endswith(audio_extensions)]
-        except Exception:
+            return sorted([f for f in all_files if f.lower().endswith(audio_extensions)])
+        except Exception as e:
+            logger.warning(f"Failed to list BGM files: {e}")
             return []
 
