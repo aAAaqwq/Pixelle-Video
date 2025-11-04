@@ -2,7 +2,7 @@
 Standard Video Generation Pipeline
 
 Standard workflow for generating short videos from topic or fixed script.
-This is the default pipeline that replicates the original VideoGeneratorService logic.
+This is the default pipeline for general-purpose video generation.
 """
 
 from datetime import datetime

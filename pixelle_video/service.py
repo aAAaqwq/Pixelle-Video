@@ -13,9 +13,6 @@ from pixelle_video.services.llm_service import LLMService
 from pixelle_video.services.tts_service import TTSService
 from pixelle_video.services.image import ImageService
 from pixelle_video.services.video import VideoService
-from pixelle_video.services.narration_generator import NarrationGeneratorService
-from pixelle_video.services.image_prompt_generator import ImagePromptGeneratorService
-from pixelle_video.services.title_generator import TitleGeneratorService
 from pixelle_video.services.frame_processor import FrameProcessor
 from pixelle_video.pipelines.standard import StandardPipeline
 from pixelle_video.pipelines.custom import CustomPipeline
@@ -70,13 +67,6 @@ class PixelleVideoCore:
         self.tts: Optional[TTSService] = None
         self.image: Optional[ImageService] = None
         self.video: Optional[VideoService] = None
-        
-        # Content generation services
-        self.narration_generator: Optional[NarrationGeneratorService] = None
-        self.image_prompt_generator: Optional[ImagePromptGeneratorService] = None
-        self.title_generator: Optional[TitleGeneratorService] = None
-        
-        # Frame processing services
         self.frame_processor: Optional[FrameProcessor] = None
         
         # Video generation pipelines (dictionary of pipeline_name -> pipeline_instance)
@@ -105,23 +95,16 @@ class PixelleVideoCore:
         self.tts = TTSService(self.config)
         self.image = ImageService(self.config)
         self.video = VideoService()
-        
-        # 2. Initialize content generation services
-        self.narration_generator = NarrationGeneratorService(self)
-        self.image_prompt_generator = ImagePromptGeneratorService(self)
-        self.title_generator = TitleGeneratorService(self)
-        
-        # 3. Initialize frame processing services
         self.frame_processor = FrameProcessor(self)
         
-        # 4. Register video generation pipelines
+        # 2. Register video generation pipelines
         self.pipelines = {
             "standard": StandardPipeline(self),
             "custom": CustomPipeline(self),
         }
         logger.info(f"📹 Registered pipelines: {', '.join(self.pipelines.keys())}")
         
-        # 5. Set default pipeline callable (for backward compatibility)
+        # 3. Set default pipeline callable (for backward compatibility)
         self.generate_video = self._create_generate_video_wrapper()
         
         self._initialized = True
