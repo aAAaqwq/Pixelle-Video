@@ -4,9 +4,9 @@
     "app.title": "⚡ Pixelle-Video - AI Auto Short Video Engine",
     "app.subtitle": "Powered by Pixelle AI",
     
-    "section.content_input": "📖 Content Input",
+    "section.content_input": "📝 Video Script",
     "section.bgm": "🎵 Background Music",
-    "section.tts": "🎤 Text-to-Speech",
+    "section.tts": "🎤 Voiceover",
     "section.image": "🎨 Image Generation",
     "section.template": "📐 Storyboard Template",
     "section.video_generation": "🎬 Generate Video",
@@ -14,8 +14,8 @@
     "input_mode.topic": "💡 Topic",
     "input_mode.custom": "✍️ Custom Content",
     
-    "mode.generate": "💡 Generate Mode",
-    "mode.fixed": "📄 Fixed Mode",
+    "mode.generate": "💡 AI Creation",
+    "mode.fixed": "✍️ Custom Script",
     
     "input.topic": "Topic",
     "input.topic_placeholder": "AI automatically creates specified number of narrations\nExample: How to build passive income, 如何增加被动收入",

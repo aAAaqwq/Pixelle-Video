@@ -4,9 +4,9 @@
     "app.title": "⚡ Pixelle-Video - AI 全自动短视频引擎",
     "app.subtitle": "打造专属你的视频创作引擎",
     
-    "section.content_input": "📖 内容输入",
+    "section.content_input": "📝 视频脚本",
     "section.bgm": "🎵 背景音乐",
-    "section.tts": "🎤 语音合成",
+    "section.tts": "🎤 配音合成",
     "section.image": "🎨 插图生成",
     "section.template": "📐 分镜模板",
     "section.video_generation": "🎬 生成视频",
@@ -14,8 +14,8 @@
     "input_mode.topic": "💡 主题",
     "input_mode.custom": "✍️ 自定义内容",
     
-    "mode.generate": "💡 生成模式",
-    "mode.fixed": "📄 固定模式",
+    "mode.generate": "💡 AI 创作",
+    "mode.fixed": "✍️ 自行创作",
     
     "input.topic": "主题",
     "input.topic_placeholder": "AI 自动创作指定数量的旁白\n例如：如何增加被动收入、How to build passive income",
