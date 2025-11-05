@@ -1,4 +1,3 @@
-<div align="center">
 <h1 align="center">Pixelle-Video 🎬</h1>
 
 <p align="center">
@@ -8,11 +7,7 @@
   <a href="https://github.com/PixelleLab/Pixelle-Video/blob/main/LICENSE"><img src="https://img.shields.io/github/license/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="License"></a>
 </p>
 
-<br>
-
 <h3 align="center">🚀 AI 视频创作工具 - 3 分钟生成一个短视频</h3>
-
-<br>
 
 只需输入一个 **主题**，Pixelle-Video 就能自动完成：
 - ✍️ 撰写视频文案
@@ -21,11 +16,8 @@
 - 🎵 添加背景音乐
 - 🎬 一键合成视频
 
-<br>
 
 **零门槛，零剪辑经验**，让视频创作成为一句话的事！
-
-</div>
 
 ---
 
@@ -43,7 +35,7 @@
 
 ---
 
-## 📊 工作流程
+## 📊 视频生成流程
 
 Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 
@@ -62,6 +54,45 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 ---
 
 ## 🚀 快速开始
+
+### 第零步：安装环境依赖
+
+在开始之前，需要先安装 Python 包管理器 `uv` 和视频处理工具 `ffmpeg`：
+
+#### 安装 uv
+
+**macOS / Linux**
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+**Windows**
+```powershell
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+安装完成后，在终端中运行 `uv --version` 验证安装成功。
+
+#### 安装 ffmpeg
+
+**macOS**
+```bash
+brew install ffmpeg
+```
+
+**Ubuntu / Debian**
+```bash
+sudo apt update
+sudo apt install ffmpeg
+```
+
+**Windows**
+- 下载地址：https://ffmpeg.org/download.html
+- 下载后解压，将 `bin` 目录添加到系统环境变量 PATH 中
+
+安装完成后，在终端中运行 `ffmpeg -version` 验证安装成功。
+
+---
 
 ### 第一步：下载项目
 
