@@ -7,7 +7,7 @@ This is the default pipeline for general-purpose video generation.
 
 from datetime import datetime
 from pathlib import Path
-from typing import Optional, Callable, Literal
+from typing import Optional, Callable, Literal, Dict, Any
 
 from loguru import logger
 
@@ -84,6 +84,7 @@ class StandardPipeline(BasePipeline):
         
         # === Frame Template (determines video size) ===
         frame_template: Optional[str] = None,
+        template_params: Optional[Dict[str, Any]] = None,  # Custom template parameters
         
         # === Image Style ===
         prompt_prefix: Optional[str] = None,
@@ -206,7 +207,8 @@ class StandardPipeline(BasePipeline):
             image_width=image_width,
             image_height=image_height,
             image_workflow=image_workflow,
-            frame_template=frame_template or "1080x1920/default.html"
+            frame_template=frame_template or "1080x1920/default.html",
+            template_params=template_params
         )
         
         # Create storyboard

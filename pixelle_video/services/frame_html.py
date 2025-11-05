@@ -12,6 +12,7 @@ Linux Environment Requirements:
 """
 
 import os
+import re
 import uuid
 from typing import Dict, Any, Optional
 from pathlib import Path
@@ -102,6 +103,156 @@ class HTMLFrameGenerator:
         
         logger.debug(f"Template loaded: {len(content)} chars")
         return content
+    
+    def parse_template_parameters(self) -> Dict[str, Dict[str, Any]]:
+        """
+        Parse custom parameters from HTML template
+        
+        Supports syntax: {{param:type=default}}
+        - {{param}} -> text type, no default
+        - {{param=value}} -> text type, with default
+        - {{param:type}} -> specified type, no default
+        - {{param:type=value}} -> specified type, with default
+        
+        Supported types: text, number, color, bool
+        
+        Returns:
+            Dictionary of custom parameters with their configurations:
+            {
+                'param_name': {
+                    'type': 'text' | 'number' | 'color' | 'bool',
+                    'default': Any,
+                    'label': str  # same as param_name
+                }
+            }
+        """
+        # Preset parameters that should be ignored
+        PRESET_PARAMS = {'title', 'text', 'image', 'content_title', 'content_author', 
+                        'content_subtitle', 'content_genre'}
+        
+        # Pattern: {{param_name:type=default}} or {{param_name=default}} or {{param_name:type}} or {{param_name}}
+        # Param name: must start with letter or underscore, can contain letters, digits, underscores
+        PARAM_PATTERN = r'\{\{([a-zA-Z_][a-zA-Z0-9_]*)(?::([a-z]+))?(?:=([^}]+))?\}\}'
+        
+        params = {}
+        
+        for match in re.finditer(PARAM_PATTERN, self.template):
+            param_name = match.group(1)
+            param_type = match.group(2) or 'text'  # Default to text
+            default_value = match.group(3)
+            
+            # Skip preset parameters
+            if param_name in PRESET_PARAMS:
+                continue
+            
+            # Skip if already parsed (use first occurrence)
+            if param_name in params:
+                continue
+            
+            # Validate type
+            if param_type not in {'text', 'number', 'color', 'bool'}:
+                logger.warning(f"Unknown parameter type '{param_type}' for '{param_name}', defaulting to 'text'")
+                param_type = 'text'
+            
+            # Parse default value based on type
+            parsed_default = self._parse_default_value(param_type, default_value)
+            
+            params[param_name] = {
+                'type': param_type,
+                'default': parsed_default,
+                'label': param_name,  # Use param name as label
+            }
+        
+        if params:
+            logger.debug(f"Parsed {len(params)} custom parameter(s) from template: {list(params.keys())}")
+        
+        return params
+    
+    def _parse_default_value(self, param_type: str, value_str: Optional[str]) -> Any:
+        """
+        Parse default value based on parameter type
+        
+        Args:
+            param_type: Type of parameter (text, number, color, bool)
+            value_str: String value to parse (can be None)
+        
+        Returns:
+            Parsed value with appropriate type
+        """
+        if value_str is None:
+            # No default value specified, return type-specific defaults
+            return {
+                'text': '',
+                'number': 0,
+                'color': '#000000',
+                'bool': False,
+            }.get(param_type, '')
+        
+        if param_type == 'number':
+            try:
+                # Try int first, then float
+                if '.' in value_str:
+                    return float(value_str)
+                else:
+                    return int(value_str)
+            except ValueError:
+                logger.warning(f"Invalid number value '{value_str}', using 0")
+                return 0
+        
+        elif param_type == 'bool':
+            # Accept: true/false, 1/0, yes/no, on/off (case-insensitive)
+            return value_str.lower() in {'true', '1', 'yes', 'on'}
+        
+        elif param_type == 'color':
+            # Auto-add # if missing
+            if value_str.startswith('#'):
+                return value_str
+            else:
+                return f'#{value_str}'
+        
+        else:  # text
+            return value_str
+    
+    def _replace_parameters(self, html: str, values: Dict[str, Any]) -> str:
+        """
+        Replace parameter placeholders with actual values
+        
+        Supports DSL syntax: {{param:type=default}}
+        - If value provided in values dict, use it
+        - Otherwise, use default value from placeholder
+        - If no default, use empty string
+        
+        Args:
+            html: HTML template content
+            values: Dictionary of parameter values
+        
+        Returns:
+            HTML with placeholders replaced
+        """
+        PARAM_PATTERN = r'\{\{([a-zA-Z_][a-zA-Z0-9_]*)(?::([a-z]+))?(?:=([^}]+))?\}\}'
+        
+        def replacer(match):
+            param_name = match.group(1)
+            param_type = match.group(2) or 'text'
+            default_value_str = match.group(3)
+            
+            # Check if value is provided
+            if param_name in values:
+                value = values[param_name]
+                # Convert bool to string for HTML
+                if isinstance(value, bool):
+                    return 'true' if value else 'false'
+                return str(value) if value is not None else ''
+            
+            # Use default value from placeholder if available
+            elif default_value_str:
+                return default_value_str
+            
+            # No value and no default
+            else:
+                return ''
+        
+        return re.sub(PARAM_PATTERN, replacer, html)
     
     def _find_chrome_executable(self) -> Optional[str]:
         """
@@ -248,11 +399,8 @@ class HTMLFrameGenerator:
         if ext:
             context.update(ext)
         
-        # Replace variables in HTML
-        html = self.template
-        for key, value in context.items():
-            placeholder = f"{{{{{key}}}}}"
-            html = html.replace(placeholder, str(value) if value is not None else "")
+        # Replace variables in HTML (supports DSL syntax: {{param:type=default}})
+        html = self._replace_parameters(self.template, context)
         
         # Use provided output path or auto-generate
         if output_path is None:

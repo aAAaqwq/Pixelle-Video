@@ -213,6 +213,10 @@ class FrameProcessor:
             ext["content_subtitle"] = content_metadata.subtitle or ""
             ext["content_genre"] = content_metadata.genre or ""
         
+        # Add custom template parameters
+        if config.template_params:
+            ext.update(config.template_params)
+        
         # Generate frame using HTML (size is auto-parsed from template path)
         generator = HTMLFrameGenerator(template_path)
         composed_path = await generator.generate_frame(

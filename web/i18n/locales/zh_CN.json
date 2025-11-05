@@ -100,6 +100,7 @@
     "template.preview_failed": "❌ 预览失败：{error}",
     "template.preview_image_help": "支持本地路径或 URL",
     "template.preview_caption": "模板预览：{template}",
+    "template.custom_parameters": "自定义参数",
     
     "video.title": "🎬 视频设置",
     "video.frames": "分镜数",
