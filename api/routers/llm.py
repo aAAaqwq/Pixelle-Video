@@ -8,7 +8,7 @@ from loguru import logger
 from api.dependencies import PixelleVideoDep
 from api.schemas.llm import LLMChatRequest, LLMChatResponse
 
-router = APIRouter(prefix="/llm", tags=["LLM"])
+router = APIRouter(prefix="/llm", tags=["Basic Services"])
 
 
 @router.post("/chat", response_model=LLMChatResponse)

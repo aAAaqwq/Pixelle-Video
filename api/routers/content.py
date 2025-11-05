@@ -16,6 +16,11 @@ from api.schemas.content import (
     TitleGenerateRequest,
     TitleGenerateResponse,
 )
+from pixelle_video.utils.content_generators import (
+    generate_narrations_from_topic,
+    generate_image_prompts,
+    generate_title,
+)
 
 router = APIRouter(prefix="/content", tags=["Content Generation"])
 
@@ -40,9 +45,10 @@ async def generate_narration(
     try:
         logger.info(f"Generating {request.n_scenes} narrations from text")
         
-        # Call narration generator service
-        narrations = await pixelle_video.narration_generator(
-            text=request.text,
+        # Call narration generator utility function
+        narrations = await generate_narrations_from_topic(
+            llm_service=pixelle_video.llm,
+            topic=request.text,
             n_scenes=request.n_scenes,
             min_words=request.min_words,
             max_words=request.max_words
@@ -76,8 +82,9 @@ async def generate_image_prompt(
     try:
         logger.info(f"Generating image prompts for {len(request.narrations)} narrations")
         
-        # Call image prompt generator service
-        image_prompts = await pixelle_video.image_prompt_generator(
+        # Call image prompt generator utility function
+        image_prompts = await generate_image_prompts(
+            llm_service=pixelle_video.llm,
             narrations=request.narrations,
             min_words=request.min_words,
             max_words=request.max_words
@@ -93,7 +100,7 @@ async def generate_image_prompt(
 
 
 @router.post("/title", response_model=TitleGenerateResponse)
-async def generate_title(
+async def generate_title_endpoint(
     request: TitleGenerateRequest,
     pixelle_video: PixelleVideoDep
 ):
@@ -110,9 +117,11 @@ async def generate_title(
     try:
         logger.info("Generating title from text")
         
-        # Call title generator service
-        title = await pixelle_video.title_generator(
-            text=request.text
+        # Call title generator utility function
+        title = await generate_title(
+            llm_service=pixelle_video.llm,
+            content=request.text,
+            strategy="llm"
         )
         
         return TitleGenerateResponse(

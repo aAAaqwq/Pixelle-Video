@@ -9,7 +9,7 @@ from api.dependencies import PixelleVideoDep
 from api.schemas.tts import TTSSynthesizeRequest, TTSSynthesizeResponse
 from pixelle_video.utils.tts_util import get_audio_duration
 
-router = APIRouter(prefix="/tts", tags=["TTS"])
+router = APIRouter(prefix="/tts", tags=["Basic Services"])
 
 
 @router.post("/synthesize", response_model=TTSSynthesizeResponse)
@@ -33,7 +33,7 @@ async def tts_synthesize(
         # Call TTS service
         audio_path = await pixelle_video.tts(
             text=request.text,
-            voice_id=request.voice_id
+            voice=request.voice_id
         )
         
         # Get audio duration
