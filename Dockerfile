@@ -38,6 +38,7 @@ COPY web ./web
 COPY bgm ./bgm
 COPY templates ./templates
 COPY workflows ./workflows
+COPY resources ./resources
 
 # Create output and data directories
 RUN mkdir -p /app/output /app/data
