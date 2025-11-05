@@ -51,26 +51,41 @@ async def generate_video_sync(
     try:
         logger.info(f"Sync video generation: {request_body.text[:50]}...")
         
+        # Build video generation parameters
+        video_params = {
+            "text": request_body.text,
+            "mode": request_body.mode,
+            "title": request_body.title,
+            "n_scenes": request_body.n_scenes,
+            "min_narration_words": request_body.min_narration_words,
+            "max_narration_words": request_body.max_narration_words,
+            "min_image_prompt_words": request_body.min_image_prompt_words,
+            "max_image_prompt_words": request_body.max_image_prompt_words,
+            "image_width": request_body.image_width,
+            "image_height": request_body.image_height,
+            "image_workflow": request_body.image_workflow,
+            "video_fps": request_body.video_fps,
+            "frame_template": request_body.frame_template,
+            "prompt_prefix": request_body.prompt_prefix,
+            "bgm_path": request_body.bgm_path,
+            "bgm_volume": request_body.bgm_volume,
+        }
+        
+        # Add TTS workflow if specified
+        if request_body.tts_workflow:
+            video_params["tts_workflow"] = request_body.tts_workflow
+        
+        # Add ref_audio if specified
+        if request_body.ref_audio:
+            video_params["ref_audio"] = request_body.ref_audio
+        
+        # Legacy voice_id support (deprecated)
+        if request_body.voice_id:
+            logger.warning("voice_id parameter is deprecated, please use tts_workflow instead")
+            video_params["voice_id"] = request_body.voice_id
+        
         # Call video generator service
-        result = await pixelle_video.generate_video(
-            text=request_body.text,
-            mode=request_body.mode,
-            title=request_body.title,
-            n_scenes=request_body.n_scenes,
-            voice_id=request_body.voice_id,
-            min_narration_words=request_body.min_narration_words,
-            max_narration_words=request_body.max_narration_words,
-            min_image_prompt_words=request_body.min_image_prompt_words,
-            max_image_prompt_words=request_body.max_image_prompt_words,
-            image_width=request_body.image_width,
-            image_height=request_body.image_height,
-            image_workflow=request_body.image_workflow,
-            video_fps=request_body.video_fps,
-            frame_template=request_body.frame_template,
-            prompt_prefix=request_body.prompt_prefix,
-            bgm_path=request_body.bgm_path,
-            bgm_volume=request_body.bgm_volume,
-        )
+        result = await pixelle_video.generate_video(**video_params)
         
         # Get file size
         file_size = os.path.getsize(result.video_path) if os.path.exists(result.video_path) else 0
@@ -124,27 +139,42 @@ async def generate_video_async(
         # Define async execution function
         async def execute_video_generation():
             """Execute video generation in background"""
-            result = await pixelle_video.generate_video(
-                text=request_body.text,
-                mode=request_body.mode,
-                title=request_body.title,
-                n_scenes=request_body.n_scenes,
-                voice_id=request_body.voice_id,
-                min_narration_words=request_body.min_narration_words,
-                max_narration_words=request_body.max_narration_words,
-                min_image_prompt_words=request_body.min_image_prompt_words,
-                max_image_prompt_words=request_body.max_image_prompt_words,
-                image_width=request_body.image_width,
-                image_height=request_body.image_height,
-                image_workflow=request_body.image_workflow,
-                video_fps=request_body.video_fps,
-                frame_template=request_body.frame_template,
-                prompt_prefix=request_body.prompt_prefix,
-                bgm_path=request_body.bgm_path,
-                bgm_volume=request_body.bgm_volume,
+            # Build video generation parameters
+            video_params = {
+                "text": request_body.text,
+                "mode": request_body.mode,
+                "title": request_body.title,
+                "n_scenes": request_body.n_scenes,
+                "min_narration_words": request_body.min_narration_words,
+                "max_narration_words": request_body.max_narration_words,
+                "min_image_prompt_words": request_body.min_image_prompt_words,
+                "max_image_prompt_words": request_body.max_image_prompt_words,
+                "image_width": request_body.image_width,
+                "image_height": request_body.image_height,
+                "image_workflow": request_body.image_workflow,
+                "video_fps": request_body.video_fps,
+                "frame_template": request_body.frame_template,
+                "prompt_prefix": request_body.prompt_prefix,
+                "bgm_path": request_body.bgm_path,
+                "bgm_volume": request_body.bgm_volume,
                 # Progress callback can be added here if needed
-                # progress_callback=lambda event: task_manager.update_progress(...)
-            )
+                # "progress_callback": lambda event: task_manager.update_progress(...)
+            }
+            
+            # Add TTS workflow if specified
+            if request_body.tts_workflow:
+                video_params["tts_workflow"] = request_body.tts_workflow
+            
+            # Add ref_audio if specified
+            if request_body.ref_audio:
+                video_params["ref_audio"] = request_body.ref_audio
+            
+            # Legacy voice_id support (deprecated)
+            if request_body.voice_id:
+                logger.warning("voice_id parameter is deprecated, please use tts_workflow instead")
+                video_params["voice_id"] = request_body.voice_id
+            
+            result = await pixelle_video.generate_video(**video_params)
             
             # Get file size
             file_size = os.path.getsize(result.video_path) if os.path.exists(result.video_path) else 0

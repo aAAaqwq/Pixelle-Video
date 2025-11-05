@@ -30,6 +30,8 @@ from api.routers import (
     video_router,
     tasks_router,
     files_router,
+    resources_router,
+    frame_router,
 )
 
 
@@ -107,6 +109,8 @@ app.include_router(content_router, prefix=api_config.api_prefix)
 app.include_router(video_router, prefix=api_config.api_prefix)
 app.include_router(tasks_router, prefix=api_config.api_prefix)
 app.include_router(files_router, prefix=api_config.api_prefix)
+app.include_router(resources_router, prefix=api_config.api_prefix)
+app.include_router(frame_router, prefix=api_config.api_prefix)
 
 
 @app.get("/")
@@ -124,6 +128,9 @@ async def root():
             "content": f"{api_config.api_prefix}/content",
             "video": f"{api_config.api_prefix}/video",
             "tasks": f"{api_config.api_prefix}/tasks",
+            "files": f"{api_config.api_prefix}/files",
+            "resources": f"{api_config.api_prefix}/resources",
+            "frame": f"{api_config.api_prefix}/frame",
         }
     }
 

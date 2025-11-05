@@ -10,6 +10,8 @@ from api.routers.content import router as content_router
 from api.routers.video import router as video_router
 from api.routers.tasks import router as tasks_router
 from api.routers.files import router as files_router
+from api.routers.resources import router as resources_router
+from api.routers.frame import router as frame_router
 
 __all__ = [
     "health_router",
@@ -20,5 +22,7 @@ __all__ = [
     "video_router",
     "tasks_router",
     "files_router",
+    "resources_router",
+    "frame_router",
 ]
 

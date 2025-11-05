@@ -23,7 +23,20 @@ class VideoGenerateRequest(BaseModel):
     
     # === Basic Config ===
     n_scenes: int = Field(5, ge=1, le=20, description="Number of scenes (generate mode only)")
-    voice_id: str = Field("[Chinese] zh-CN Yunjian", description="TTS voice ID")
+    
+    # === TTS Parameters ===
+    tts_workflow: Optional[str] = Field(
+        None, 
+        description="TTS workflow key (e.g., 'runninghub/tts_edge.json'). If not specified, uses default workflow from config."
+    )
+    ref_audio: Optional[str] = Field(
+        None, 
+        description="Reference audio path for voice cloning (optional)"
+    )
+    voice_id: Optional[str] = Field(
+        None, 
+        description="(Deprecated) TTS voice ID for legacy compatibility"
+    )
     
     # === LLM Parameters ===
     min_narration_words: int = Field(5, ge=1, le=100, description="Min narration words")
