@@ -47,9 +47,7 @@
 
 Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 
-<div align="center">
-<img src="resources/flow.png" alt="视频生成流程图" width="100%">
-</div>
+![视频生成流程图](resources/flow.png)
 
 从输入文本到最终视频输出，整个流程简洁清晰：**文案生成 → 配图规划 → 逐帧处理 → 视频合成**
 
