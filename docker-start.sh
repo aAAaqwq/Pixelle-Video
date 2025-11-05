@@ -7,15 +7,31 @@ echo "🐳 Pixelle-Video Docker Deployment"
 echo "=================================="
 echo ""
 
-# Check if config.yaml exists
+# Check if config.yaml exists as a directory (Docker mount issue)
+if [ -d config.yaml ]; then
+    echo "⚠️  config.yaml is a directory (Docker mount issue), removing it..."
+    rm -rf config.yaml
+fi
+
+# Check if config.yaml exists, if not, create from example
 if [ ! -f config.yaml ]; then
-    echo "❌ Error: config.yaml not found!"
-    echo ""
-    echo "Please create config.yaml before starting:"
-    echo "  1. Copy from config.example.yaml"
-    echo "  2. Fill in your API keys and ComfyUI URL"
-    echo ""
-    exit 1
+    echo "⚠️  config.yaml not found, creating from config.example.yaml..."
+    if [ -f config.example.yaml ]; then
+        cp config.example.yaml config.yaml
+        echo "✅ config.yaml created successfully!"
+        echo ""
+        echo "⚠️  IMPORTANT: Please edit config.yaml and fill in:"
+        echo "   - LLM API key and settings"
+        echo "   - ComfyUI URL (use host.docker.internal:8188 for local Mac/Windows)"
+        echo "   - RunningHub API key (optional, for cloud workflows)"
+        echo ""
+        echo "You can also configure these settings in the Web UI after starting."
+        echo ""
+    else
+        echo "❌ Error: config.example.yaml not found!"
+        echo ""
+        exit 1
+    fi
 fi
 
 # Check if docker-compose is available

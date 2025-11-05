@@ -11,8 +11,9 @@ services:
     ports:
       - "8000:8000"
     volumes:
-      # Mount config file (required)
-      - ./config.yaml:/app/config.yaml:ro
+      # Mount config file (required, read-write to allow saving from Web UI)
+      # IMPORTANT: Create config.yaml before first run: cp config.example.yaml config.yaml
+      - ./config.yaml:/app/config.yaml
       # Mount data directories for persistence
       # data/ contains: users/, bgm/, templates/, workflows/ (custom resources)
       - ./data:/app/data
@@ -46,8 +47,9 @@ services:
     ports:
       - "8501:8501"
     volumes:
-      # Mount config file (required)
-      - ./config.yaml:/app/config.yaml:ro
+      # Mount config file (required, read-write to allow saving from Web UI)
+      # IMPORTANT: Create config.yaml before first run: cp config.example.yaml config.yaml
+      - ./config.yaml:/app/config.yaml
       # Mount data directories for persistence
       # data/ contains: users/, bgm/, templates/, workflows/ (custom resources)
       - ./data:/app/data
