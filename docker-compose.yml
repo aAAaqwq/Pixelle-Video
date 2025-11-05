@@ -7,7 +7,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: pixelle-video-api
-    command: uv run python api/app.py --host 0.0.0.0 --port 8000
+    command: /root/.cargo/bin/uv run python api/app.py --host 0.0.0.0 --port 8000
     ports:
       - "8000:8000"
     volumes:
@@ -42,7 +42,7 @@ services:
       context: .
       dockerfile: Dockerfile
     container_name: pixelle-video-web
-    command: uv run streamlit run web/app.py --server.port 8501 --server.address 0.0.0.0
+    command: /root/.cargo/bin/uv run streamlit run web/app.py --server.port 8501 --server.address 0.0.0.0
     ports:
       - "8501:8501"
     volumes:

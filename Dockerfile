@@ -20,14 +20,16 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv package manager
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    export PATH="/root/.cargo/bin:$PATH" && \
+    uv --version
 ENV PATH="/root/.cargo/bin:$PATH"
 
 # Copy dependency files first for better layer caching
 COPY pyproject.toml uv.lock ./
 
 # Install Python dependencies using uv
-RUN uv sync --frozen --no-dev
+RUN /root/.cargo/bin/uv sync --frozen --no-dev
 
 # Copy application code
 COPY pixelle_video ./pixelle_video
@@ -50,5 +52,5 @@ ENV CHROME_BIN=/usr/bin/chromium
 EXPOSE 8000 8501
 
 # Default command (can be overridden in docker-compose)
-CMD ["uv", "run", "python", "api/app.py"]
+CMD ["/root/.cargo/bin/uv", "run", "python", "api/app.py"]
 
