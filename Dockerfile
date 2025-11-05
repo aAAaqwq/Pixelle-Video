@@ -24,14 +24,15 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     /root/.local/bin/uv --version
 ENV PATH="/root/.local/bin:$PATH"
 
-# Copy dependency files first for better layer caching
+# Copy dependency files and source code for building
+# Note: pixelle_video is needed for hatchling to build the package
 COPY pyproject.toml uv.lock README.md ./
+COPY pixelle_video ./pixelle_video
 
 # Install Python dependencies using uv
 RUN /root/.local/bin/uv sync --frozen --no-dev
 
-# Copy application code
-COPY pixelle_video ./pixelle_video
+# Copy rest of application code
 COPY api ./api
 COPY web ./web
 COPY bgm ./bgm
