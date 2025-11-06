@@ -3,8 +3,21 @@
 
 FROM python:3.11-slim
 
+# Build arguments for mirror configuration
+# USE_CN_MIRROR: whether to use China mirrors (true/false)
+# UV_INDEX_URL: Python package index URL (defaults to Aliyun when USE_CN_MIRROR=true)
+ARG USE_CN_MIRROR=false
+ARG UV_INDEX_URL=https://pypi.org/simple
+
 # Set working directory
 WORKDIR /app
+
+# Replace apt sources with China mirrors if needed
+# Debian 12 uses DEB822 format in /etc/apt/sources.list.d/debian.sources
+RUN if [ "$USE_CN_MIRROR" = "true" ]; then \
+    sed -i 's|deb.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources && \
+    sed -i 's|security.debian.org|mirrors.aliyun.com|g' /etc/apt/sources.list.d/debian.sources; \
+    fi
 
 # Install system dependencies
 # - curl: for health checks and downloads
@@ -29,8 +42,13 @@ ENV PATH="/root/.local/bin:$PATH"
 COPY pyproject.toml uv.lock README.md ./
 COPY pixelle_video ./pixelle_video
 
-# Install Python dependencies using uv
-RUN /root/.local/bin/uv sync --frozen --no-dev
+# Install Python dependencies using uv with configurable index URL
+# Auto-select Aliyun mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
+RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.org/simple" ]; then \
+        /root/.local/bin/uv sync --frozen --no-dev --index-url https://mirrors.aliyun.com/pypi/simple/; \
+    else \
+        /root/.local/bin/uv sync --frozen --no-dev --index-url $UV_INDEX_URL; \
+    fi
 
 # Copy rest of application code
 COPY api ./api
