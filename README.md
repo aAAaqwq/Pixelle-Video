@@ -1,10 +1,10 @@
 <h1 align="center">Pixelle-Video 🎬</h1>
 
 <p align="center">
-  <a href="https://github.com/PixelleLab/Pixelle-Video/stargazers"><img src="https://img.shields.io/github/stars/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="Stargazers"></a>
-  <a href="https://github.com/PixelleLab/Pixelle-Video/issues"><img src="https://img.shields.io/github/issues/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="Issues"></a>
-  <a href="https://github.com/PixelleLab/Pixelle-Video/network/members"><img src="https://img.shields.io/github/forks/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="Forks"></a>
-  <a href="https://github.com/PixelleLab/Pixelle-Video/blob/main/LICENSE"><img src="https://img.shields.io/github/license/PixelleLab/Pixelle-Video.svg?style=for-the-badge" alt="License"></a>
+  <a href="https://github.com/AIDC-AI/Pixelle-Video/stargazers"><img src="https://img.shields.io/github/stars/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="Stargazers"></a>
+  <a href="https://github.com/AIDC-AI/Pixelle-Video/issues"><img src="https://img.shields.io/github/issues/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="Issues"></a>
+  <a href="https://github.com/AIDC-AI/Pixelle-Video/network/members"><img src="https://img.shields.io/github/forks/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="Forks"></a>
+  <a href="https://github.com/AIDC-AI/Pixelle-Video/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="License"></a>
 </p>
 
 <h3 align="center">🚀 AI 视频创作工具 - 3 分钟生成一个短视频</h3>
@@ -97,7 +97,7 @@ sudo apt install ffmpeg
 ### 第一步：下载项目
 
 ```bash
-git clone https://github.com/PixelleLab/Pixelle-Video.git
+git clone https://github.com/AIDC-AI/Pixelle-Video.git
 cd Pixelle-Video
 ```
 
@@ -279,8 +279,8 @@ Pixelle-Video 的设计受到以下优秀开源项目的启发：
 
 ## 📢 反馈与支持
 
-- 🐛 **遇到问题**: 提交 [Issue](https://github.com/PixelleLab/Pixelle-Video/issues)
-- 💡 **功能建议**: 提交 [Feature Request](https://github.com/PixelleLab/Pixelle-Video/issues)
+- 🐛 **遇到问题**: 提交 [Issue](https://github.com/AIDC-AI/Pixelle-Video/issues)
+- 💡 **功能建议**: 提交 [Feature Request](https://github.com/AIDC-AI/Pixelle-Video/issues)
 - ⭐ **给个 Star**: 如果这个项目对你有帮助，欢迎给个 Star 支持一下！
 
 ---
@@ -293,5 +293,5 @@ Pixelle-Video 的设计受到以下优秀开源项目的启发：
 
 ## ⭐ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=PixelleLab/Pixelle-Video&type=Date)](https://star-history.com/#PixelleLab/Pixelle-Video&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=AIDC-AI/Pixelle-Video&type=Date)](https://star-history.com/#AIDC-AI/Pixelle-Video&Date)
 

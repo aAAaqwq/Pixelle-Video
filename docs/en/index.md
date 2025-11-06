@@ -4,9 +4,9 @@
 
 **AI Video Creator - Generate a short video in 3 minutes**
 
-[![Stars](https://img.shields.io/github/stars/PixelleLab/Pixelle-Video.svg?style=flat-square)](https://github.com/PixelleLab/Pixelle-Video/stargazers)
-[![Issues](https://img.shields.io/github/issues/PixelleLab/Pixelle-Video.svg?style=flat-square)](https://github.com/PixelleLab/Pixelle-Video/issues)
-[![License](https://img.shields.io/github/license/PixelleLab/Pixelle-Video.svg?style=flat-square)](https://github.com/PixelleLab/Pixelle-Video/blob/main/LICENSE)
+[![Stars](https://img.shields.io/github/stars/AIDC-AI/Pixelle-Video.svg?style=flat-square)](https://github.com/AIDC-AI/Pixelle-Video/stargazers)
+[![Issues](https://img.shields.io/github/issues/AIDC-AI/Pixelle-Video.svg?style=flat-square)](https://github.com/AIDC-AI/Pixelle-Video/issues)
+[![License](https://img.shields.io/github/license/AIDC-AI/Pixelle-Video.svg?style=flat-square)](https://github.com/AIDC-AI/Pixelle-Video/blob/main/LICENSE)
 
 </div>
 
@@ -85,13 +85,13 @@ Thanks to these projects for their open source spirit! 🙏
 
 ## 📢 Feedback & Support
 
-- 🐛 **Found a bug**: Submit an [Issue](https://github.com/PixelleLab/Pixelle-Video/issues)
-- 💡 **Feature request**: Submit a [Feature Request](https://github.com/PixelleLab/Pixelle-Video/issues)
+- 🐛 **Found a bug**: Submit an [Issue](https://github.com/AIDC-AI/Pixelle-Video/issues)
+- 💡 **Feature request**: Submit a [Feature Request](https://github.com/AIDC-AI/Pixelle-Video/issues)
 - ⭐ **Give us a Star**: If this project helps you, please give us a star!
 
 ---
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/PixelleLab/Pixelle-Video/blob/main/LICENSE) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/AIDC-AI/Pixelle-Video/blob/main/LICENSE) file for details.
 

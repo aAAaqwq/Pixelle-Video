@@ -24,7 +24,7 @@ This page will guide you through installing Pixelle-Video.
 ### Step 1: Clone the Repository
 
 ```bash
-git clone https://github.com/PixelleLab/Pixelle-Video.git
+git clone https://github.com/AIDC-AI/Pixelle-Video.git
 cd Pixelle-Video
 ```
 

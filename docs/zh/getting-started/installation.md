@@ -24,7 +24,7 @@
 ### 第一步：克隆项目
 
 ```bash
-git clone https://github.com/PixelleLab/Pixelle-Video.git
+git clone https://github.com/AIDC-AI/Pixelle-Video.git
 cd Pixelle-Video
 ```
 

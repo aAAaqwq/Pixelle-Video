@@ -1,13 +1,13 @@
 site_name: Pixelle-Video
 site_description: AI Video Creator - Generate a short video in 3 minutes
-site_author: PixelleLab
-site_url: https://pixellelab.github.io/Pixelle-Video/
+site_author: Pixelle.AI
+site_url: https://AIDC-AI.github.io/Pixelle-Video/
 
-repo_name: PixelleLab/Pixelle-Video
-repo_url: https://github.com/PixelleLab/Pixelle-Video
+repo_name: AIDC-AI/Pixelle-Video
+repo_url: https://github.com/AIDC-AI/Pixelle-Video
 edit_uri: edit/main/docs/
 
-copyright: Copyright &copy; 2025 PixelleLab
+copyright: Copyright &copy; 2025 Pixelle.AI
 
 theme:
   name: material
@@ -164,7 +164,7 @@ nav:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/PixelleLab/Pixelle-Video
+      link: https://github.com/AIDC-AI/Pixelle-Video
       name: GitHub Repository
 
 extra_css:
