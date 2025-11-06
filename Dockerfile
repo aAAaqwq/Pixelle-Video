@@ -33,9 +33,15 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/*
 
 # Install uv package manager
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-    /root/.local/bin/uv --version
+# For China: use pip to install uv from mirror (faster and more stable)
+# For International: use official installer script
+RUN if [ "$USE_CN_MIRROR" = "true" ]; then \
+        pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ uv; \
+    else \
+        curl -LsSf https://astral.sh/uv/install.sh | sh; \
+    fi
 ENV PATH="/root/.local/bin:$PATH"
+RUN uv --version
 
 # Copy dependency files and source code for building
 # Note: pixelle_video is needed for hatchling to build the package
@@ -45,9 +51,9 @@ COPY pixelle_video ./pixelle_video
 # Install Python dependencies using uv with configurable index URL
 # Auto-select Aliyun mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
 RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.org/simple" ]; then \
-        /root/.local/bin/uv sync --frozen --no-dev --index-url https://mirrors.aliyun.com/pypi/simple/; \
+        uv sync --frozen --no-dev --index-url https://mirrors.aliyun.com/pypi/simple/; \
     else \
-        /root/.local/bin/uv sync --frozen --no-dev --index-url $UV_INDEX_URL; \
+        uv sync --frozen --no-dev --index-url $UV_INDEX_URL; \
     fi
 
 # Copy rest of application code
@@ -71,5 +77,5 @@ ENV CHROME_BIN=/usr/bin/chromium
 EXPOSE 8000 8501
 
 # Default command (can be overridden in docker-compose)
-CMD ["/root/.local/bin/uv", "run", "python", "api/app.py"]
+CMD ["uv", "run", "python", "api/app.py"]
 
