@@ -124,18 +124,29 @@ class FrameProcessor:
         from pixelle_video.utils.os_util import get_task_frame_path
         output_path = get_task_frame_path(config.task_id, frame.index, "audio")
         
-        # Call TTS with specific output path and workflow
+        # Build TTS params based on inference mode
         tts_params = {
             "text": frame.narration,
-            "workflow": config.tts_workflow,
-            "voice": config.voice_id,
-            "speed": config.tts_speed,
+            "inference_mode": config.tts_inference_mode,
             "output_path": output_path,
         }
         
-        # Add ref_audio if provided
-        if config.ref_audio:
-            tts_params["ref_audio"] = config.ref_audio
+        if config.tts_inference_mode == "local":
+            # Local mode: pass voice and speed
+            if config.voice_id:
+                tts_params["voice"] = config.voice_id
+            if config.tts_speed is not None:
+                tts_params["speed"] = config.tts_speed
+        else:  # comfyui
+            # ComfyUI mode: pass workflow, voice, speed, and ref_audio
+            if config.tts_workflow:
+                tts_params["workflow"] = config.tts_workflow
+            if config.voice_id:
+                tts_params["voice"] = config.voice_id
+            if config.tts_speed is not None:
+                tts_params["speed"] = config.tts_speed
+            if config.ref_audio:
+                tts_params["ref_audio"] = config.ref_audio
         
         audio_path = await self.core.tts(**tts_params)
         

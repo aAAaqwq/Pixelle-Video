@@ -14,9 +14,28 @@ class LLMConfig(BaseModel):
     model: str = Field(default="", description="LLM Model Name")
 
 
+class TTSLocalConfig(BaseModel):
+    """Local TTS configuration (Edge TTS)"""
+    voice: str = Field(default="zh-CN-YunjianNeural", description="Edge TTS voice ID")
+    speed: float = Field(default=1.2, ge=0.5, le=2.0, description="Speech speed multiplier (0.5-2.0)")
+
+
+class TTSComfyUIConfig(BaseModel):
+    """ComfyUI TTS configuration"""
+    default_workflow: Optional[str] = Field(default=None, description="Default TTS workflow (optional)")
+
+
 class TTSSubConfig(BaseModel):
     """TTS-specific configuration (under comfyui.tts)"""
-    default_workflow: Optional[str] = Field(default=None, description="Default TTS workflow (optional)")
+    inference_mode: str = Field(default="local", description="TTS inference mode: 'local' or 'comfyui'")
+    local: TTSLocalConfig = Field(default_factory=TTSLocalConfig, description="Local TTS (Edge TTS) configuration")
+    comfyui: TTSComfyUIConfig = Field(default_factory=TTSComfyUIConfig, description="ComfyUI TTS configuration")
+    
+    # Backward compatibility: keep default_workflow at top level
+    @property
+    def default_workflow(self) -> Optional[str]:
+        """Get default workflow (for backward compatibility)"""
+        return self.comfyui.default_workflow
 
 
 class ImageSubConfig(BaseModel):

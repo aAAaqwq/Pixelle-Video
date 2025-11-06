@@ -24,10 +24,11 @@ class StoryboardConfig:
     video_fps: int = 30                        # Frame rate
     
     # Audio parameters
-    voice_id: str = "[Chinese] zh-CN Yunjian"     # Default voice
-    tts_workflow: Optional[str] = None         # TTS workflow filename (None = use default)
-    tts_speed: float = 1.2                     # TTS speed multiplier (1.0 = normal, >1.0 = faster)
-    ref_audio: Optional[str] = None            # Reference audio for voice cloning (only some workflows support this)
+    tts_inference_mode: str = "local"          # TTS inference mode: "local" or "comfyui"
+    voice_id: Optional[str] = None             # Voice ID (for local: Edge TTS voice ID; for comfyui: workflow-specific)
+    tts_workflow: Optional[str] = None         # TTS workflow filename (for ComfyUI mode, None = use default)
+    tts_speed: Optional[float] = None          # TTS speed multiplier (0.5-2.0, 1.0 = normal)
+    ref_audio: Optional[str] = None            # Reference audio for voice cloning (ComfyUI mode only)
     
     # Image parameters
     image_width: int = 1024

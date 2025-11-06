@@ -62,10 +62,17 @@ class StandardPipeline(BasePipeline):
         
         # === Basic Config ===
         n_scenes: int = 5,  # Only used in generate mode; ignored in fixed mode
-        voice_id: str = "[Chinese] zh-CN Yunjian",
-        tts_workflow: Optional[str] = None,
-        tts_speed: float = 1.2,
-        ref_audio: Optional[str] = None,  # Reference audio for voice cloning
+        
+        # === TTS Parameters ===
+        tts_inference_mode: Optional[str] = None,  # "local" or "comfyui"
+        tts_voice: Optional[str] = None,  # For local mode: Edge TTS voice ID
+        tts_speed: Optional[float] = None,  # Speed multiplier (0.5-2.0)
+        tts_workflow: Optional[str] = None,  # For ComfyUI mode: workflow path
+        ref_audio: Optional[str] = None,  # For ComfyUI mode: reference audio
+        
+        # Deprecated (kept for backward compatibility)
+        voice_id: Optional[str] = None,
+        
         output_path: Optional[str] = None,
         
         # === LLM Parameters ===
@@ -191,6 +198,29 @@ class StandardPipeline(BasePipeline):
             output_path = get_task_final_video_path(task_id)
             logger.info(f"   Will copy final video to: {user_specified_output}")
         
+        # Determine TTS inference mode and parameters
+        # Priority: explicit params > backward compatibility > config defaults
+        if tts_inference_mode is None:
+            # Check if user provided ComfyUI-specific params
+            if tts_workflow is not None or ref_audio is not None:
+                tts_inference_mode = "comfyui"
+            # Check if user provided old voice_id param (backward compatibility)
+            elif voice_id is not None:
+                tts_inference_mode = "comfyui"
+                if tts_voice is None:
+                    tts_voice = voice_id
+            else:
+                # Use config default
+                tts_config = self.core.config.get("comfyui", {}).get("tts", {})
+                tts_inference_mode = tts_config.get("inference_mode", "local")
+        
+        # Set voice_id based on mode for StoryboardConfig
+        final_voice_id = None
+        if tts_inference_mode == "local":
+            final_voice_id = tts_voice or voice_id
+        else:  # comfyui
+            final_voice_id = voice_id  # For ComfyUI, might be None
+        
         # Create storyboard config
         config = StoryboardConfig(
             task_id=task_id,
@@ -200,7 +230,8 @@ class StandardPipeline(BasePipeline):
             min_image_prompt_words=min_image_prompt_words,
             max_image_prompt_words=max_image_prompt_words,
             video_fps=video_fps,
-            voice_id=voice_id,
+            tts_inference_mode=tts_inference_mode,
+            voice_id=final_voice_id,
             tts_workflow=tts_workflow,
             tts_speed=tts_speed,
             ref_audio=ref_audio,

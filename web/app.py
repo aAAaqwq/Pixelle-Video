@@ -449,58 +449,146 @@ def main():
                 st.markdown(f"**{tr('help.how')}**")
                 st.markdown(tr("tts.how"))
             
-            # Get available TTS workflows
-            tts_workflows = pixelle_video.tts.list_workflows()
-            
-            # Build options for selectbox
-            tts_workflow_options = [wf["display_name"] for wf in tts_workflows]
-            tts_workflow_keys = [wf["key"] for wf in tts_workflows]
-            
-            # Default to saved workflow if exists
-            default_tts_index = 0
+            # Get TTS config
             comfyui_config = config_manager.get_comfyui_config()
-            saved_tts_workflow = comfyui_config["tts"]["default_workflow"]
-            if saved_tts_workflow and saved_tts_workflow in tts_workflow_keys:
-                default_tts_index = tts_workflow_keys.index(saved_tts_workflow)
+            tts_config = comfyui_config["tts"]
             
-            tts_workflow_display = st.selectbox(
-                "TTS Workflow",
-                tts_workflow_options if tts_workflow_options else ["No TTS workflows found"],
-                index=default_tts_index,
-                label_visibility="collapsed",
-                key="tts_workflow_select"
+            # Inference mode selection
+            tts_mode = st.radio(
+                tr("tts.inference_mode"),
+                ["local", "comfyui"],
+                horizontal=True,
+                format_func=lambda x: tr(f"tts.mode.{x}"),
+                index=0 if tts_config.get("inference_mode", "local") == "local" else 1,
+                key="tts_inference_mode"
             )
             
-            # Get the actual workflow key
-            if tts_workflow_options:
-                tts_selected_index = tts_workflow_options.index(tts_workflow_display)
-                tts_workflow_key = tts_workflow_keys[tts_selected_index]
+            # Show hint based on mode
+            if tts_mode == "local":
+                st.caption(tr("tts.mode.local_hint"))
             else:
-                tts_workflow_key = "selfhost/tts_edge.json"  # fallback
+                st.caption(tr("tts.mode.comfyui_hint"))
             
-            # Reference audio upload (optional, for voice cloning)
-            ref_audio_file = st.file_uploader(
-                tr("tts.ref_audio"),
-                type=["mp3", "wav", "flac", "m4a", "aac", "ogg"],
-                help=tr("tts.ref_audio_help"),
-                key="ref_audio_upload"
-            )
-            
-            # Save uploaded ref_audio to temp file if provided
-            ref_audio_path = None
-            if ref_audio_file is not None:
-                # Audio preview player (directly play uploaded file)
-                st.audio(ref_audio_file)
+            # ================================================================
+            # Local Mode UI
+            # ================================================================
+            if tts_mode == "local":
+                # Import voice configuration
+                from pixelle_video.tts_voices import EDGE_TTS_VOICES, get_voice_display_name
                 
-                # Save to temp directory
-                import tempfile
-                temp_dir = Path("temp")
-                temp_dir.mkdir(exist_ok=True)
-                ref_audio_path = temp_dir / f"ref_audio_{ref_audio_file.name}"
-                with open(ref_audio_path, "wb") as f:
-                    f.write(ref_audio_file.getbuffer())
+                # Get saved voice from config
+                local_config = tts_config.get("local", {})
+                saved_voice = local_config.get("voice", "zh-CN-YunjianNeural")
+                saved_speed = local_config.get("speed", 1.2)
+                
+                # Build voice options with i18n
+                voice_options = []
+                voice_ids = []
+                default_voice_index = 0
+                
+                for idx, voice_config in enumerate(EDGE_TTS_VOICES):
+                    voice_id = voice_config["id"]
+                    display_name = get_voice_display_name(voice_id, tr, get_language())
+                    voice_options.append(display_name)
+                    voice_ids.append(voice_id)
+                    
+                    # Set default index if matches saved voice
+                    if voice_id == saved_voice:
+                        default_voice_index = idx
+                
+                # Two-column layout: Voice | Speed
+                voice_col, speed_col = st.columns([1, 1])
+                
+                with voice_col:
+                    # Voice selector
+                    selected_voice_display = st.selectbox(
+                        tr("tts.voice_selector"),
+                        voice_options,
+                        index=default_voice_index,
+                        key="tts_local_voice"
+                    )
+                    
+                    # Get actual voice ID
+                    selected_voice_index = voice_options.index(selected_voice_display)
+                    selected_voice = voice_ids[selected_voice_index]
+                
+                with speed_col:
+                    # Speed slider
+                    tts_speed = st.slider(
+                        tr("tts.speed"),
+                        min_value=0.5,
+                        max_value=2.0,
+                        value=saved_speed,
+                        step=0.1,
+                        format="%.1fx",
+                        key="tts_local_speed"
+                    )
+                    st.caption(tr("tts.speed_label", speed=f"{tts_speed:.1f}"))
+                
+                # Variables for video generation
+                tts_workflow_key = None
+                ref_audio_path = None
             
-            # TTS preview expander (simplified, uses default voice and speed)
+            # ================================================================
+            # ComfyUI Mode UI
+            # ================================================================
+            else:  # comfyui mode
+                # Get available TTS workflows
+                tts_workflows = pixelle_video.tts.list_workflows()
+                
+                # Build options for selectbox
+                tts_workflow_options = [wf["display_name"] for wf in tts_workflows]
+                tts_workflow_keys = [wf["key"] for wf in tts_workflows]
+                
+                # Default to saved workflow if exists
+                default_tts_index = 0
+                saved_tts_workflow = tts_config.get("comfyui", {}).get("default_workflow")
+                if saved_tts_workflow and saved_tts_workflow in tts_workflow_keys:
+                    default_tts_index = tts_workflow_keys.index(saved_tts_workflow)
+                
+                tts_workflow_display = st.selectbox(
+                    "TTS Workflow",
+                    tts_workflow_options if tts_workflow_options else ["No TTS workflows found"],
+                    index=default_tts_index,
+                    label_visibility="collapsed",
+                    key="tts_workflow_select"
+                )
+                
+                # Get the actual workflow key
+                if tts_workflow_options:
+                    tts_selected_index = tts_workflow_options.index(tts_workflow_display)
+                    tts_workflow_key = tts_workflow_keys[tts_selected_index]
+                else:
+                    tts_workflow_key = "selfhost/tts_edge.json"  # fallback
+                
+                # Reference audio upload (optional, for voice cloning)
+                ref_audio_file = st.file_uploader(
+                    tr("tts.ref_audio"),
+                    type=["mp3", "wav", "flac", "m4a", "aac", "ogg"],
+                    help=tr("tts.ref_audio_help"),
+                    key="ref_audio_upload"
+                )
+                
+                # Save uploaded ref_audio to temp file if provided
+                ref_audio_path = None
+                if ref_audio_file is not None:
+                    # Audio preview player (directly play uploaded file)
+                    st.audio(ref_audio_file)
+                    
+                    # Save to temp directory
+                    temp_dir = Path("temp")
+                    temp_dir.mkdir(exist_ok=True)
+                    ref_audio_path = temp_dir / f"ref_audio_{ref_audio_file.name}"
+                    with open(ref_audio_path, "wb") as f:
+                        f.write(ref_audio_file.getbuffer())
+                
+                # Variables for video generation
+                selected_voice = None
+                tts_speed = None
+            
+            # ================================================================
+            # TTS Preview (works for both modes)
+            # ================================================================
             with st.expander(tr("tts.preview_title"), expanded=False):
                 # Preview text input
                 preview_text = st.text_input(
@@ -514,14 +602,19 @@ def main():
                 if st.button(tr("tts.preview_button"), key="preview_tts", use_container_width=True):
                     with st.spinner(tr("tts.previewing")):
                         try:
-                            # Generate preview audio using selected workflow (use default voice and speed)
-                            # Pass ref_audio if uploaded
+                            # Build TTS params based on mode
                             tts_params = {
                                 "text": preview_text,
-                                "workflow": tts_workflow_key
+                                "inference_mode": tts_mode
                             }
-                            if ref_audio_path:
-                                tts_params["ref_audio"] = str(ref_audio_path)
+                            
+                            if tts_mode == "local":
+                                tts_params["voice"] = selected_voice
+                                tts_params["speed"] = tts_speed
+                            else:  # comfyui
+                                tts_params["workflow"] = tts_workflow_key
+                                if ref_audio_path:
+                                    tts_params["ref_audio"] = str(ref_audio_path)
                             
                             audio_path = run_async(pixelle_video.tts(**tts_params))
                             
@@ -979,7 +1072,6 @@ def main():
                         "mode": mode,
                         "title": title if title else None,
                         "n_scenes": n_scenes,
-                        "tts_workflow": tts_workflow_key,
                         "image_workflow": workflow_key,
                         "image_width": int(image_width),
                         "image_height": int(image_height),
@@ -989,13 +1081,19 @@ def main():
                         "progress_callback": update_progress,
                     }
                     
+                    # Add TTS parameters based on mode
+                    video_params["tts_inference_mode"] = tts_mode
+                    if tts_mode == "local":
+                        video_params["tts_voice"] = selected_voice
+                        video_params["tts_speed"] = tts_speed
+                    else:  # comfyui
+                        video_params["tts_workflow"] = tts_workflow_key
+                        if ref_audio_path:
+                            video_params["ref_audio"] = str(ref_audio_path)
+                    
                     # Add custom template parameters if any
                     if custom_values_for_video:
                         video_params["template_params"] = custom_values_for_video
-                    
-                    # Add ref_audio if uploaded
-                    if ref_audio_path:
-                        video_params["ref_audio"] = str(ref_audio_path)
                     
                     result = run_async(pixelle_video.generate_video(**video_params))
                     

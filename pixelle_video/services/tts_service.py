@@ -1,13 +1,18 @@
 """
-TTS (Text-to-Speech) Service - ComfyUI Workflow-based implementation
+TTS (Text-to-Speech) Service - Supports both local and ComfyUI inference
 """
 
+import os
+import uuid
+from pathlib import Path
 from typing import Optional
 
 from comfykit import ComfyKit
 from loguru import logger
 
 from pixelle_video.services.comfy_base_service import ComfyBaseService
+from pixelle_video.utils.tts_util import edge_tts
+from pixelle_video.tts_voices import speed_to_rate
 
 
 class TTSService(ComfyBaseService):
@@ -52,22 +57,25 @@ class TTSService(ComfyBaseService):
         comfyui_url: Optional[str] = None,
         runninghub_api_key: Optional[str] = None,
         # TTS parameters
-        voice: str = "[Chinese] zh-CN Yunjian",
-        speed: float = 1.2,
+        voice: Optional[str] = None,
+        speed: Optional[float] = None,
+        # Inference mode override
+        inference_mode: Optional[str] = None,
         # Output path
         output_path: Optional[str] = None,
         **params
     ) -> str:
         """
-        Generate speech using ComfyUI workflow
+        Generate speech using local Edge TTS or ComfyUI workflow
         
         Args:
             text: Text to convert to speech
-            workflow: Workflow filename (default: from config)
+            workflow: Workflow filename (for ComfyUI mode, default: from config)
             comfyui_url: ComfyUI URL (optional, overrides config)
             runninghub_api_key: RunningHub API key (optional, overrides config)
-            voice: Voice ID (workflow-specific)
+            voice: Voice ID (for local mode: Edge TTS voice ID; for ComfyUI: workflow-specific)
             speed: Speech speed multiplier (1.0 = normal, >1.0 = faster, <1.0 = slower)
+            inference_mode: Override inference mode ("local" or "comfyui", default: from config)
             output_path: Custom output path (auto-generated if None)
             **params: Additional workflow parameters
         
@@ -75,49 +83,103 @@ class TTSService(ComfyBaseService):
             Generated audio file path
         
         Examples:
-            # Simplest: use default workflow
-            audio_path = await pixelle_video.tts(text="Hello, world!")
-            
-            # Use specific workflow
+            # Local inference (Edge TTS)
             audio_path = await pixelle_video.tts(
-                text="你好，世界！",
-                workflow="tts_edge.json"
-            )
-            
-            # With voice and speed
-            audio_path = await pixelle_video.tts(
-                text="Hello",
-                workflow="tts_edge.json",
-                voice="[Chinese] zh-CN Xiaoxiao",
+                text="Hello, world!",
+                inference_mode="local",
+                voice="zh-CN-YunjianNeural",
                 speed=1.2
             )
             
-            # With absolute path
+            # ComfyUI inference
             audio_path = await pixelle_video.tts(
-                text="Hello",
-                workflow="/path/to/custom_tts.json"
-            )
-            
-            # With custom ComfyUI server
-            audio_path = await pixelle_video.tts(
-                text="Hello",
-                comfyui_url="http://192.168.1.100:8188"
+                text="你好，世界！",
+                inference_mode="comfyui",
+                workflow="runninghub/tts_edge.json"
             )
         """
-        # 1. Resolve workflow (returns structured info)
-        workflow_info = self._resolve_workflow(workflow=workflow)
+        # Determine inference mode (param > config)
+        mode = inference_mode or self.config.get("inference_mode", "local")
         
-        # 2. Execute ComfyUI workflow
-        return await self._call_comfyui_workflow(
-            workflow_info=workflow_info,
-            text=text,
-            comfyui_url=comfyui_url,
-            runninghub_api_key=runninghub_api_key,
-            voice=voice,
-            speed=speed,
-            output_path=output_path,
-            **params
-        )
+        # Route to appropriate implementation
+        if mode == "local":
+            return await self._call_local_tts(
+                text=text,
+                voice=voice,
+                speed=speed,
+                output_path=output_path
+            )
+        else:  # comfyui
+            # 1. Resolve workflow (returns structured info)
+            workflow_info = self._resolve_workflow(workflow=workflow)
+            
+            # 2. Execute ComfyUI workflow
+            return await self._call_comfyui_workflow(
+                workflow_info=workflow_info,
+                text=text,
+                comfyui_url=comfyui_url,
+                runninghub_api_key=runninghub_api_key,
+                voice=voice,
+                speed=speed,
+                output_path=output_path,
+                **params
+            )
+    
+    async def _call_local_tts(
+        self,
+        text: str,
+        voice: Optional[str] = None,
+        speed: Optional[float] = None,
+        output_path: Optional[str] = None,
+    ) -> str:
+        """
+        Generate speech using local Edge TTS
+        
+        Args:
+            text: Text to convert to speech
+            voice: Edge TTS voice ID (default: from config)
+            speed: Speech speed multiplier (default: from config)
+            output_path: Custom output path (auto-generated if None)
+        
+        Returns:
+            Generated audio file path
+        """
+        # Get config defaults
+        local_config = self.config.get("local", {})
+        
+        # Determine voice and speed (param > config)
+        final_voice = voice or local_config.get("voice", "zh-CN-YunjianNeural")
+        final_speed = speed if speed is not None else local_config.get("speed", 1.2)
+        
+        # Convert speed to rate parameter
+        rate = speed_to_rate(final_speed)
+        
+        logger.info(f"🎙️  Using local Edge TTS: voice={final_voice}, speed={final_speed}x (rate={rate})")
+        
+        # Generate output path if not provided
+        if not output_path:
+            # Generate unique filename
+            unique_id = uuid.uuid4().hex
+            output_path = f"output/{unique_id}.mp3"
+            
+            # Ensure output directory exists
+            Path("output").mkdir(parents=True, exist_ok=True)
+        
+        # Call Edge TTS
+        try:
+            audio_bytes = await edge_tts(
+                text=text,
+                voice=final_voice,
+                rate=rate,
+                output_path=output_path
+            )
+            
+            logger.info(f"✅ Generated audio (local Edge TTS): {output_path}")
+            return output_path
+        
+        except Exception as e:
+            logger.error(f"Local TTS generation error: {e}")
+            raise
     
     async def _call_comfyui_workflow(
         self,
