@@ -49,8 +49,12 @@ COPY pyproject.toml uv.lock README.md ./
 COPY pixelle_video ./pixelle_video
 
 # Install Python dependencies using uv with configurable index URL
-# Auto-select Aliyun mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
+# Auto-select China mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
+# Set longer timeout and reduce concurrent downloads for stability
 RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.org/simple" ]; then \
+        export UV_HTTP_TIMEOUT=300 && \
+        export UV_CONCURRENT_DOWNLOADS=2 && \
+        uv sync --frozen --no-dev --index-url https://pypi.tuna.tsinghua.edu.cn/simple/ || \
         uv sync --frozen --no-dev --index-url https://mirrors.aliyun.com/pypi/simple/; \
     else \
         uv sync --frozen --no-dev --index-url $UV_INDEX_URL; \

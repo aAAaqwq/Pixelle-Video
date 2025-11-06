@@ -3,14 +3,14 @@ version: '3.8'
 # Build Arguments Configuration
 # You can override these by setting environment variables before running docker-compose
 #
-# Example for China environment (auto uses Aliyun mirrors):
+# Example for China environment (auto uses Tsinghua/Aliyun mirrors):
 #   USE_CN_MIRROR=true docker-compose up -d
 #
 # Example for international environment (default):
 #   docker-compose up -d
 #
 # Advanced: Use custom PyPI mirror:
-#   USE_CN_MIRROR=true UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple/ docker-compose up -d
+#   UV_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple/ docker-compose up -d
 
 services:
   # API Service - FastAPI backend
