@@ -53,6 +53,8 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 
 以下是使用 Pixelle-Video 生成的实际案例，展示了不同主题和风格的视频效果：
 
+### 📱 竖屏视频展示
+
 <table>
 <tr>
 <td width="33%">
@@ -86,6 +88,23 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 <h3>📚 知识科普类</h3>
 <video src="https://github.com/user-attachments/assets/8ac21768-41ce-4d41-acdd-e3dd3eb9725a" controls width="100%"></video>
 <p align="center"><b>养生知识</b></p>
+</td>
+</tr>
+</table>
+
+### 🖥️ 横屏视频展示
+
+<table>
+<tr>
+<td width="50%">
+<h3>💰 副业赚钱</h3>
+<video src="https://github.com/user-attachments/assets/c9209d4e-73a6-4b82-aaad-cf102248c9e2" controls width="100%"></video>
+<p align="center"><b>副业赚钱</b></p>
+</td>
+<td width="50%">
+<h3>🏛️ 资治通鉴启示录</h3>
+<video src="https://github.com/user-attachments/assets/a767c452-d5f1-4cff-bb34-b80fff0d4c3e" controls width="100%"></video>
+<p align="center"><b>资治通鉴启示录</b></p>
 </td>
 </tr>
 </table>

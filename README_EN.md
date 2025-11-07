@@ -53,6 +53,8 @@ Each step supports flexible customization, allowing you to choose different AI m
 
 Here are actual cases generated using Pixelle-Video, showcasing video effects with different themes and styles:
 
+### 📱 Portrait Video Showcase
+
 <table>
 <tr>
 <td width="33%">
@@ -86,6 +88,23 @@ Here are actual cases generated using Pixelle-Video, showcasing video effects wi
 <h3>📚 Health & Wellness</h3>
 <video src="https://github.com/user-attachments/assets/8ac21768-41ce-4d41-acdd-e3dd3eb9725a" controls width="100%"></video>
 <p align="center"><b>Health Knowledge</b></p>
+</td>
+</tr>
+</table>
+
+### 🖥️ Landscape Video Showcase
+
+<table>
+<tr>
+<td width="50%">
+<h3>💰 Side Hustle Money Making</h3>
+<video src="https://github.com/user-attachments/assets/c9209d4e-73a6-4b82-aaad-cf102248c9e2" controls width="100%"></video>
+<p align="center"><b>Side Hustle Money Making</b></p>
+</td>
+<td width="50%">
+<h3>🏛️ Insights from Zizhi Tongjian</h3>
+<video src="https://github.com/user-attachments/assets/a767c452-d5f1-4cff-bb34-b80fff0d4c3e" controls width="100%"></video>
+<p align="center"><b>Insights from Zizhi Tongjian</b></p>
 </td>
 </tr>
 </table>
