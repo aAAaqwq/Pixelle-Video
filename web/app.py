@@ -666,7 +666,7 @@ def main():
             }
             
             display_options = []
-            template_path_map = {}
+            template_paths_ordered = []  # Use ordered list instead of dict to avoid key conflicts
             default_index = 0
             current_index = 0
             
@@ -685,13 +685,14 @@ def main():
                 # Add group separator
                 separator = f"─── {orientation} {width}×{height} ───"
                 display_options.append(separator)
+                template_paths_ordered.append(None)  # Separator has no template path
                 current_index += 1
                 
                 # Add templates in this group
                 for t in templates:
                     display_name = f"  {t.display_info.name}"
                     display_options.append(display_name)
-                    template_path_map[display_name] = t.template_path
+                    template_paths_ordered.append(t.template_path)  # Add to ordered list
                     
                     # Set default to first "default.html" in portrait orientation
                     if default_index == 0 and "default.html" in t.display_info.name and t.display_info.orientation == 'portrait':
@@ -700,21 +701,32 @@ def main():
                     current_index += 1
             
             # Dropdown with grouped display
-            selected_display_name = st.selectbox(
+            # Create unique display strings by appending hidden unique identifier
+            # This ensures Streamlit doesn't confuse templates with same name in different groups
+            unique_display_options = []
+            for i, option in enumerate(display_options):
+                # Add zero-width space characters as unique identifier (invisible to users)
+                unique_option = option + ("\u200B" * i)  # \u200B is zero-width space
+                unique_display_options.append(unique_option)
+            
+            selected_unique_option = st.selectbox(
                 tr("template.select"),
-                display_options,
+                unique_display_options,
                 index=default_index,
                 label_visibility="collapsed",
                 help=tr("template.select_help")
             )
             
+            # Get index from selected unique option
+            selected_index = unique_display_options.index(selected_unique_option)
+            
             # Check if separator is selected (shouldn't happen, but handle it)
-            if selected_display_name.startswith("───"):
+            if display_options[selected_index].startswith("───"):
                 st.warning(tr("template.separator_selected"))
                 st.stop()
             
-            # Get full template path
-            frame_template = template_path_map.get(selected_display_name)
+            # Get full template path directly by index
+            frame_template = template_paths_ordered[selected_index]
             
             # Display video size from template
             from pixelle_video.utils.template_util import parse_template_size
