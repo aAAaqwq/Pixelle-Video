@@ -221,6 +221,12 @@ class StandardPipeline(BasePipeline):
         else:  # comfyui
             final_voice_id = voice_id  # For ComfyUI, might be None
         
+        # Determine frame template
+        # Priority: explicit param > config default > hardcoded default
+        if frame_template is None:
+            template_config = self.core.config.get("template", {})
+            frame_template = template_config.get("default_template", "1080x1920/default.html")
+        
         # Create storyboard config
         config = StoryboardConfig(
             task_id=task_id,
@@ -238,7 +244,7 @@ class StandardPipeline(BasePipeline):
             image_width=image_width,
             image_height=image_height,
             image_workflow=image_workflow,
-            frame_template=frame_template or "1080x1920/default.html",
+            frame_template=frame_template,
             template_params=template_params
         )
         

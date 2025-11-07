@@ -55,11 +55,20 @@ class ComfyUIConfig(BaseModel):
     image: ImageSubConfig = Field(default_factory=ImageSubConfig, description="Image-specific configuration")
 
 
+class TemplateConfig(BaseModel):
+    """Template configuration"""
+    default_template: str = Field(
+        default="1080x1920/default.html",
+        description="Default frame template path"
+    )
+
+
 class PixelleVideoConfig(BaseModel):
     """Pixelle-Video main configuration"""
     project_name: str = Field(default="Pixelle-Video", description="Project name")
     llm: LLMConfig = Field(default_factory=LLMConfig)
     comfyui: ComfyUIConfig = Field(default_factory=ComfyUIConfig)
+    template: TemplateConfig = Field(default_factory=TemplateConfig)
     
     def is_llm_configured(self) -> bool:
         """Check if LLM is properly configured"""

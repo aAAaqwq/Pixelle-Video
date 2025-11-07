@@ -83,7 +83,7 @@ class CustomPipeline(BasePipeline):
         image_width: int = 1024,
         image_height: int = 1024,
         
-        frame_template: str = "1080x1920/default.html",
+        frame_template: Optional[str] = None,
         video_fps: int = 30,
         output_path: Optional[str] = None,
         
@@ -132,6 +132,12 @@ class CustomPipeline(BasePipeline):
         else:
             user_specified_output = output_path
             output_path = get_task_final_video_path(task_id)
+        
+        # Determine frame template
+        # Priority: explicit param > config default > hardcoded default
+        if frame_template is None:
+            template_config = self.core.config.get("template", {})
+            frame_template = template_config.get("default_template", "1080x1920/default.html")
         
         # ========== Step 0.5: Check template requirements ==========
         # Detect if template requires {{image}} parameter

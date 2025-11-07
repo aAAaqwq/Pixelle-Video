@@ -670,6 +670,10 @@ def main():
             default_index = 0
             current_index = 0
             
+            # Get default template from config
+            template_config = pixelle_video.config.get("template", {})
+            config_default_template = template_config.get("default_template", "1080x1920/default.html")
+            
             for size, templates in grouped_templates.items():
                 if not templates:
                     continue
@@ -694,8 +698,10 @@ def main():
                     display_options.append(display_name)
                     template_paths_ordered.append(t.template_path)  # Add to ordered list
                     
-                    # Set default to first "default.html" in portrait orientation
-                    if default_index == 0 and "default.html" in t.display_info.name and t.display_info.orientation == 'portrait':
+                    # Set default based on config (priority: config > first default.html in portrait)
+                    if t.template_path == config_default_template:
+                        default_index = current_index
+                    elif default_index == 0 and "default.html" in t.display_info.name and t.display_info.orientation == 'portrait':
                         default_index = current_index
                     
                     current_index += 1

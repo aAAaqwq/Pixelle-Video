@@ -35,7 +35,26 @@ class ConfigManager:
     def _load(self) -> PixelleVideoConfig:
         """Load configuration from file"""
         data = load_config_dict(str(self.config_path))
-        return PixelleVideoConfig(**data)
+        config = PixelleVideoConfig(**data)
+        
+        # Validate template path exists
+        self._validate_template(config.template.default_template)
+        
+        return config
+    
+    def _validate_template(self, template_path: str):
+        """Validate that the configured template exists"""
+        from pixelle_video.utils.template_util import resolve_template_path
+        
+        try:
+            # Try to resolve the template path
+            resolved_path = resolve_template_path(template_path)
+            logger.debug(f"Template validation passed: {template_path} -> {resolved_path}")
+        except FileNotFoundError as e:
+            logger.warning(
+                f"Configured default template '{template_path}' not found. "
+                f"Will fall back to '1080x1920/default.html' if needed. Error: {e}"
+            )
     
     def reload(self):
         """Reload configuration from file"""

@@ -37,3 +37,15 @@ comfyui:
     
     # Image prompt prefix (optional)
     prompt_prefix: "Minimalist black-and-white matchstick figure style illustration, clean lines, simple sketch style"
+
+# ==================== Template Configuration ====================
+# Configure default template for video generation
+template:
+  # Default frame template to use when not explicitly specified
+  # Determines video aspect ratio and layout style
+  # Options: 
+  #   - 1080x1920 (vertical/portrait): default.html, modern.html, elegant.html, etc.
+  #   - 1080x1080 (square): minimal_framed.html, magazine_cover.html, etc.
+  #   - 1920x1080 (horizontal/landscape): film.html, full.html, etc.
+  # See templates/ directory for all available templates
+  default_template: "1080x1920/default.html"
