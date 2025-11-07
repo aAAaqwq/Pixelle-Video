@@ -11,6 +11,7 @@ Linux Environment Requirements:
     CentOS/RHEL: sudo yum install -y fontconfig liberation-fonts google-noto-cjk-fonts
 """
 
+from math import log
 import os
 import re
 import uuid
@@ -312,22 +313,22 @@ class HTMLFrameGenerator:
         if self.hti is None:
             # Configure Chrome flags for Linux headless environment
             custom_flags = [
-                '--no-sandbox',  # Bypass AppArmor/sandbox restrictions
-                '--disable-dev-shm-usage',  # Avoid shared memory issues
-                '--disable-gpu',  # Disable GPU acceleration
-                '--disable-software-rasterizer',  # Disable software rasterizer
-                '--disable-extensions',  # Disable extensions
-                '--disable-setuid-sandbox',  # Additional sandbox bypass
-                '--disable-dbus',  # Disable DBus to avoid permission errors
-                '--hide-scrollbars',  # Hide scrollbars for cleaner output
-                '--mute-audio',  # Mute audio
-                '--disable-background-networking',  # Disable background networking
-                '--disable-features=TranslateUI',  # Disable translate UI
-                '--disable-ipc-flooding-protection',  # Improve performance
-                '--no-first-run',  # Skip first run dialogs
-                '--no-default-browser-check',  # Skip default browser check
-                '--disable-backgrounding-occluded-windows',  # Improve performance
-                '--disable-renderer-backgrounding',  # Improve performance
+                # '--no-sandbox',  # Bypass AppArmor/sandbox restrictions
+                # '--disable-dev-shm-usage',  # Avoid shared memory issues
+                # '--disable-gpu',  # Disable GPU acceleration
+                # '--disable-software-rasterizer',  # Disable software rasterizer
+                # '--disable-extensions',  # Disable extensions
+                # '--disable-setuid-sandbox',  # Additional sandbox bypass
+                # '--disable-dbus',  # Disable DBus to avoid permission errors
+                # '--hide-scrollbars',  # Hide scrollbars for cleaner output
+                # '--mute-audio',  # Mute audio
+                # '--disable-background-networking',  # Disable background networking
+                # '--disable-features=TranslateUI',  # Disable translate UI
+                # '--disable-ipc-flooding-protection',  # Improve performance
+                # '--no-first-run',  # Skip first run dialogs
+                # '--no-default-browser-check',  # Skip default browser check
+                # '--disable-backgrounding-occluded-windows',  # Improve performance
+                # '--disable-renderer-backgrounding',  # Improve performance
             ]
             
             # Try to find non-snap browser
@@ -401,7 +402,7 @@ class HTMLFrameGenerator:
         
         # Replace variables in HTML (supports DSL syntax: {{param:type=default}})
         html = self._replace_parameters(self.template, context)
-        
+        logger.info(f"html--->{html}")
         # Use provided output path or auto-generate
         if output_path is None:
             # Fallback: auto-generate (for backward compatibility)
