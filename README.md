@@ -1,5 +1,7 @@
 <h1 align="center">Pixelle-Video 🎬</h1>
 
+<p align="center"><a href="README_EN.md">English</a> | <b>中文</b></p>
+
 <p align="center">
   <a href="https://github.com/AIDC-AI/Pixelle-Video/stargazers"><img src="https://img.shields.io/github/stars/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="Stargazers"></a>
   <a href="https://github.com/AIDC-AI/Pixelle-Video/issues"><img src="https://img.shields.io/github/issues/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="Issues"></a>
@@ -7,7 +9,7 @@
   <a href="https://github.com/AIDC-AI/Pixelle-Video/blob/main/LICENSE"><img src="https://img.shields.io/github/license/AIDC-AI/Pixelle-Video.svg?style=for-the-badge" alt="License"></a>
 </p>
 
-<h3 align="center">🚀 AI 视频创作工具 - 3 分钟生成一个短视频</h3>
+<h3 align="center">🚀 AI 全自动短视频引擎</h3>
 
 只需输入一个 **主题**，Pixelle-Video 就能自动完成：
 - ✍️ 撰写视频文案
@@ -23,7 +25,7 @@
 
 ## ✨ 功能亮点
 
-- ✅ **全自动生成** - 输入主题，3 分钟自动生成完整视频
+- ✅ **全自动生成** - 输入主题，自动生成完整视频
 - ✅ **AI 智能文案** - 根据主题智能创作解说词，无需自己写脚本
 - ✅ **AI 生成配图** - 每句话都配上精美的 AI 插图
 - ✅ **AI 生成语音** - 支持 Edge-TTS、Index-TTS 等众多主流 TTS 方案
@@ -236,7 +238,7 @@ uv run streamlit run web/app.py
 ### ❓ 常见问题
 
 **Q: 第一次使用需要多久？**  
-A: 生成一个 3 段视频大约需要 2-5 分钟，取决于你的网络和 AI 推理速度。
+A: 生成时长取决于视频分镜数量、网络状况和 AI 推理速度，通常几分钟内即可完成。
 
 **Q: 视频效果不满意怎么办？**  
 A: 可以尝试：
@@ -249,7 +251,7 @@ A: 可以尝试：
 A: **本项目完全支持免费运行！**
 
 - **完全免费方案**: LLM 使用 Ollama（本地运行）+ ComfyUI 本地部署 = 0 元
-- **推荐方案**: LLM 使用通义千问（生成一个 3 段视频约 0.01-0.05 元）+ ComfyUI 本地部署
+- **推荐方案**: LLM 使用通义千问（成本极低，性价比高）+ ComfyUI 本地部署
 - **云端方案**: LLM 使用 OpenAI + 图像使用 RunningHub（费用较高但无需本地环境）
 
 **选择建议**：本地有显卡建议完全免费方案，否则推荐使用通义千问（性价比高）
