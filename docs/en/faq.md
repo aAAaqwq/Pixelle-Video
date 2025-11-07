@@ -22,7 +22,16 @@ Yes, you can use traditional pip + venv approach.
 
 ### Q: Do I need to configure ComfyUI?
 
-Not necessarily. You can use RunningHub cloud service without local deployment.
+**Not necessarily** - it depends on your template choice:
+
+| Template Type | ComfyUI | Best For | Speed |
+|--------------|---------|----------|-------|
+| Text-only<br/>(e.g., `simple.html`) | ❌ Not needed | Quotes, announcements, reading prompts | ⚡⚡⚡ Very fast |
+| AI Images<br/>(e.g., `default.html`) | ✅ Required | Rich visual content | ⚡ Standard |
+
+**Tip**: Beginners can start with text-only templates for instant zero-barrier experience!
+
+**Alternative**: If you need AI images but don't want local ComfyUI, use RunningHub cloud service.
 
 ### Q: Which LLMs are supported?
 

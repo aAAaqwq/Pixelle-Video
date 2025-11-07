@@ -56,6 +56,9 @@ class FrameProcessor:
         
         frame_num = frame.index + 1
         
+        # Determine if this frame needs image generation
+        needs_image = frame.image_prompt is not None
+        
         try:
             # Step 1: Generate audio (TTS)
             if progress_callback:
@@ -69,23 +72,27 @@ class FrameProcessor:
                 ))
             await self._step_generate_audio(frame, config)
             
-            # Step 2: Generate image (ComfyKit)
-            if progress_callback:
-                progress_callback(ProgressEvent(
-                    event_type="frame_step",
-                    progress=0.25,
-                    frame_current=frame_num,
-                    frame_total=total_frames,
-                    step=2,
-                    action="image"
-                ))
-            await self._step_generate_image(frame, config)
+            # Step 2: Generate image (conditional)
+            if needs_image:
+                if progress_callback:
+                    progress_callback(ProgressEvent(
+                        event_type="frame_step",
+                        progress=0.25,
+                        frame_current=frame_num,
+                        frame_total=total_frames,
+                        step=2,
+                        action="image"
+                    ))
+                await self._step_generate_image(frame, config)
+            else:
+                frame.image_path = None
+                logger.debug(f"  2/4: Skipped image generation (not required by template)")
             
             # Step 3: Compose frame (add subtitle)
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
-                    progress=0.50,
+                    progress=0.50 if needs_image else 0.33,
                     frame_current=frame_num,
                     frame_total=total_frames,
                     step=3,
@@ -97,7 +104,7 @@ class FrameProcessor:
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
-                    progress=0.75,
+                    progress=0.75 if needs_image else 0.67,
                     frame_current=frame_num,
                     frame_total=total_frames,
                     step=4,

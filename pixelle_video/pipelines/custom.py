@@ -32,9 +32,23 @@ class CustomPipeline(BasePipeline):
     You can customize:
     - Content processing logic
     - Narration generation strategy
-    - Image prompt generation
+    - Image prompt generation (conditional based on template)
     - Frame composition
     - Video assembly
+    
+    KEY OPTIMIZATION: Conditional Image Generation
+    -----------------------------------------------
+    This pipeline supports automatic detection of template image requirements.
+    If your template doesn't use {{image}}, the entire image generation pipeline
+    can be skipped, providing:
+      ⚡ Faster generation (no image API calls)
+      💰 Lower cost (no LLM calls for image prompts)
+      🚀 Reduced dependencies (no ComfyUI needed for text-only videos)
+    
+    Usage patterns:
+      1. Text-only videos: Use templates/1080x1920/simple.html
+      2. AI-generated images: Use templates with {{image}} placeholder
+      3. Custom logic: Modify template or override the detection logic in your subclass
     
     Example usage:
         # 1. Create your own pipeline by copying this file
@@ -90,6 +104,11 @@ class CustomPipeline(BasePipeline):
         
         Returns:
             VideoGenerationResult
+        
+        Image Generation Logic:
+            - If template has {{image}} → automatically generates images
+            - If template has no {{image}} → skips image generation (faster, cheaper)
+            - To customize: Override the template_requires_image logic in your subclass
         """
         logger.info("Starting CustomPipeline")
         logger.info(f"Input text length: {len(text)} chars")
@@ -113,6 +132,22 @@ class CustomPipeline(BasePipeline):
         else:
             user_specified_output = output_path
             output_path = get_task_final_video_path(task_id)
+        
+        # ========== Step 0.5: Check template requirements ==========
+        # Detect if template requires {{image}} parameter
+        # This allows skipping the entire image generation pipeline for text-only templates
+        from pixelle_video.services.frame_html import HTMLFrameGenerator
+        from pixelle_video.utils.template_util import resolve_template_path
+        
+        template_path = resolve_template_path(frame_template)
+        generator = HTMLFrameGenerator(template_path)
+        template_requires_image = generator.requires_image()
+        
+        if template_requires_image:
+            logger.info(f"📸 Template requires image generation")
+        else:
+            logger.info(f"⚡ Template does not require images - skipping image generation pipeline")
+            logger.info(f"   💡 Benefits: Faster generation + Lower cost + No ComfyUI dependency")
         
         # ========== Step 1: Process content (CUSTOMIZE THIS) ==========
         self._report_progress(progress_callback, "processing_content", 0.10)
@@ -138,29 +173,37 @@ class CustomPipeline(BasePipeline):
         
         logger.info(f"Generated {len(narrations)} narrations")
         
-        # ========== Step 2: Generate image prompts (CUSTOMIZE THIS) ==========
+        # ========== Step 2: Generate image prompts (CONDITIONAL - CUSTOMIZE THIS) ==========
         self._report_progress(progress_callback, "generating_image_prompts", 0.25)
         
-        # Example: Generate image prompts using LLM
-        from pixelle_video.utils.content_generators import generate_image_prompts
-        
-        image_prompts = await generate_image_prompts(
-            self.llm,
-            narrations=narrations,
-            min_words=30,
-            max_words=60
-        )
-        
-        # Example: Apply custom prompt prefix
-        from pixelle_video.utils.prompt_helper import build_image_prompt
-        custom_prefix = "cinematic style, professional lighting"  # Customize this
-        
-        final_image_prompts = []
-        for base_prompt in image_prompts:
-            final_prompt = build_image_prompt(base_prompt, custom_prefix)
-            final_image_prompts.append(final_prompt)
-        
-        logger.info(f"Generated {len(final_image_prompts)} image prompts")
+        # IMPORTANT: Check if template actually needs images
+        # If your template doesn't use {{image}}, you can skip this entire step!
+        if template_requires_image:
+            # Template requires images - generate image prompts using LLM
+            from pixelle_video.utils.content_generators import generate_image_prompts
+            
+            image_prompts = await generate_image_prompts(
+                self.llm,
+                narrations=narrations,
+                min_words=30,
+                max_words=60
+            )
+            
+            # Example: Apply custom prompt prefix
+            from pixelle_video.utils.prompt_helper import build_image_prompt
+            custom_prefix = "cinematic style, professional lighting"  # Customize this
+            
+            final_image_prompts = []
+            for base_prompt in image_prompts:
+                final_prompt = build_image_prompt(base_prompt, custom_prefix)
+                final_image_prompts.append(final_prompt)
+            
+            logger.info(f"✅ Generated {len(final_image_prompts)} image prompts")
+        else:
+            # Template doesn't need images - skip image generation entirely
+            final_image_prompts = [None] * len(narrations)
+            logger.info(f"⚡ Skipped image prompt generation (template doesn't need images)")
+            logger.info(f"   💡 Savings: {len(narrations)} LLM calls + {len(narrations)} image generations")
         
         # ========== Step 3: Create storyboard ==========
         config = StoryboardConfig(
@@ -317,8 +360,8 @@ class CustomPipeline(BasePipeline):
 # ==================== Usage Examples ====================
 
 """
-Example 1: Register and use custom pipeline
-----------------------------------------
+Example 1: Text-only video (no AI image generation)
+---------------------------------------------------
 from pixelle_video import pixelle_video
 from pixelle_video.pipelines.custom import CustomPipeline
 
@@ -328,15 +371,27 @@ await pixelle_video.initialize()
 # Register custom pipeline
 pixelle_video.pipelines["my_custom"] = CustomPipeline(pixelle_video)
 
-# Use it
+# Use text-only template - no image generation!
 result = await pixelle_video.generate_video(
-    text="Your input content here",
+    text="Your content here",
     pipeline="my_custom",
-    custom_param_example="custom_value"
+    frame_template="1080x1920/simple.html"  # Template without {{image}}
 )
+# Benefits: ⚡ Fast, 💰 Cheap, 🚀 No ComfyUI needed
 
 
-Example 2: Create your own pipeline class
+Example 2: AI-generated image video
+---------------------------------------------------
+# Use template with {{image}} - automatic image generation
+result = await pixelle_video.generate_video(
+    text="Your content here",
+    pipeline="my_custom",
+    frame_template="1080x1920/default.html"  # Template with {{image}}
+)
+# Will automatically generate images via LLM + ComfyUI
+
+
+Example 3: Create your own pipeline class
 ----------------------------------------
 from pixelle_video.pipelines.custom import CustomPipeline
 
@@ -351,7 +406,7 @@ class MySpecialPipeline(CustomPipeline):
         return result
 
 
-Example 3: Inline custom pipeline
+Example 4: Inline custom pipeline
 ----------------------------------------
 from pixelle_video.pipelines.base import BasePipeline
 

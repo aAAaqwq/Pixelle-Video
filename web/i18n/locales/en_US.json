@@ -102,6 +102,9 @@
     "template.preview_caption": "Template Preview: {template}",
     "template.custom_parameters": "Custom Parameters",
     
+    "image.not_required": "Current template does not require image generation",
+    "image.not_required_hint": "The selected template is text-only and does not need images. Benefits: ⚡ Faster generation 💰 Lower cost",
+    
     "video.title": "🎬 Video Settings",
     "video.frames": "Scenes",
     "video.frames_help": "More scenes = longer video",

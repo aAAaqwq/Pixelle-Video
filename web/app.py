@@ -637,145 +637,6 @@ def main():
                             logger.exception(e)
         
         # ====================================================================
-        # Image Generation Section
-        # ====================================================================
-        with st.container(border=True):
-            st.markdown(f"**{tr('section.image')}**")
-            
-            # 1. ComfyUI Workflow selection
-            with st.expander(tr("help.feature_description"), expanded=False):
-                st.markdown(f"**{tr('help.what')}**")
-                st.markdown(tr("style.workflow_what"))
-                st.markdown(f"**{tr('help.how')}**")
-                st.markdown(tr("style.workflow_how"))
-                st.markdown(f"**{tr('help.note')}**")
-                st.markdown(tr("style.image_size_note"))
-            
-            # Get available workflows from pixelle_video (with source info)
-            workflows = pixelle_video.image.list_workflows()
-            
-            # Build options for selectbox
-            # Display: "image_flux.json - Runninghub"
-            # Value: "runninghub/image_flux.json"
-            workflow_options = [wf["display_name"] for wf in workflows]
-            workflow_keys = [wf["key"] for wf in workflows]
-            
-            # Default to first option (should be runninghub by sorting)
-            default_workflow_index = 0
-            
-            # If user has a saved preference in config, try to match it
-            comfyui_config = config_manager.get_comfyui_config()
-            saved_workflow = comfyui_config["image"]["default_workflow"]
-            if saved_workflow and saved_workflow in workflow_keys:
-                default_workflow_index = workflow_keys.index(saved_workflow)
-            
-            workflow_display = st.selectbox(
-                "Workflow",
-                workflow_options if workflow_options else ["No workflows found"],
-                index=default_workflow_index,
-                label_visibility="collapsed",
-                key="image_workflow_select"
-            )
-            
-            # Get the actual workflow key (e.g., "runninghub/image_flux.json")
-            if workflow_options:
-                workflow_selected_index = workflow_options.index(workflow_display)
-                workflow_key = workflow_keys[workflow_selected_index]
-            else:
-                workflow_key = "runninghub/image_flux.json"  # fallback
-            
-            
-            # 2. Image size input
-            col1, col2 = st.columns(2)
-            with col1:
-                image_width = st.number_input(
-                    tr('style.image_width'),
-                    min_value=128,
-                    value=1024,
-                    step=1,
-                    label_visibility="visible",
-                    help=tr('style.image_width_help')
-                )
-            with col2:
-                image_height = st.number_input(
-                    tr('style.image_height'),
-                    min_value=128,
-                    value=1024,
-                    step=1,
-                    label_visibility="visible",
-                    help=tr('style.image_height_help')
-                )
-            
-            # 3. Prompt prefix input
-            # Get current prompt_prefix from config
-            current_prefix = comfyui_config["image"]["prompt_prefix"]
-            
-            # Prompt prefix input (temporary, not saved to config)
-            prompt_prefix = st.text_area(
-                tr('style.prompt_prefix'),
-                value=current_prefix,
-                placeholder=tr("style.prompt_prefix_placeholder"),
-                height=80,
-                label_visibility="visible",
-                help=tr("style.prompt_prefix_help")
-            )
-            
-            # Style preview expander (similar to template preview)
-            with st.expander(tr("style.preview_title"), expanded=False):
-                # Test prompt input
-                test_prompt = st.text_input(
-                    tr("style.test_prompt"),
-                    value="a dog",
-                    help=tr("style.test_prompt_help"),
-                    key="style_test_prompt"
-                )
-                
-                # Preview button
-                if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
-                    with st.spinner(tr("style.previewing")):
-                        try:
-                            from pixelle_video.utils.prompt_helper import build_image_prompt
-                            
-                            # Build final prompt with prefix
-                            final_prompt = build_image_prompt(test_prompt, prompt_prefix)
-                            
-                            # Generate preview image (use user-specified size)
-                            preview_image_path = run_async(pixelle_video.image(
-                                prompt=final_prompt,
-                                workflow=workflow_key,
-                                width=int(image_width),
-                                height=int(image_height)
-                            ))
-                            
-                            # Display preview (support both URL and local path)
-                            if preview_image_path:
-                                st.success(tr("style.preview_success"))
-                                
-                                # Read and encode image
-                                if preview_image_path.startswith('http'):
-                                    # URL - use directly
-                                    img_html = f'<div class="preview-image"><img src="{preview_image_path}" alt="Style Preview"/></div>'
-                                else:
-                                    # Local file - encode as base64
-                                    with open(preview_image_path, 'rb') as f:
-                                        img_data = base64.b64encode(f.read()).decode()
-                                    img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
-                                
-                                st.markdown(img_html, unsafe_allow_html=True)
-                                
-                                # Show the final prompt used
-                                st.info(f"**{tr('style.final_prompt_label')}**\n{final_prompt}")
-                                
-                                # Show file path
-                                st.caption(f"📁 {preview_image_path}")
-                            else:
-                                st.error(tr("style.preview_failed_general"))
-                        except Exception as e:
-                            st.error(tr("style.preview_failed", error=str(e)))
-                            logger.exception(e)
-            
-        
-        # ====================================================================
         # Storyboard Template Section
         # ====================================================================
         with st.container(border=True):
@@ -865,6 +726,11 @@ def main():
             template_path_for_params = f"templates/{frame_template}"
             generator_for_params = HTMLFrameGenerator(template_path_for_params)
             custom_params_for_video = generator_for_params.parse_template_parameters()
+            
+            # Detect if template requires image generation
+            template_requires_image = generator_for_params.requires_image()
+            # Store in session state for Image Section to read
+            st.session_state['template_requires_image'] = template_requires_image
             
             custom_values_for_video = {}
             if custom_params_for_video:
@@ -1004,7 +870,163 @@ def main():
                         except Exception as e:
                             st.error(tr("template.preview_failed", error=str(e)))
                             logger.exception(e)
-    
+        
+        # ====================================================================
+        # Image Generation Section (conditional based on template)
+        # ====================================================================
+        # Check if current template requires image generation
+        if st.session_state.get('template_requires_image', True):
+            # Template requires images - show full Image Section
+            with st.container(border=True):
+                st.markdown(f"**{tr('section.image')}**")
+            
+                # 1. ComfyUI Workflow selection
+                with st.expander(tr("help.feature_description"), expanded=False):
+                    st.markdown(f"**{tr('help.what')}**")
+                    st.markdown(tr("style.workflow_what"))
+                    st.markdown(f"**{tr('help.how')}**")
+                    st.markdown(tr("style.workflow_how"))
+                    st.markdown(f"**{tr('help.note')}**")
+                    st.markdown(tr("style.image_size_note"))
+            
+                # Get available workflows from pixelle_video (with source info)
+                workflows = pixelle_video.image.list_workflows()
+            
+                # Build options for selectbox
+                # Display: "image_flux.json - Runninghub"
+                # Value: "runninghub/image_flux.json"
+                workflow_options = [wf["display_name"] for wf in workflows]
+                workflow_keys = [wf["key"] for wf in workflows]
+            
+                # Default to first option (should be runninghub by sorting)
+                default_workflow_index = 0
+            
+                # If user has a saved preference in config, try to match it
+                comfyui_config = config_manager.get_comfyui_config()
+                saved_workflow = comfyui_config["image"]["default_workflow"]
+                if saved_workflow and saved_workflow in workflow_keys:
+                    default_workflow_index = workflow_keys.index(saved_workflow)
+            
+                workflow_display = st.selectbox(
+                    "Workflow",
+                    workflow_options if workflow_options else ["No workflows found"],
+                    index=default_workflow_index,
+                    label_visibility="collapsed",
+                    key="image_workflow_select"
+                )
+            
+                # Get the actual workflow key (e.g., "runninghub/image_flux.json")
+                if workflow_options:
+                    workflow_selected_index = workflow_options.index(workflow_display)
+                    workflow_key = workflow_keys[workflow_selected_index]
+                else:
+                    workflow_key = "runninghub/image_flux.json"  # fallback
+            
+            
+                # 2. Image size input
+                col1, col2 = st.columns(2)
+                with col1:
+                    image_width = st.number_input(
+                        tr('style.image_width'),
+                        min_value=128,
+                        value=1024,
+                        step=1,
+                        label_visibility="visible",
+                        help=tr('style.image_width_help')
+                    )
+                with col2:
+                    image_height = st.number_input(
+                        tr('style.image_height'),
+                        min_value=128,
+                        value=1024,
+                        step=1,
+                        label_visibility="visible",
+                        help=tr('style.image_height_help')
+                    )
+            
+                # 3. Prompt prefix input
+                # Get current prompt_prefix from config
+                current_prefix = comfyui_config["image"]["prompt_prefix"]
+            
+                # Prompt prefix input (temporary, not saved to config)
+                prompt_prefix = st.text_area(
+                    tr('style.prompt_prefix'),
+                    value=current_prefix,
+                    placeholder=tr("style.prompt_prefix_placeholder"),
+                    height=80,
+                    label_visibility="visible",
+                    help=tr("style.prompt_prefix_help")
+                )
+            
+                # Style preview expander (similar to template preview)
+                with st.expander(tr("style.preview_title"), expanded=False):
+                    # Test prompt input
+                    test_prompt = st.text_input(
+                        tr("style.test_prompt"),
+                        value="a dog",
+                        help=tr("style.test_prompt_help"),
+                        key="style_test_prompt"
+                    )
+                
+                    # Preview button
+                    if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
+                        with st.spinner(tr("style.previewing")):
+                            try:
+                                from pixelle_video.utils.prompt_helper import build_image_prompt
+                            
+                                # Build final prompt with prefix
+                                final_prompt = build_image_prompt(test_prompt, prompt_prefix)
+                            
+                                # Generate preview image (use user-specified size)
+                                preview_image_path = run_async(pixelle_video.image(
+                                    prompt=final_prompt,
+                                    workflow=workflow_key,
+                                    width=int(image_width),
+                                    height=int(image_height)
+                                ))
+                            
+                                # Display preview (support both URL and local path)
+                                if preview_image_path:
+                                    st.success(tr("style.preview_success"))
+                                
+                                    # Read and encode image
+                                    if preview_image_path.startswith('http'):
+                                        # URL - use directly
+                                        img_html = f'<div class="preview-image"><img src="{preview_image_path}" alt="Style Preview"/></div>'
+                                    else:
+                                        # Local file - encode as base64
+                                        with open(preview_image_path, 'rb') as f:
+                                            img_data = base64.b64encode(f.read()).decode()
+                                        img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
+                                
+                                    st.markdown(img_html, unsafe_allow_html=True)
+                                
+                                    # Show the final prompt used
+                                    st.info(f"**{tr('style.final_prompt_label')}**\n{final_prompt}")
+                                
+                                    # Show file path
+                                    st.caption(f"📁 {preview_image_path}")
+                                else:
+                                    st.error(tr("style.preview_failed_general"))
+                            except Exception as e:
+                                st.error(tr("style.preview_failed", error=str(e)))
+                                logger.exception(e)
+            
+        
+        else:
+            # Template doesn't need images - show simplified message
+            with st.container(border=True):
+                st.markdown(f"**{tr('section.image')}**")
+                st.info("ℹ️ " + tr("image.not_required"))
+                st.caption(tr("image.not_required_hint"))
+                
+                # Set default values for later use
+                workflow_key = None
+                image_width = 1024
+                image_height = 1024
+                prompt_prefix = ""
+        
+
     # ========================================================================
     # Right Column: Generate Button + Progress + Video Preview
     # ========================================================================

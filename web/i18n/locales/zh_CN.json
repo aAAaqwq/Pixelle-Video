@@ -102,6 +102,9 @@
     "template.preview_caption": "模板预览：{template}",
     "template.custom_parameters": "自定义参数",
     
+    "image.not_required": "当前模板不需要插图生成",
+    "image.not_required_hint": "您选择的模板是纯文本模板，无需生成图片。这将：⚡ 加快生成速度 💰 降低生成成本",
+    
     "video.title": "🎬 视频设置",
     "video.frames": "分镜数",
     "video.frames_help": "更多分镜 = 更长视频",

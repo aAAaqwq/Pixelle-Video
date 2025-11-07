@@ -57,6 +57,22 @@ class HTMLFrameGenerator:
         self._check_linux_dependencies()
         logger.debug(f"Loaded HTML template: {template_path} (size: {self.width}x{self.height})")
     
+    def requires_image(self) -> bool:
+        """
+        Detect if template requires {{image}} parameter
+        
+        This method checks if the template uses the {{image}} variable.
+        If the template doesn't use images, the entire image generation
+        pipeline can be skipped, significantly improving:
+        - Generation speed (no image generation API calls)
+        - Cost efficiency (no LLM calls for image prompts)
+        - Dependency requirements (no ComfyUI needed)
+        
+        Returns:
+            True if template contains {{image}}, False otherwise
+        """
+        return '{{image}}' in self.template
+    
     def _check_linux_dependencies(self):
         """Check Linux system dependencies and warn if missing"""
         if os.name != 'posix':
@@ -403,7 +419,7 @@ class HTMLFrameGenerator:
         
         # Replace variables in HTML (supports DSL syntax: {{param:type=default}})
         html = self._replace_parameters(self.template, context)
-        logger.info(f"html--->{html}")
+        logger.debug(f"html--->{html}")
         # Use provided output path or auto-generate
         if output_path is None:
             # Fallback: auto-generate (for backward compatibility)
