@@ -313,22 +313,23 @@ class HTMLFrameGenerator:
         if self.hti is None:
             # Configure Chrome flags for Linux headless environment
             custom_flags = [
-                # '--no-sandbox',  # Bypass AppArmor/sandbox restrictions
-                # '--disable-dev-shm-usage',  # Avoid shared memory issues
-                # '--disable-gpu',  # Disable GPU acceleration
-                # '--disable-software-rasterizer',  # Disable software rasterizer
-                # '--disable-extensions',  # Disable extensions
-                # '--disable-setuid-sandbox',  # Additional sandbox bypass
-                # '--disable-dbus',  # Disable DBus to avoid permission errors
-                # '--hide-scrollbars',  # Hide scrollbars for cleaner output
-                # '--mute-audio',  # Mute audio
-                # '--disable-background-networking',  # Disable background networking
-                # '--disable-features=TranslateUI',  # Disable translate UI
-                # '--disable-ipc-flooding-protection',  # Improve performance
-                # '--no-first-run',  # Skip first run dialogs
-                # '--no-default-browser-check',  # Skip default browser check
-                # '--disable-backgrounding-occluded-windows',  # Improve performance
-                # '--disable-renderer-backgrounding',  # Improve performance
+                '--default-background-color=00000000',
+                '--no-sandbox',  # Bypass AppArmor/sandbox restrictions
+                '--disable-dev-shm-usage',  # Avoid shared memory issues
+                '--disable-gpu',  # Disable GPU acceleration
+                '--disable-software-rasterizer',  # Disable software rasterizer
+                '--disable-extensions',  # Disable extensions
+                '--disable-setuid-sandbox',  # Additional sandbox bypass
+                '--disable-dbus',  # Disable DBus to avoid permission errors
+                '--hide-scrollbars',  # Hide scrollbars for cleaner output
+                '--mute-audio',  # Mute audio
+                '--disable-background-networking',  # Disable background networking
+                '--disable-features=TranslateUI',  # Disable translate UI
+                '--disable-ipc-flooding-protection',  # Improve performance
+                '--no-first-run',  # Skip first run dialogs
+                '--no-default-browser-check',  # Skip default browser check
+                '--disable-backgrounding-occluded-windows',  # Improve performance
+                '--disable-renderer-backgrounding',  # Improve performance
             ]
             
             # Try to find non-snap browser
