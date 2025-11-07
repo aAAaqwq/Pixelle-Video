@@ -19,6 +19,9 @@
             color: #fff;
             position: relative;
             background: transparent; /* 移除黑色背景 */
+            background-image: url("{{image}}");
+            background-size: cover;
+            background-position: center;
         }
 
         /* 背景使用图片并做模糊处理，完全覆盖整个页面 */
@@ -32,53 +35,55 @@
             z-index: 0;
         }
 
+        .main {
+            width: 100%;
+            height: 1080px;
+        }
+
         .title {
         	position: absolute;
         	top: 160px;
             width: 100%;
             text-align: center;
-            font-size: 92px;
-            font-weight: 400;
+            font-size: 80px;
+            font-weight: 600;
             line-height: 1.2;
-            text-shadow: 0 6px 22px rgba(0,0,0,0.6);
+            text-shadow: 0 6px 22px rgba(0,0,0,0.6),
+                        -2px -2px 0 #000,
+                        2px -2px 0 #000,
+                        -2px 2px 0 #000,
+                        2px 2px 0 #000;
             /* 使用 Ma Shan Zheng 毛笔字体 */
             font-family: 'Ma Shan Zheng', 'PingFang SC', 'Source Han Sans', 'Microsoft YaHei', cursive;
-            -webkit-text-stroke: 1px #000;
             letter-spacing: 4px;
         }
 
         /* 底部字幕覆盖在图片底部 */
         .text {
         	position: absolute;
-        	bottom: 60px;
+        	bottom: 170px;
             width: 100%; /* 稍微调整以适应全宽图片 */
             padding: 0 60px;
             text-align: center;
             font-size: 54px;
-            font-weight: 900;
-            line-height: 1.2;
+            font-weight: 400;
+            /* line-height: 1.2; */
             color: #ffffff;
             font-family: 'ArtisticFont', 'Noto Serif SC', 'Noto Sans SC', 'PingFang SC', serif;
-            -webkit-text-stroke: 1px #000;
             letter-spacing: 1px;
-            text-shadow: 0 0 0 #000,
-                         -3px -3px 0 #000,
-                          3px -3px 0 #000,
-                         -3px  3px 0 #000,
-                          3px  3px 0 #000,
-                          0 10px 24px rgba(0,0,0,0.6);
-        }
-
-        @media (max-width: 1080px) {
-            .title { font-size: 80px; }
-            .text { font-size: 48px; }
+            text-shadow: 0 6px 22px rgba(0,0,0,0.6),
+                        -2px -2px 0 #000,
+                        2px -2px 0 #000,
+                        -2px 2px 0 #000,
+                        2px 2px 0 #000;
         }
     </style>
 </head>
 <body>
-    <div class="bg">
-    <div class="title">{{title}}</div>
-    <div class="text">{{text}}</div>
+    <!-- <div class="bg"></div> -->
+     <div class="main">
+        <div class="title">{{title}}</div>
+        <div class="text">{{text}}</div>
     </div>
 </body>
 </html>
