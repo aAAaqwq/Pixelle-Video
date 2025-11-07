@@ -253,6 +253,7 @@ uv run streamlit run web/app.py
 - 从下拉菜单选择模板，按尺寸分组显示（竖屏/横屏/方形）
 - 点击「预览模板」可以自定义参数测试效果
 - 如果懂 HTML，可以在 `templates/` 文件夹创建自己的模板
+- 🔗 [查看所有模板效果图](https://aidc-ai.github.io/Pixelle-Video/zh/user-guide/templates/#_3)
 
 ---
 

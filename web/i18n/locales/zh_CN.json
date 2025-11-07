@@ -74,6 +74,7 @@
     "template.selector": "模板选择",
     "template.select": "选择模板",
     "template.select_help": "选择模板和视频尺寸",
+    "template.preview_link": "查看所有模板效果图",
     "template.video_size_info": "最终视频尺寸：{width} × {height}",
     "template.separator_selected": "请选择具体的模板，而不是分组标题",
     "template.default": "默认",

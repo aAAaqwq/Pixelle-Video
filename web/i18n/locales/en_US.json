@@ -74,6 +74,7 @@
     "template.selector": "Template Selection",
     "template.select": "Select Template",
     "template.select_help": "Select template and video size",
+    "template.preview_link": "View All Template Previews",
     "template.video_size_info": "Final Video Size: {width} × {height}",
     "template.separator_selected": "Please select a specific template, not the group header",
     "template.default": "Default",

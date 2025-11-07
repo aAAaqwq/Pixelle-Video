@@ -253,6 +253,7 @@ Determines video layout and design.
 - Select template from dropdown menu, displayed grouped by dimension (portrait/landscape/square)
 - Click "Preview Template" to test effect with custom parameters
 - If you know HTML, you can create your own templates in the `templates/` folder
+- 🔗 [View All Template Previews](https://aidc-ai.github.io/Pixelle-Video/user-guide/templates/#built-in-template-preview)
 
 ---
 
