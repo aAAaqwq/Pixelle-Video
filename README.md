@@ -53,13 +53,46 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 
 以下是使用 Pixelle-Video 生成的实际案例，展示了不同主题和风格的视频效果：
 
-| 📚 知识科普类 | 💡 个人成长类 | 🤔 深度思考类 |
-|:---:|:---:|:---:|
-| <video src="docs/videos/养生.mp4" controls width="100%"></video><br>**养生知识** | <video src="docs/videos/如何提升自己.mp4" controls width="100%"></video><br>**如何提升自己** | <video src="docs/videos/如何理解反脆弱.mp4" controls width="100%"></video><br>**如何理解反脆弱** |
-| **🌅 情感类** | **📖 小说解说类** | **🏛️ 历史文化类** |
-| <video src="docs/videos/冬日暖阳.mp4" controls width="100%"></video><br>**冬日暖阳** | <video src="docs/videos/斗破苍穹.mp4" controls width="100%"></video><br>**斗破苍穹** | <video src="docs/videos/资治通鉴.mp4" controls width="100%"></video><br>**资治通鉴** |
+<table>
+<tr>
+<td width="33%">
+<h3>📚 知识科普类</h3>
+<video src="docs/videos/养生.mp4" controls width="100%"></video>
+<p align="center"><b>养生知识</b></p>
+</td>
+<td width="33%">
+<h3>💡 个人成长类</h3>
+<video src="docs/videos/如何提升自己.mp4" controls width="100%"></video>
+<p align="center"><b>如何提升自己</b></p>
+</td>
+<td width="33%">
+<h3>🤔 深度思考类</h3>
+<video src="docs/videos/如何理解反脆弱.mp4" controls width="100%"></video>
+<p align="center"><b>如何理解反脆弱</b></p>
+</td>
+</tr>
+<tr>
+<td width="33%">
+<h3>🌅 情感类</h3>
+<video src="docs/videos/冬日暖阳.mp4" controls width="100%"></video>
+<p align="center"><b>冬日暖阳</b></p>
+</td>
+<td width="33%">
+<h3>📖 小说解说类</h3>
+<video src="docs/videos/斗破苍穹.mp4" controls width="100%"></video>
+<p align="center"><b>斗破苍穹</b></p>
+</td>
+<td width="33%">
+<h3>🏛️ 历史文化类</h3>
+<video src="docs/videos/资治通鉴.mp4" controls width="100%"></video>
+<p align="center"><b>资治通鉴</b></p>
+</td>
+</tr>
+</table>
 
 > 💡 **提示**: 这些视频都是通过输入一个主题关键词，由 AI 全自动生成的，无需任何视频剪辑经验！
+
+---
 
 ## 🚀 快速开始
 
