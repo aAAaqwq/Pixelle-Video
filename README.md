@@ -51,9 +51,15 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 
 ## 🎬 视频示例
 
-> 待补充：这里可以添加一些生成的视频示例
+以下是使用 Pixelle-Video 生成的实际案例，展示了不同主题和风格的视频效果：
 
----
+| 📚 知识科普类 | 💡 个人成长类 | 🤔 深度思考类 |
+|:---:|:---:|:---:|
+| <video src="docs/videos/养生.mp4" controls width="100%"></video><br>**养生知识** | <video src="docs/videos/如何提升自己.mp4" controls width="100%"></video><br>**如何提升自己** | <video src="docs/videos/如何理解反脆弱.mp4" controls width="100%"></video><br>**如何理解反脆弱** |
+| **🌅 情感类** | **📖 小说解说类** | **🏛️ 历史文化类** |
+| <video src="docs/videos/冬日暖阳.mp4" controls width="100%"></video><br>**冬日暖阳** | <video src="docs/videos/斗破苍穹.mp4" controls width="100%"></video><br>**斗破苍穹** | <video src="docs/videos/资治通鉴.mp4" controls width="100%"></video><br>**资治通鉴** |
+
+> 💡 **提示**: 这些视频都是通过输入一个主题关键词，由 AI 全自动生成的，无需任何视频剪辑经验！
 
 ## 🚀 快速开始
 

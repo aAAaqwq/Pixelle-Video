@@ -50,7 +50,6 @@ config.yaml.bak
 
 # Test outputs
 test_outputs/
-*.mp4
 *.mp3
 *.wav
 *.bak
