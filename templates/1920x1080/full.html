@@ -77,6 +77,78 @@
                         -2px 2px 0 #000,
                         2px 2px 0 #000;
         }
+        /* Footer */
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 25px 20px 0 20px;
+            position: absolute;
+            bottom: 100px;
+            color: #fff;
+            text-shadow: -1px -1px 0 #000,
+                        1px -1px 0 #000,
+                        -1px 1px 0 #000,
+                        1px 1px 0 #000;
+        }
+        
+        .author {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            letter-spacing: 2px;
+        }
+        
+        .author-name {
+            font-size: 30px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .author-mark {
+            width: 8px;
+            height: 8px;
+            /* border-radius: 50%; */
+            /* background: rgba(149, 165, 166, 0.7); */
+        }
+        
+        .author-desc {
+            font-size: 22px;
+            /* color: #5d6d7e; */
+            line-height: 1.3;
+            font-weight: 400;
+        }
+        
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .logo-marks {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .logo-mark {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(149, 165, 166, 0.45);
+        }
+        
+        .logo-mark.active {
+            background: rgba(149, 165, 166, 0.75);
+        }
     </style>
 </head>
 <body>
@@ -84,6 +156,24 @@
      <div class="main">
         <div class="title">{{title}}</div>
         <div class="text">{{text}}</div>
+    </div>
+    <div class="footer">
+        <div class="author">
+            <div class="author-name">
+                <span class="author-mark"></span>
+                <div class="logo">{{author=@Pixelle.AI}}</div>
+            </div>
+            <div class="author-desc">{{describe=Open Source Omnimodal AI Creative Agent}}</div>
+        </div>
+        <div class="logo-section">
+            <div class="logo">{{brand=Pixelle-Video}}</div>
+            <div class="logo-marks">
+                <div class="logo-mark"></div>
+                <div class="logo-mark active"></div>
+                <div class="logo-mark"></div>
+                <div class="logo-mark"></div>
+            </div>
+        </div>
     </div>
 </body>
 </html>

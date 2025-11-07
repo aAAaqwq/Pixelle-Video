@@ -53,26 +53,94 @@
         /* 底部字幕覆盖在图片底部 */
         .text {
         	position: absolute;
-        	bottom: 160px;
+        	bottom: 300px;
             width: 100%; /* 稍微调整以适应全宽图片 */
             padding: 0 60px;
             text-align: center;
-            font-size: 54px;
+            font-size: 40px;
             font-weight: 400;
             line-height: 1.2;
             color: #ffffff;
             font-family: 'ArtisticFont', 'Noto Serif SC', 'Noto Sans SC', 'PingFang SC', serif;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
             text-shadow: 0 6px 22px rgba(0,0,0,0.6),
-                        -2px -2px 0 #000,
-                        2px -2px 0 #000,
-                        -2px 2px 0 #000,
-                        2px 2px 0 #000;
+                        -1px -1px 0 #000,
+                        1px -1px 0 #000,
+                        -1px 1px 0 #000,
+                        1px 1px 0 #000;
         }
 
-        @media (max-width: 1080px) {
-            .title { font-size: 80px; }
-            .text { font-size: 48px; }
+        /* Footer */
+        .footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+            padding: 25px 20px 0 20px;
+            position: absolute;
+            bottom: 100px;
+            color: #fff;
+            text-shadow: -1px -1px 0 #000,
+                        1px -1px 0 #000,
+                        -1px 1px 0 #000,
+                        1px 1px 0 #000;
+        }
+        
+        .author {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            letter-spacing: 2px;
+        }
+        
+        .author-name {
+            font-size: 30px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .author-mark {
+            width: 8px;
+            height: 8px;
+            /* border-radius: 50%; */
+            /* background: rgba(149, 165, 166, 0.7); */
+        }
+        
+        .author-desc {
+            font-size: 22px;
+            /* color: #5d6d7e; */
+            line-height: 1.3;
+            font-weight: 400;
+        }
+        
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        
+        .logo {
+            font-size: 24px;
+            font-weight: 500;
+        }
+        
+        .logo-marks {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .logo-mark {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: rgba(149, 165, 166, 0.45);
+        }
+        
+        .logo-mark.active {
+            background: rgba(149, 165, 166, 0.75);
         }
     </style>
 </head>
@@ -80,6 +148,24 @@
     <div class="bg">
     <div class="title">{{title}}</div>
     <div class="text">{{text}}</div>
+    </div>
+    <div class="footer">
+        <div class="author">
+            <div class="author-name">
+                <span class="author-mark"></span>
+                <div class="logo">{{author=@Pixelle.AI}}</div>
+            </div>
+            <div class="author-desc">{{describe=Open Source Omnimodal AI Creative Agent}}</div>
+        </div>
+        <div class="logo-section">
+            <div class="logo">{{brand=Pixelle-Video}}</div>
+            <div class="logo-marks">
+                <div class="logo-mark"></div>
+                <div class="logo-mark active"></div>
+                <div class="logo-mark"></div>
+                <div class="logo-mark"></div>
+            </div>
+        </div>
     </div>
 </body>
 </html>
