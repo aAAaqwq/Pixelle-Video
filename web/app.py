@@ -1072,6 +1072,10 @@ def main():
                 progress_bar = st.progress(0)
                 status_text = st.empty()
                 
+                # Record start time for generation
+                import time
+                start_time = time.time()
+                
                 try:
                     # Progress callback to update UI
                     def update_progress(event: ProgressEvent):
@@ -1137,6 +1141,9 @@ def main():
                     
                     result = run_async(pixelle_video.generate_video(**video_params))
                     
+                    # Calculate total generation time
+                    total_generation_time = time.time() - start_time
+                    
                     progress_bar.progress(100)
                     status_text.text(tr("status.success"))
                     
@@ -1154,7 +1161,7 @@ def main():
                     video_width, video_height = parse_template_size(template_path)
                     
                     info_text = (
-                        f"⏱️ {result.duration:.1f}s   "
+                        f"⏱️ {tr('info.generation_time')} {total_generation_time:.1f}s   "
                         f"📦 {file_size_mb:.2f}MB   "
                         f"🎬 {len(result.storyboard.frames)}{tr('info.scenes_unit')}   "
                         f"📐 {video_width}x{video_height}"

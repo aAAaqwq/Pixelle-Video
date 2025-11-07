@@ -160,6 +160,7 @@
     "info.resolution": "Resolution",
     "info.video_information": "📊 Video Information",
     "info.no_video_yet": "Video preview will appear here after generation",
+    "info.generation_time": "Generation Time",
     
     "settings.title": "⚙️ System Configuration (Required)",
     "settings.not_configured": "⚠️ Please complete system configuration before generating videos",

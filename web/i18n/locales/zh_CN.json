@@ -160,6 +160,7 @@
     "info.resolution": "分辨率",
     "info.video_information": "📊 视频信息",
     "info.no_video_yet": "生成视频后，预览将显示在这里",
+    "info.generation_time": "生成耗时",
     
     "settings.title": "⚙️ 系统配置（必需）",
     "settings.not_configured": "⚠️ 请先完成系统配置才能生成视频",
