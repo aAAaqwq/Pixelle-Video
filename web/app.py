@@ -16,10 +16,19 @@ Pixelle-Video Web UI
 A simple web interface for generating short videos from content.
 """
 
+import sys
+from pathlib import Path
+
+# Add project root to sys.path for module imports
+# This ensures imports work correctly in both development and packaged environments
+_script_dir = Path(__file__).resolve().parent
+_project_root = _script_dir.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import asyncio
 import base64
 import os
-from pathlib import Path
 
 import streamlit as st
 from loguru import logger
