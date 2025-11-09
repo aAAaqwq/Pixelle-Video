@@ -1,0 +1,78 @@
+# Windows Package Build Configuration
+
+# Package information
+package:
+  name: Pixelle-Video
+  version_source: pyproject.toml  # Read version from pyproject.toml
+  architecture: win64
+  
+# Python configuration
+python:
+  version: "3.11.9"
+  download_url: "https://www.python.org/ftp/python/3.11.9/python-3.11.9-embed-amd64.zip"
+  # Mirror for China users (optional)
+  mirror_url: "https://mirrors.huaweicloud.com/python/3.11.9/python-3.11.9-embed-amd64.zip"
+
+# FFmpeg configuration
+ffmpeg:
+  version: "6.1.1"
+  download_url: "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
+  # Alternative mirror
+  mirror_url: "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip"
+
+# Chrome/Chromium configuration (for html2image)
+chrome:
+  include: false  # Set to true to bundle Chrome portable
+  version: "120.0.6099.109"
+  download_url: ""  # Add portable Chrome download URL if needed
+  note: "Users can use system Chrome or install separately"
+
+# Build options
+build:
+  # Files/folders to exclude from project copy
+  exclude_patterns:
+    - ".git"
+    - ".github"
+    - "__pycache__"
+    - "*.pyc"
+    - ".pytest_cache"
+    - ".ruff_cache"
+    - "*.log"
+    - ".DS_Store"
+    - "output/*"  # Don't include output files
+    - "temp/*"
+    - "plans/*"  # Don't include planning docs
+    - "repositories/*"  # Don't include referenced repos
+    - "docs/*"  # Don't include docs in package
+    - "test_*.py"  # Don't include test files
+    - ".venv"
+    - "venv"
+    - "node_modules"
+    - "uv.lock"
+  
+  # Dependencies installation
+  use_uv: true  # Use uv for faster dependency installation
+  pre_install_deps: true  # Install deps during build (recommended for end users)
+  
+  # Output
+  output_dir: "dist/windows"
+  create_zip: true
+  zip_compression: "deflate"  # deflate, bzip2, lzma
+  
+  # Additional options
+  include_readme: true
+  include_license: true
+  create_empty_dirs:
+    - "data"
+    - "output"
+
+# Download cache
+cache:
+  enabled: true
+  cache_dir: "packaging/windows/.cache"
+  
+# Mirror settings (for China users)
+mirrors:
+  use_cn_mirror: false  # Set to true for faster downloads in China
+  pypi_mirror: "https://pypi.tuna.tsinghua.edu.cn/simple"
+
