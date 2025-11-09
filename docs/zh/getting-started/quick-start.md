@@ -6,6 +6,14 @@
 
 ## 启动 Web 界面
 
+### Windows 一键整合包用户
+
+如果你使用的是 Windows 一键整合包，只需：
+1. 双击运行 `start.bat`
+2. 浏览器会自动打开 `http://localhost:8501`
+
+### 从源码安装用户
+
 ```bash
 # 使用 uv 运行
 uv run streamlit run web/app.py

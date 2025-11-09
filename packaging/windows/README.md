@@ -39,7 +39,7 @@ The build process creates:
 
 ```
 dist/windows/
-├── Pixelle-Video-v0.1.0-win64/         # Build directory
+├── Pixelle-Video-v*-win64/             # Build directory (version number varies)
 │   ├── python/                         # Python embedded
 │   ├── tools/                          # FFmpeg, etc.
 │   ├── Pixelle-Video/                  # Project files
@@ -49,8 +49,8 @@ dist/windows/
 │   ├── start_api.bat                   # API launcher
 │   ├── start_web.bat                   # Web launcher
 │   └── README.txt                      # User guide
-├── Pixelle-Video-v0.1.0-win64.zip      # ZIP package
-└── Pixelle-Video-v0.1.0-win64.zip.sha256  # Checksum
+├── Pixelle-Video-v*-win64.zip          # ZIP package (version number varies)
+└── Pixelle-Video-v*-win64.zip.sha256   # Checksum (version number varies)
 ```
 
 ## Build Process
@@ -205,7 +205,7 @@ Users verify download:
 
 ```bash
 # Windows PowerShell
-Get-FileHash Pixelle-Video-v0.1.0-win64.zip -Algorithm SHA256
+Get-FileHash Pixelle-Video-v*-win64.zip -Algorithm SHA256
 ```
 
 Compare with `.sha256` file.

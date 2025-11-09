@@ -52,6 +52,8 @@
 想马上体验？只需三步：
 
 1. **[安装 Pixelle-Video](getting-started/installation.md)** - 下载并安装项目
+   - 🪟 **Windows 用户推荐**: 使用 [一键整合包](https://github.com/AIDC-AI/Pixelle-Video/releases/latest)，无需安装 Python 环境
+   - 💻 **macOS/Linux 用户**: 从源码安装，详见 [安装指南](getting-started/installation.md)
 2. **[配置服务](getting-started/configuration.md)** - 配置 LLM 和图像生成服务
 3. **[生成第一个视频](getting-started/quick-start.md)** - 开始创作你的第一个视频
 

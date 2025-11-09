@@ -115,18 +115,36 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 
 ## 🚀 快速开始
 
-### 前置环境依赖
+### 🪟 Windows 一键整合包（推荐 Windows 用户使用）
+
+**无需安装 Python、uv 或 ffmpeg，一键开箱即用！**
+
+👉 **[下载 Windows 一键整合包](https://github.com/AIDC-AI/Pixelle-Video/releases/latest)**
+
+1. 下载最新的 Windows 一键整合包并解压
+2. 双击运行 `start.bat` 启动 Web 界面
+3. 浏览器会自动打开 http://localhost:8501
+4. 在「⚙️ 系统配置」中配置 LLM API 和图像生成服务
+5. 开始生成视频！
+
+> 💡 **提示**: 整合包已包含所有依赖，无需手动安装任何环境。首次使用只需配置 API 密钥即可。
+
+---
+
+### 从源码安装（适合 macOS / Linux 用户或需要自定义的用户）
+
+#### 前置环境依赖
 
 在开始之前，需要先安装 Python 包管理器 `uv` 和视频处理工具 `ffmpeg`：
 
-#### 安装 uv
+##### 安装 uv
 
 请访问 uv 官方文档查看适合你系统的安装方法：  
 👉 **[uv 安装指南](https://docs.astral.sh/uv/getting-started/installation/)**
 
 安装完成后，在终端中运行 `uv --version` 验证安装成功。
 
-#### 安装 ffmpeg
+##### 安装 ffmpeg
 
 **macOS**
 ```bash
@@ -147,14 +165,14 @@ sudo apt install ffmpeg
 
 ---
 
-### 第一步：下载项目
+#### 第一步：下载项目
 
 ```bash
 git clone https://github.com/AIDC-AI/Pixelle-Video.git
 cd Pixelle-Video
 ```
 
-### 第二步：启动 Web 界面
+#### 第二步：启动 Web 界面
 
 ```bash
 # 使用 uv 运行（推荐，会自动安装依赖）
@@ -163,7 +181,7 @@ uv run streamlit run web/app.py
 
 浏览器会自动打开 http://localhost:8501
 
-### 第三步：在 Web 界面配置
+#### 第三步：在 Web 界面配置
 
 首次使用时，展开「⚙️ 系统配置」面板，填写：
 - **LLM 配置**: 选择 AI 模型（如通义千问、GPT 等）并填入 API Key

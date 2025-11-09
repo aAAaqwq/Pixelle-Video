@@ -19,7 +19,26 @@ This page will guide you through installing Pixelle-Video.
 
 ---
 
-## Installation Steps
+## 🪟 Windows All-in-One Package (Recommended for Windows Users)
+
+**No need to install Python, uv, or ffmpeg - ready to use out of the box!**
+
+### Download and Install
+
+1. Visit [GitHub Releases](https://github.com/AIDC-AI/Pixelle-Video/releases/latest) to download the latest version
+2. Download the latest Windows All-in-One Package and extract it to any directory
+3. Double-click `start.bat` to launch the Web interface
+4. Your browser will automatically open `http://localhost:8501`
+
+!!! success "Installation Complete!"
+    The package includes all dependencies, no need to manually install any environment. On first use, you only need to configure API keys in "⚙️ System Configuration" to get started.
+
+!!! tip "Next Steps"
+    After installation, check out the [Configuration Guide](configuration.md) to set up LLM and image generation services, then see [Quick Start](quick-start.md) to create your first video.
+
+---
+
+## Install from Source (For macOS / Linux Users or Users Who Need Customization)
 
 ### Step 1: Clone the Repository
 

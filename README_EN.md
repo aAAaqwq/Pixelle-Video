@@ -115,18 +115,36 @@ Here are actual cases generated using Pixelle-Video, showcasing video effects wi
 
 ## 🚀 Quick Start
 
-### Prerequisites
+### 🪟 Windows All-in-One Package (Recommended for Windows Users)
+
+**No need to install Python, uv, or ffmpeg - ready to use out of the box!**
+
+👉 **[Download Windows All-in-One Package](https://github.com/AIDC-AI/Pixelle-Video/releases/latest)**
+
+1. Download the latest Windows All-in-One Package and extract it
+2. Double-click `start.bat` to launch the Web interface
+3. Browser will automatically open http://localhost:8501
+4. Configure LLM API and image generation service in "⚙️ System Configuration"
+5. Start generating videos!
+
+> 💡 **Tip**: The package includes all dependencies, no need to manually install any environment. On first use, you only need to configure API keys.
+
+---
+
+### Install from Source (For macOS / Linux Users or Users Who Need Customization)
+
+#### Prerequisites
 
 Before starting, you need to install Python package manager `uv` and video processing tool `ffmpeg`:
 
-#### Install uv
+##### Install uv
 
 Please visit the uv official documentation to see the installation method for your system:  
 👉 **[uv Installation Guide](https://docs.astral.sh/uv/getting-started/installation/)**
 
 After installation, run `uv --version` in the terminal to verify successful installation.
 
-#### Install ffmpeg
+##### Install ffmpeg
 
 **macOS**
 ```bash
@@ -147,14 +165,14 @@ After installation, run `ffmpeg -version` in the terminal to verify successful i
 
 ---
 
-### Step 1: Clone Project
+#### Step 1: Clone Project
 
 ```bash
 git clone https://github.com/AIDC-AI/Pixelle-Video.git
 cd Pixelle-Video
 ```
 
-### Step 2: Launch Web Interface
+#### Step 2: Launch Web Interface
 
 ```bash
 # Run with uv (recommended, will automatically install dependencies)
@@ -163,7 +181,7 @@ uv run streamlit run web/app.py
 
 Browser will automatically open http://localhost:8501
 
-### Step 3: Configure in Web Interface
+#### Step 3: Configure in Web Interface
 
 On first use, expand the "⚙️ System Configuration" panel and fill in:
 - **LLM Configuration**: Select AI model (such as Qwen, GPT, etc.) and enter API Key

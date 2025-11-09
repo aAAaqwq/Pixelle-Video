@@ -6,6 +6,14 @@ Already installed and configured? Let's create your first video!
 
 ## Start the Web Interface
 
+### Windows All-in-One Package Users
+
+If you're using the Windows All-in-One Package, simply:
+1. Double-click `start.bat`
+2. Your browser will automatically open `http://localhost:8501`
+
+### Install from Source Users
+
 ```bash
 # Using uv
 uv run streamlit run web/app.py

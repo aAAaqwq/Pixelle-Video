@@ -52,6 +52,8 @@ Simply input a **topic**, and Pixelle-Video will automatically:
 Ready to get started? Just three steps:
 
 1. **[Install Pixelle-Video](getting-started/installation.md)** - Download and install the project
+   - 🪟 **Windows Users (Recommended)**: Use the [All-in-One Package](https://github.com/AIDC-AI/Pixelle-Video/releases/latest), no Python installation required
+   - 💻 **macOS/Linux Users**: Install from source, see [Installation Guide](getting-started/installation.md)
 2. **[Configure Services](getting-started/configuration.md)** - Set up LLM and image generation services
 3. **[Create Your First Video](getting-started/quick-start.md)** - Start creating your first video
 
