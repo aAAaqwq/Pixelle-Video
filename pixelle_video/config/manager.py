@@ -147,8 +147,7 @@ class ConfigManager:
         updates = {}
         if comfyui_url is not None:
             updates["comfyui_url"] = comfyui_url
-        if runninghub_api_key is not None:
-            updates["runninghub_api_key"] = runninghub_api_key
+        updates["runninghub_api_key"] = runninghub_api_key
         
         if updates:
             self.update({"comfyui": updates})

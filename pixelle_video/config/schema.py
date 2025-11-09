@@ -62,7 +62,7 @@ class ImageSubConfig(BaseModel):
 class ComfyUIConfig(BaseModel):
     """ComfyUI configuration (includes global settings and service-specific configs)"""
     comfyui_url: str = Field(default="http://127.0.0.1:8188", description="ComfyUI Server URL")
-    runninghub_api_key: str = Field(default="", description="RunningHub API Key (optional)")
+    runninghub_api_key: Optional[str] = Field(default=None, description="RunningHub API Key (optional)")
     tts: TTSSubConfig = Field(default_factory=TTSSubConfig, description="TTS-specific configuration")
     image: ImageSubConfig = Field(default_factory=ImageSubConfig, description="Image-specific configuration")
 
