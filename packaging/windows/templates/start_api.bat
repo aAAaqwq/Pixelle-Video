@@ -18,6 +18,9 @@ cd /d "%PROJECT_ROOT%"
 :: Set PYTHONPATH to project root for module imports
 set "PYTHONPATH=%PROJECT_ROOT%"
 
+:: Set PIXELLE_VIDEO_ROOT environment variable for reliable path resolution
+set "PIXELLE_VIDEO_ROOT=%PROJECT_ROOT%"
+
 :: Start API Server
 echo [Starting] Launching Pixelle-Video API Server...
 echo API will be available at: http://localhost:8000

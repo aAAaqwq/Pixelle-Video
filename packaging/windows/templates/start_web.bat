@@ -18,6 +18,9 @@ cd /d "%PROJECT_ROOT%"
 :: Set PYTHONPATH to project root for module imports
 set "PYTHONPATH=%PROJECT_ROOT%"
 
+:: Set PIXELLE_VIDEO_ROOT environment variable for reliable path resolution
+set "PIXELLE_VIDEO_ROOT=%PROJECT_ROOT%"
+
 :: Start Web UI (Standalone mode)
 echo [Starting] Launching Pixelle-Video Web UI (Standalone)...
 echo Browser will open at: http://localhost:8501
