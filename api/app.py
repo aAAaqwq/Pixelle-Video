@@ -22,6 +22,16 @@ Or with custom settings:
     uv run python api/app.py --host 0.0.0.0 --port 8080 --reload
 """
 
+import sys
+from pathlib import Path
+
+# Add project root to sys.path for module imports
+# This ensures imports work correctly in both development and packaged environments
+_script_dir = Path(__file__).resolve().parent
+_project_root = _script_dir.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 import argparse
 from contextlib import asynccontextmanager
 from fastapi import FastAPI

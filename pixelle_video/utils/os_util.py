@@ -26,11 +26,21 @@ from typing import Optional, Tuple, Literal
 
 def get_pixelle_video_root_path() -> str:
     """
-    Get Pixelle-Video root path - current working directory
+    Get Pixelle-Video root path
+    
+    Uses PIXELLE_VIDEO_ROOT environment variable to determine project root.
+    This ensures reliable path resolution in both development and packaged environments.
     
     Returns:
-        Current working directory as string
+        Project root path as string
     """
+    # Check environment variable (required for reliable operation)
+    env_root = os.environ.get("PIXELLE_VIDEO_ROOT")
+    if env_root and Path(env_root).exists():
+        return str(Path(env_root).resolve())
+    
+    # Fallback to current working directory if environment variable not set
+    # (for development environments where env var might not be set)
     return str(Path.cwd())
 
 
