@@ -476,8 +476,9 @@ class WindowsPackageBuilder:
             path_str = str(path.relative_to(self.project_root))
             for pattern in exclude_patterns:
                 if pattern.endswith('/*'):
-                    # Directory content exclusion
-                    if path_str.startswith(pattern[:-2]):
+                    # Directory content exclusion - must match exact directory name or start with "dirname/"
+                    dir_name = pattern[:-2]
+                    if path_str == dir_name or path_str.startswith(f"{dir_name}/"):
                         return True
                 elif pattern.endswith('*'):
                     # Wildcard pattern
