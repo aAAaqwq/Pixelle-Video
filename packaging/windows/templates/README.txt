@@ -90,7 +90,7 @@ Solution: Re-extract the package completely, don't move files
 ========================================
 
 GitHub: https://github.com/AIDC-AI/Pixelle-Video
-Documentation: https://pixelle.ai/docs
+Documentation: https://aidc-ai.github.io/Pixelle-Video
 Issues: https://github.com/AIDC-AI/Pixelle-Video/issues
 
 ========================================
