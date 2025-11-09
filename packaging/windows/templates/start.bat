@@ -23,7 +23,7 @@ set "PIXELLE_VIDEO_ROOT=%PROJECT_ROOT%"
 
 :: Start Web UI
 echo [Starting] Launching Pixelle-Video Web UI...
-echo Browser will open at: http://localhost:8501
+echo Browser will open automatically.
 echo.
 echo Note: Configure API keys and settings in the Web UI.
 echo Press Ctrl+C to stop the server

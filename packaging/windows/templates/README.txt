@@ -12,18 +12,11 @@ Build Date: {BUILD_DATE}
 ========================================
 
 1. Double-click "start.bat" to launch the Web UI
-2. Configure your API keys in the Web UI (Settings section)
-3. Open your browser at: http://localhost:8501
+2. Browser will open automatically
+3. Configure your API keys in the Web UI (Settings section)
 
-========================================
-  Available Launchers
-========================================
-
-start.bat         - Launch Web UI (Default)
-start_api.bat     - Launch API Server only (Port 8000)
-start_web.bat     - Launch Web UI only (Port 8501)
-
-For most users, just use "start.bat"
+That's it! Just one click to start.
+You can launch multiple instances - each will use a different port automatically.
 
 ========================================
   First-Time Setup
@@ -87,7 +80,7 @@ Problem: "Failed to start"
 Solution: Check if Python and dependencies are installed correctly
 
 Problem: "Port already in use"
-Solution: Close other applications using port 8501 or 8000
+Solution: Streamlit automatically uses the next available port. You can run multiple instances simultaneously.
 
 Problem: "Module not found"
 Solution: Re-extract the package completely, don't move files
