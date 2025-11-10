@@ -771,7 +771,9 @@ def main():
             
             # Custom template parameters (for video generation)
             from pixelle_video.services.frame_html import HTMLFrameGenerator
-            template_path_for_params = f"templates/{frame_template}"
+            # Resolve template path to support both data/templates/ and templates/
+            from pixelle_video.utils.template_util import resolve_template_path
+            template_path_for_params = resolve_template_path(frame_template)
             generator_for_params = HTMLFrameGenerator(template_path_for_params)
             custom_params_for_video = generator_for_params.parse_template_parameters()
             
@@ -880,8 +882,8 @@ def main():
                     )
                 
                 # Info: Size is auto-determined from template
-                from pixelle_video.utils.template_util import parse_template_size
-                template_width, template_height = parse_template_size(f"templates/{frame_template}")
+                from pixelle_video.utils.template_util import parse_template_size, resolve_template_path
+                template_width, template_height = parse_template_size(resolve_template_path(frame_template))
                 st.info(f"📐 {tr('template.size_info')}: {template_width} × {template_height}")
                 
                 # Preview button
@@ -889,9 +891,10 @@ def main():
                     with st.spinner(tr("template.preview_generating")):
                         try:
                             from pixelle_video.services.frame_html import HTMLFrameGenerator
-                            
+
                             # Use the currently selected template (size is auto-parsed)
-                            template_path = f"templates/{frame_template}"
+                            from pixelle_video.utils.template_util import resolve_template_path
+                            template_path = resolve_template_path(frame_template)
                             generator = HTMLFrameGenerator(template_path)
                             
                             # Generate preview (use custom parameters from video generation section)
