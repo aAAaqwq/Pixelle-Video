@@ -183,6 +183,8 @@
     "settings.comfyui.comfyui_url_help": "Local or remote ComfyUI server address",
     "settings.comfyui.runninghub_api_key": "RunningHub API Key",
     "settings.comfyui.runninghub_api_key_help": "Visit https://runninghub.ai to register and get API Key",
+    "settings.comfyui.runninghub_hint": "No local ComfyUI? Use RunningHub Cloud:",
+    "settings.comfyui.runninghub_get_api_key": "Get RunningHub API Key",
     
     "tts.inference_mode": "Synthesis Mode",
     "tts.mode.local": "Local Synthesis",

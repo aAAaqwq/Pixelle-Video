@@ -256,6 +256,11 @@ def render_advanced_settings():
                     help=tr("settings.comfyui.runninghub_api_key_help"),
                     key="runninghub_api_key_input"
                 )
+                st.caption(
+                    f"{tr('settings.comfyui.runninghub_hint')} "
+                    f"[{tr('settings.comfyui.runninghub_get_api_key')}]"
+                    f"(https://www.runninghub{'.cn' if get_language() == 'zh_CN' else '.ai'}/?inviteCode=bozpdlbj)"
+                )
         
         # ====================================================================
         # Action Buttons (full width at bottom)
