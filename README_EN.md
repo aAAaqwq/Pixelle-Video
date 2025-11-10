@@ -359,7 +359,7 @@ Thanks for the open-source spirit of these projects! 🙏
 
 ## 📝 License
 
-This project is released under the MIT License. For details, please see the [LICENSE](LICENSE) file.
+This project is released under the Apache License 2.0. For details, please see the [LICENSE](LICENSE) file.
 
 ---
 

@@ -359,7 +359,7 @@ Pixelle-Video 的设计受到以下优秀开源项目的启发：
 
 ## 📝 许可证
 
-本项目采用 MIT 许可证，详情请查看 [LICENSE](LICENSE) 文件。
+本项目采用 Apache 2.0 许可证，详情请查看 [LICENSE](LICENSE) 文件。
 
 ---
 

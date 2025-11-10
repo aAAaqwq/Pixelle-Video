@@ -95,5 +95,5 @@ Thanks to these projects for their open source spirit! 🙏
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](https://github.com/AIDC-AI/Pixelle-Video/blob/main/LICENSE) file for details.
+This project is licensed under the Apache License 2.0. See the [LICENSE](https://github.com/AIDC-AI/Pixelle-Video/blob/main/LICENSE) file for details.
 
