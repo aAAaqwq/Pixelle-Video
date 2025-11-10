@@ -31,6 +31,7 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 from html2image import Html2Image
 from loguru import logger
+from PIL import Image
 
 from pixelle_video.utils.template_util import parse_template_size
 
@@ -51,6 +52,13 @@ class HTMLFrameGenerator:
         ...     ext={"content_title": "Sample Title", "content_author": "Author Name"}
         ... )
     """
+    
+    # Workaround for Chromium screenshot height issue
+    # Due to a Chromium bug that causes screenshots to be cropped at the bottom,
+    # we temporarily render with extra height and then crop it back.
+    # See: https://issues.chromium.org/issues/405165895
+    # This is a temporary workaround until the issue is fixed in Chromium.
+    CHROMIUM_HEIGHT_OFFSET = 87
     
     def __init__(self, template_path: str):
         """
@@ -363,8 +371,11 @@ class HTMLFrameGenerator:
             # Try to find non-snap browser
             browser_path = self._find_chrome_executable()
             
+            # Workaround: Add extra height to compensate for Chromium screenshot cropping bug
+            # The extra pixels will be cropped back in generate_frame() after rendering
+            # See CHROMIUM_HEIGHT_OFFSET constant for details
             kwargs = {
-                'size': (width, height),
+                'size': (width, height + self.CHROMIUM_HEIGHT_OFFSET),
                 'custom_flags': custom_flags
             }
             
@@ -464,6 +475,18 @@ class HTMLFrameGenerator:
             temp_file = os.path.join(os.getcwd(), output_filename)
             if os.path.exists(temp_file) and temp_file != output_path:
                 shutil.move(temp_file, output_path)
+            
+            # Workaround: Crop image to remove extra height added to compensate for Chromium bug
+            # Chromium screenshots are cropped at the bottom, so we render with extra height
+            # and then crop it back to the desired size. See CHROMIUM_HEIGHT_OFFSET constant.
+            # Reference: https://issues.chromium.org/issues/405165895
+            if os.path.exists(output_path):
+                with Image.open(output_path) as img:
+                    # Crop from (0, 0) to (originWidth, originHeight)
+                    # This removes the extra CHROMIUM_HEIGHT_OFFSET pixels added during rendering
+                    cropped_img = img.crop((0, 0, self.width, self.height))
+                    cropped_img.save(output_path)
+                    logger.debug(f"Cropped image to size: {self.width}x{self.height} (removed {self.CHROMIUM_HEIGHT_OFFSET}px workaround offset)")
             
             logger.info(f"✅ Frame generated: {output_path}")
             return output_path
