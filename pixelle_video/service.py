@@ -23,7 +23,7 @@ from loguru import logger
 from pixelle_video.config import config_manager
 from pixelle_video.services.llm_service import LLMService
 from pixelle_video.services.tts_service import TTSService
-from pixelle_video.services.image import ImageService
+from pixelle_video.services.media import MediaService
 from pixelle_video.services.video import VideoService
 from pixelle_video.services.frame_processor import FrameProcessor
 from pixelle_video.pipelines.standard import StandardPipeline
@@ -45,7 +45,7 @@ class PixelleVideoCore:
         # Use capabilities directly
         answer = await pixelle_video.llm("Explain atomic habits")
         audio = await pixelle_video.tts("Hello world")
-        image = await pixelle_video.image(prompt="a cat")
+        media = await pixelle_video.media(prompt="a cat")
         
         # Check active capabilities
         print(f"Using LLM: {pixelle_video.llm.active}")
@@ -56,7 +56,7 @@ class PixelleVideoCore:
           ├── config (configuration)
           ├── llm (LLM service - direct OpenAI SDK)
           ├── tts (TTS service - ComfyKit workflows)
-          ├── image (Image service - ComfyKit workflows)
+          ├── media (Media service - ComfyKit workflows, supports image & video)
           └── pipelines (video generation pipelines)
               ├── standard (standard workflow)
               ├── custom (custom workflow template)
@@ -77,7 +77,7 @@ class PixelleVideoCore:
         # Core services (initialized in initialize())
         self.llm: Optional[LLMService] = None
         self.tts: Optional[TTSService] = None
-        self.image: Optional[ImageService] = None
+        self.media: Optional[MediaService] = None
         self.video: Optional[VideoService] = None
         self.frame_processor: Optional[FrameProcessor] = None
         
@@ -105,7 +105,7 @@ class PixelleVideoCore:
         # 1. Initialize core services
         self.llm = LLMService(self.config)
         self.tts = TTSService(self.config)
-        self.image = ImageService(self.config)
+        self.media = MediaService(self.config)
         self.video = VideoService()
         self.frame_processor = FrameProcessor(self)
         

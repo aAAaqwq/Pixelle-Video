@@ -260,7 +260,7 @@ def get_task_path(task_id: str, *paths: str) -> str:
 def get_task_frame_path(
     task_id: str, 
     frame_index: int, 
-    file_type: Literal["audio", "image", "composed", "segment"]
+    file_type: Literal["audio", "image", "video", "composed", "segment"]
 ) -> str:
     """
     Get frame file path within task directory
@@ -268,7 +268,7 @@ def get_task_frame_path(
     Args:
         task_id: Task ID
         frame_index: Frame index (0-based internally, but filename starts from 01)
-        file_type: File type (audio/image/composed/segment)
+        file_type: File type (audio/image/video/composed/segment)
     
     Returns:
         Absolute path to frame file
@@ -280,6 +280,7 @@ def get_task_frame_path(
     ext_map = {
         "audio": "mp3",
         "image": "png",
+        "video": "mp4",
         "composed": "png",
         "segment": "mp4"
     }

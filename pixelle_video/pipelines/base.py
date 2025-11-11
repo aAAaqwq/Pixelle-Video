@@ -63,8 +63,11 @@ class BasePipeline(ABC):
         # Quick access to services (convenience)
         self.llm = pixelle_video_core.llm
         self.tts = pixelle_video_core.tts
-        self.image = pixelle_video_core.image
+        self.media = pixelle_video_core.media
         self.video = pixelle_video_core.video
+        
+        # Backward compatibility alias
+        self.image = pixelle_video_core.media
     
     @abstractmethod
     async def __call__(
