@@ -135,6 +135,10 @@ class ConfigManager:
             "image": {
                 "default_workflow": self.config.comfyui.image.default_workflow,
                 "prompt_prefix": self.config.comfyui.image.prompt_prefix,
+            },
+            "video": {
+                "default_workflow": self.config.comfyui.video.default_workflow,
+                "prompt_prefix": self.config.comfyui.video.prompt_prefix,
             }
         }
     
