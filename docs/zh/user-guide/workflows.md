@@ -16,9 +16,41 @@ Pixelle-Video 基于 ComfyUI 架构，支持自定义工作流。
 
 位于 `workflows/selfhost/` 或 `workflows/runninghub/`
 
+用于文本转语音（Text-to-Speech），支持多种 TTS 引擎：
+- Edge-TTS
+- Index-TTS（支持声音克隆）
+- 其他 ComfyUI 兼容的 TTS 节点
+
 ### 图像生成工作流
 
 位于 `workflows/selfhost/` 或 `workflows/runninghub/`
+
+用于生成静态图像作为视频背景：
+- FLUX 系列模型
+- Stable Diffusion 系列模型
+- 其他图像生成模型
+
+### 视频生成工作流
+
+位于 `workflows/selfhost/` 或 `workflows/runninghub/`
+
+**新功能**：支持 AI 视频生成，创建动态视频内容。
+
+**预置工作流**：
+- `runninghub/video_wan2.1_fusionx.json`: 云端工作流（推荐）
+  - 基于 WAN 2.1 模型
+  - 无需本地环境，通过 RunningHub API 调用
+  - 支持文本到视频（Text-to-Video）
+  
+- `selfhost/video_wan2.1_fusionx.json`: 本地工作流
+  - 需要本地 ComfyUI 环境
+  - 需要安装相应的视频生成节点
+  - 适合有本地 GPU 的用户
+
+**使用场景**：
+- 配合 `video_*.html` 模板使用
+- 自动根据文案生成动态视频背景
+- 增强视频的视觉表现力和观看体验
 
 ---
 
