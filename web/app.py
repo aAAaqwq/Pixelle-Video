@@ -684,13 +684,41 @@ def main():
             st.markdown(f"🔗 [{tr('template.preview_link')}]({template_docs_url})")
             
             # Import template utilities
-            from pixelle_video.utils.template_util import get_templates_grouped_by_size
+            from pixelle_video.utils.template_util import get_templates_grouped_by_size_and_type, get_template_type
             
-            # Get templates grouped by size
-            grouped_templates = get_templates_grouped_by_size()
+            # Template type selector
+            st.markdown(f"**{tr('template.type_selector')}**")
+            
+            template_type_options = {
+                'static': tr('template.type.static'),
+                'image': tr('template.type.image'),
+                'video': tr('template.type.video')
+            }
+            
+            # Radio buttons in horizontal layout
+            selected_template_type = st.radio(
+                tr('template.type_selector'),
+                options=list(template_type_options.keys()),
+                format_func=lambda x: template_type_options[x],
+                index=1,  # Default to 'image'
+                key="template_type_selector",
+                label_visibility="collapsed",
+                horizontal=True
+            )
+            
+            # Display hint based on selected type (below radio buttons)
+            if selected_template_type == 'static':
+                st.info(tr('template.type.static_hint'))
+            elif selected_template_type == 'image':
+                st.info(tr('template.type.image_hint'))
+            elif selected_template_type == 'video':
+                st.info(tr('template.type.video_hint'))
+            
+            # Get templates grouped by size, filtered by selected type
+            grouped_templates = get_templates_grouped_by_size_and_type(selected_template_type)
             
             if not grouped_templates:
-                st.error("No templates found. Please ensure templates are in templates/ directory with proper structure (e.g., templates/1080x1920/default.html).")
+                st.warning(f"No {template_type_options[selected_template_type]} templates found. Please select a different type or add templates.")
                 st.stop()
             
             # Build display options with group separators
@@ -707,7 +735,19 @@ def main():
             
             # Get default template from config
             template_config = pixelle_video.config.get("template", {})
-            config_default_template = template_config.get("default_template", "1080x1920/default.html")
+            config_default_template = template_config.get("default_template", "1080x1920/image_default.html")
+
+            # Backward compatibility
+            if config_default_template == "1080x1920/default.html":
+                config_default_template = "1080x1920/image_default.html"
+            
+            # Determine type-specific default template
+            type_default_templates = {
+                'static': '1080x1920/static_default.html',
+                'image': '1080x1920/image_default.html',
+                'video': '1080x1920/video_default.html'
+            }
+            type_specific_default = type_default_templates.get(selected_template_type, config_default_template)
             
             for size, templates in grouped_templates.items():
                 if not templates:
@@ -733,10 +773,12 @@ def main():
                     display_options.append(display_name)
                     template_paths_ordered.append(t.template_path)  # Add to ordered list
                     
-                    # Set default based on config (priority: config > first default.html in portrait)
+                    # Set default: priority is config > type-specific default > first in portrait
                     if t.template_path == config_default_template:
                         default_index = current_index
-                    elif default_index == 0 and "default.html" in t.display_info.name and t.display_info.orientation == 'portrait':
+                    elif default_index == 0 and t.template_path == type_specific_default:
+                        default_index = current_index
+                    elif default_index == 0 and t.display_info.orientation == 'portrait':
                         default_index = current_index
                     
                     current_index += 1
@@ -789,20 +831,11 @@ def main():
             
             # Detect template media type
             from pathlib import Path
-            template_name = Path(frame_template).name
+            from pixelle_video.utils.template_util import get_template_type
             
-            if template_name.startswith("video_"):
-                # Video template
-                template_media_type = "video"
-                template_requires_media = True
-            elif generator_for_params.requires_image():
-                # Image template
-                template_media_type = "image"
-                template_requires_media = True
-            else:
-                # Text-only template
-                template_media_type = "text"
-                template_requires_media = False
+            template_name = Path(frame_template).name
+            template_media_type = get_template_type(template_name)
+            template_requires_media = (template_media_type in ["image", "video"])
             
             # Store in session state for workflow filtering
             st.session_state['template_media_type'] = template_media_type
@@ -1009,7 +1042,9 @@ def main():
             
                 # If user has a saved preference in config, try to match it
                 comfyui_config = config_manager.get_comfyui_config()
-                saved_workflow = comfyui_config["image"]["default_workflow"]
+                # Select config based on template type (image or video)
+                media_config_key = "video" if template_media_type == "video" else "image"
+                saved_workflow = comfyui_config.get(media_config_key, {}).get("default_workflow", "")
                 if saved_workflow and saved_workflow in workflow_keys:
                     default_workflow_index = workflow_keys.index(saved_workflow)
             
@@ -1040,8 +1075,8 @@ def main():
                 st.info(f"📐 {size_info_text}")
             
                 # Prompt prefix input
-                # Get current prompt_prefix from config
-                current_prefix = comfyui_config["image"]["prompt_prefix"]
+                # Get current prompt_prefix from config (based on media type)
+                current_prefix = comfyui_config.get(media_config_key, {}).get("prompt_prefix", "")
             
                 # Prompt prefix input (temporary, not saved to config)
                 prompt_prefix = st.text_area(
@@ -1268,6 +1303,18 @@ def main():
                     # Video preview
                     if os.path.exists(result.video_path):
                         st.video(result.video_path)
+                        
+                        # Download button
+                        with open(result.video_path, "rb") as video_file:
+                            video_bytes = video_file.read()
+                            video_filename = os.path.basename(result.video_path)
+                            st.download_button(
+                                label="⬇️ 下载视频" if get_language() == "zh_CN" else "⬇️ Download Video",
+                                data=video_bytes,
+                                file_name=video_filename,
+                                mime="video/mp4",
+                                use_container_width=True
+                            )
                     else:
                         st.error(tr("status.video_not_found", path=result.video_path))
                     

@@ -282,8 +282,8 @@ class StandardPipeline(BasePipeline):
             logger.info(f"🎬 Template requires video generation")
         elif template_media_type == "image":
             logger.info(f"📸 Template requires image generation")
-        else:  # text
-            logger.info(f"⚡ Template does not require media - skipping media generation pipeline")
+        else:  # static
+            logger.info(f"⚡ Static template - skipping media generation pipeline")
             logger.info(f"   💡 Benefits: Faster generation + Lower cost + No ComfyUI dependency")
         
         try:
@@ -525,35 +525,23 @@ class StandardPipeline(BasePipeline):
         - Media generation API calls
         - ComfyUI dependency
         
-        Template naming rules:
+        Template naming convention:
+        - static_*.html: Static style template (returns "static")
+        - image_*.html: Image template (returns "image")
         - video_*.html: Video template (returns "video")
-        - Other templates with {{image}}: Image template (returns "image")
-        - Other templates without {{image}}: Text-only template (returns "text")
         
         Args:
-            frame_template: Template path (e.g., "1080x1920/default.html" or "1080x1920/video_default.html")
+            frame_template: Template path (e.g., "1080x1920/image_default.html" or "1080x1920/video_default.html")
         
         Returns:
-            "video", "image", or "text"
+            "static", "image", or "video"
         """
-        from pixelle_video.services.frame_html import HTMLFrameGenerator
-        from pixelle_video.utils.template_util import resolve_template_path
+        from pixelle_video.utils.template_util import get_template_type
         
-        # Check if template name starts with video_
+        # Determine type by template filename prefix
         template_name = Path(frame_template).name
-        if template_name.startswith("video_"):
-            logger.debug(f"Template '{frame_template}' is video template (video_ prefix)")
-            return "video"
+        template_type = get_template_type(template_name)
         
-        # Check if template contains {{image}}
-        template_path = resolve_template_path(frame_template)
-        generator = HTMLFrameGenerator(template_path)
-        
-        requires_image = generator.requires_image()
-        if requires_image:
-            logger.debug(f"Template '{frame_template}' is image template (has {{image}})")
-            return "image"
-        else:
-            logger.debug(f"Template '{frame_template}' is text-only template")
-            return "text"
+        logger.debug(f"Template '{frame_template}' is {template_type} template")
+        return template_type
 
