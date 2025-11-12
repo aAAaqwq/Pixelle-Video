@@ -684,13 +684,41 @@ def main():
             st.markdown(f"🔗 [{tr('template.preview_link')}]({template_docs_url})")
             
             # Import template utilities
-            from pixelle_video.utils.template_util import get_templates_grouped_by_size
+            from pixelle_video.utils.template_util import get_templates_grouped_by_size_and_type, get_template_type
             
-            # Get templates grouped by size
-            grouped_templates = get_templates_grouped_by_size()
+            # Template type selector
+            st.markdown(f"**{tr('template.type_selector')}**")
+            
+            template_type_options = {
+                'static': tr('template.type.static'),
+                'image': tr('template.type.image'),
+                'video': tr('template.type.video')
+            }
+            
+            # Radio buttons in horizontal layout
+            selected_template_type = st.radio(
+                tr('template.type_selector'),
+                options=list(template_type_options.keys()),
+                format_func=lambda x: template_type_options[x],
+                index=1,  # Default to 'image'
+                key="template_type_selector",
+                label_visibility="collapsed",
+                horizontal=True
+            )
+            
+            # Display hint based on selected type (below radio buttons)
+            if selected_template_type == 'static':
+                st.info(tr('template.type.static_hint'))
+            elif selected_template_type == 'image':
+                st.info(tr('template.type.image_hint'))
+            elif selected_template_type == 'video':
+                st.info(tr('template.type.video_hint'))
+            
+            # Get templates grouped by size, filtered by selected type
+            grouped_templates = get_templates_grouped_by_size_and_type(selected_template_type)
             
             if not grouped_templates:
-                st.error("No templates found. Please ensure templates are in templates/ directory with proper structure (e.g., templates/1080x1920/default.html).")
+                st.warning(f"No {template_type_options[selected_template_type]} templates found. Please select a different type or add templates.")
                 st.stop()
             
             # Build display options with group separators
@@ -707,7 +735,19 @@ def main():
             
             # Get default template from config
             template_config = pixelle_video.config.get("template", {})
-            config_default_template = template_config.get("default_template", "1080x1920/default.html")
+            config_default_template = template_config.get("default_template", "1080x1920/image_default.html")
+
+            # Backward compatibility
+            if config_default_template == "1080x1920/default.html":
+                config_default_template = "1080x1920/image_default.html"
+            
+            # Determine type-specific default template
+            type_default_templates = {
+                'static': '1080x1920/static_default.html',
+                'image': '1080x1920/image_default.html',
+                'video': '1080x1920/video_default.html'
+            }
+            type_specific_default = type_default_templates.get(selected_template_type, config_default_template)
             
             for size, templates in grouped_templates.items():
                 if not templates:
@@ -733,10 +773,12 @@ def main():
                     display_options.append(display_name)
                     template_paths_ordered.append(t.template_path)  # Add to ordered list
                     
-                    # Set default based on config (priority: config > first default.html in portrait)
+                    # Set default: priority is config > type-specific default > first in portrait
                     if t.template_path == config_default_template:
                         default_index = current_index
-                    elif default_index == 0 and "default.html" in t.display_info.name and t.display_info.orientation == 'portrait':
+                    elif default_index == 0 and t.template_path == type_specific_default:
+                        default_index = current_index
+                    elif default_index == 0 and t.display_info.orientation == 'portrait':
                         default_index = current_index
                     
                     current_index += 1
@@ -782,10 +824,25 @@ def main():
             generator_for_params = HTMLFrameGenerator(template_path_for_params)
             custom_params_for_video = generator_for_params.parse_template_parameters()
             
-            # Detect if template requires image generation
-            template_requires_image = generator_for_params.requires_image()
-            # Store in session state for Image Section to read
-            st.session_state['template_requires_image'] = template_requires_image
+            # Get media size from template (for image/video generation)
+            media_width, media_height = generator_for_params.get_media_size()
+            st.session_state['template_media_width'] = media_width
+            st.session_state['template_media_height'] = media_height
+            
+            # Detect template media type
+            from pathlib import Path
+            from pixelle_video.utils.template_util import get_template_type
+            
+            template_name = Path(frame_template).name
+            template_media_type = get_template_type(template_name)
+            template_requires_media = (template_media_type in ["image", "video"])
+            
+            # Store in session state for workflow filtering
+            st.session_state['template_media_type'] = template_media_type
+            st.session_state['template_requires_media'] = template_requires_media
+            
+            # Backward compatibility
+            st.session_state['template_requires_image'] = (template_media_type == "image")
             
             custom_values_for_video = {}
             if custom_params_for_video:
@@ -928,25 +985,51 @@ def main():
                             logger.exception(e)
         
         # ====================================================================
-        # Image Generation Section (conditional based on template)
+        # Media Generation Section (conditional based on template)
         # ====================================================================
-        # Check if current template requires image generation
-        if st.session_state.get('template_requires_image', True):
-            # Template requires images - show full Image Section
+        # Check if current template requires media generation
+        template_media_type = st.session_state.get('template_media_type', 'image')
+        template_requires_media = st.session_state.get('template_requires_media', True)
+        
+        if template_requires_media:
+            # Template requires media - show Media Generation Section
             with st.container(border=True):
-                st.markdown(f"**{tr('section.image')}**")
+                # Dynamic section title based on template type
+                if template_media_type == "video":
+                    section_title = tr('section.video')
+                else:
+                    section_title = tr('section.image')
+                
+                st.markdown(f"**{section_title}**")
             
                 # 1. ComfyUI Workflow selection
                 with st.expander(tr("help.feature_description"), expanded=False):
                     st.markdown(f"**{tr('help.what')}**")
-                    st.markdown(tr("style.workflow_what"))
+                    if template_media_type == "video":
+                        st.markdown(tr('style.video_workflow_what'))
+                    else:
+                        st.markdown(tr("style.workflow_what"))
                     st.markdown(f"**{tr('help.how')}**")
-                    st.markdown(tr("style.workflow_how"))
+                    if template_media_type == "video":
+                        st.markdown(tr('style.video_workflow_how'))
+                    else:
+                        st.markdown(tr("style.workflow_how"))
                     st.markdown(f"**{tr('help.note')}**")
-                    st.markdown(tr("style.image_size_note"))
+                    if template_media_type == "video":
+                        st.markdown(tr('style.video_size_note'))
+                    else:
+                        st.markdown(tr("style.image_size_note"))
             
-                # Get available workflows from pixelle_video (with source info)
-                workflows = pixelle_video.image.list_workflows()
+                # Get available workflows and filter by template type
+                all_workflows = pixelle_video.media.list_workflows()
+                
+                # Filter workflows based on template media type
+                if template_media_type == "video":
+                    # Only show video_ workflows
+                    workflows = [wf for wf in all_workflows if "video_" in wf["key"].lower()]
+                else:
+                    # Only show image_ workflows (exclude video_)
+                    workflows = [wf for wf in all_workflows if "video_" not in wf["key"].lower()]
             
                 # Build options for selectbox
                 # Display: "image_flux.json - Runninghub"
@@ -959,7 +1042,9 @@ def main():
             
                 # If user has a saved preference in config, try to match it
                 comfyui_config = config_manager.get_comfyui_config()
-                saved_workflow = comfyui_config["image"]["default_workflow"]
+                # Select config based on template type (image or video)
+                media_config_key = "video" if template_media_type == "video" else "image"
+                saved_workflow = comfyui_config.get(media_config_key, {}).get("default_workflow", "")
                 if saved_workflow and saved_workflow in workflow_keys:
                     default_workflow_index = workflow_keys.index(saved_workflow)
             
@@ -978,31 +1063,20 @@ def main():
                 else:
                     workflow_key = "runninghub/image_flux.json"  # fallback
             
+                # Get media size from template
+                image_width = st.session_state.get('template_media_width', 1024)
+                image_height = st.session_state.get('template_media_height', 1024)
+                
+                # Display media size info (read-only)
+                if template_media_type == "video":
+                    size_info_text = tr('style.video_size_info', width=image_width, height=image_height)
+                else:
+                    size_info_text = tr('style.image_size_info', width=image_width, height=image_height)
+                st.info(f"📐 {size_info_text}")
             
-                # 2. Image size input
-                col1, col2 = st.columns(2)
-                with col1:
-                    image_width = st.number_input(
-                        tr('style.image_width'),
-                        min_value=128,
-                        value=1024,
-                        step=1,
-                        label_visibility="visible",
-                        help=tr('style.image_width_help')
-                    )
-                with col2:
-                    image_height = st.number_input(
-                        tr('style.image_height'),
-                        min_value=128,
-                        value=1024,
-                        step=1,
-                        label_visibility="visible",
-                        help=tr('style.image_height_help')
-                    )
-            
-                # 3. Prompt prefix input
-                # Get current prompt_prefix from config
-                current_prefix = comfyui_config["image"]["prompt_prefix"]
+                # Prompt prefix input
+                # Get current prompt_prefix from config (based on media type)
+                current_prefix = comfyui_config.get(media_config_key, {}).get("prompt_prefix", "")
             
                 # Prompt prefix input (temporary, not saved to config)
                 prompt_prefix = st.text_area(
@@ -1014,54 +1088,71 @@ def main():
                     help=tr("style.prompt_prefix_help")
                 )
             
-                # Style preview expander (similar to template preview)
-                with st.expander(tr("style.preview_title"), expanded=False):
+                # Media preview expander
+                preview_title = tr("style.video_preview_title") if template_media_type == "video" else tr("style.preview_title")
+                with st.expander(preview_title, expanded=False):
                     # Test prompt input
+                    if template_media_type == "video":
+                        test_prompt_label = tr("style.test_video_prompt")
+                        test_prompt_value = "a dog running in the park"
+                    else:
+                        test_prompt_label = tr("style.test_prompt")
+                        test_prompt_value = "a dog"
+                    
                     test_prompt = st.text_input(
-                        tr("style.test_prompt"),
-                        value="a dog",
+                        test_prompt_label,
+                        value=test_prompt_value,
                         help=tr("style.test_prompt_help"),
                         key="style_test_prompt"
                     )
                 
                     # Preview button
-                    if st.button(tr("style.preview"), key="preview_style", use_container_width=True):
-                        with st.spinner(tr("style.previewing")):
+                    preview_button_label = tr("style.video_preview") if template_media_type == "video" else tr("style.preview")
+                    if st.button(preview_button_label, key="preview_style", use_container_width=True):
+                        previewing_text = tr("style.video_previewing") if template_media_type == "video" else tr("style.previewing")
+                        with st.spinner(previewing_text):
                             try:
                                 from pixelle_video.utils.prompt_helper import build_image_prompt
                             
                                 # Build final prompt with prefix
                                 final_prompt = build_image_prompt(test_prompt, prompt_prefix)
                             
-                                # Generate preview image (use user-specified size)
-                                preview_image_path = run_async(pixelle_video.image(
+                                # Generate preview media (use user-specified size and media type)
+                                media_result = run_async(pixelle_video.media(
                                     prompt=final_prompt,
                                     workflow=workflow_key,
+                                    media_type=template_media_type,
                                     width=int(image_width),
                                     height=int(image_height)
                                 ))
+                                preview_media_path = media_result.url
                             
                                 # Display preview (support both URL and local path)
-                                if preview_image_path:
-                                    st.success(tr("style.preview_success"))
+                                if preview_media_path:
+                                    success_text = tr("style.video_preview_success") if template_media_type == "video" else tr("style.preview_success")
+                                    st.success(success_text)
                                 
-                                    # Read and encode image
-                                    if preview_image_path.startswith('http'):
-                                        # URL - use directly
-                                        img_html = f'<div class="preview-image"><img src="{preview_image_path}" alt="Style Preview"/></div>'
+                                    if template_media_type == "video":
+                                        # Display video
+                                        st.video(preview_media_path)
                                     else:
-                                        # Local file - encode as base64
-                                        with open(preview_image_path, 'rb') as f:
-                                            img_data = base64.b64encode(f.read()).decode()
-                                        img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
-                                
-                                    st.markdown(img_html, unsafe_allow_html=True)
+                                        # Display image
+                                        if preview_media_path.startswith('http'):
+                                            # URL - use directly
+                                            img_html = f'<div class="preview-image"><img src="{preview_media_path}" alt="Style Preview"/></div>'
+                                        else:
+                                            # Local file - encode as base64
+                                            with open(preview_media_path, 'rb') as f:
+                                                img_data = base64.b64encode(f.read()).decode()
+                                            img_html = f'<div class="preview-image"><img src="data:image/png;base64,{img_data}" alt="Style Preview"/></div>'
+                                        
+                                        st.markdown(img_html, unsafe_allow_html=True)
                                 
                                     # Show the final prompt used
                                     st.info(f"**{tr('style.final_prompt_label')}**\n{final_prompt}")
                                 
                                     # Show file path
-                                    st.caption(f"📁 {preview_image_path}")
+                                    st.caption(f"📁 {preview_media_path}")
                                 else:
                                     st.error(tr("style.preview_failed_general"))
                             except Exception as e:
@@ -1076,10 +1167,12 @@ def main():
                 st.info("ℹ️ " + tr("image.not_required"))
                 st.caption(tr("image.not_required_hint"))
                 
+                # Get media size from template (even though not used, for consistency)
+                image_width = st.session_state.get('template_media_width', 1024)
+                image_height = st.session_state.get('template_media_height', 1024)
+                
                 # Set default values for later use
                 workflow_key = None
-                image_width = 1024
-                image_height = 1024
                 prompt_prefix = ""
         
 
@@ -1149,14 +1242,13 @@ def main():
                         progress_bar.progress(min(int(event.progress * 100), 99))  # Cap at 99% until complete
                     
                     # Generate video (directly pass parameters)
+                    # Note: image_width and image_height are now auto-determined from template
                     video_params = {
                         "text": text,
                         "mode": mode,
                         "title": title if title else None,
                         "n_scenes": n_scenes,
                         "image_workflow": workflow_key,
-                        "image_width": int(image_width),
-                        "image_height": int(image_height),
                         "frame_template": frame_template,
                         "prompt_prefix": prompt_prefix,
                         "bgm_path": bgm_path,
@@ -1211,6 +1303,18 @@ def main():
                     # Video preview
                     if os.path.exists(result.video_path):
                         st.video(result.video_path)
+                        
+                        # Download button
+                        with open(result.video_path, "rb") as video_file:
+                            video_bytes = video_file.read()
+                            video_filename = os.path.basename(result.video_path)
+                            st.download_button(
+                                label="⬇️ 下载视频" if get_language() == "zh_CN" else "⬇️ Download Video",
+                                data=video_bytes,
+                                file_name=video_filename,
+                                mime="video/mp4",
+                                use_container_width=True
+                            )
                     else:
                         st.error(tr("status.video_not_found", path=result.video_path))
                     

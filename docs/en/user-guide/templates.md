@@ -154,15 +154,39 @@ Suitable for Instagram, WeChat Moments, and other platforms.
 
 ---
 
+## Template Naming Convention
+
+Templates follow a unified naming convention to distinguish different types:
+
+- **`static_*.html`**: Static templates
+  - No AI-generated media content required
+  - Pure text style rendering
+  - Suitable for quick generation and low-cost scenarios
+
+- **`image_*.html`**: Image templates
+  - Uses AI-generated images as background
+  - Invokes ComfyUI image generation workflows
+  - Suitable for content requiring visual illustrations
+
+- **`video_*.html`**: Video templates
+  - Uses AI-generated videos as background
+  - Invokes ComfyUI video generation workflows
+  - Creates dynamic video content with enhanced expressiveness
+
 ## Template Structure
 
 Templates are located in the `templates/` directory, grouped by size:
 
 ```
 templates/
-├── 1080x1920/  # Portrait (11 templates)
-├── 1920x1080/  # Landscape (2 templates)
-└── 1080x1080/  # Square (1 template)
+├── 1080x1920/  # Portrait
+│   ├── static_*.html   # Static templates
+│   ├── image_*.html    # Image templates
+│   └── video_*.html    # Video templates
+├── 1920x1080/  # Landscape
+│   └── image_*.html    # Image templates
+└── 1080x1080/  # Square
+    └── image_*.html    # Image templates
 ```
 
 ---

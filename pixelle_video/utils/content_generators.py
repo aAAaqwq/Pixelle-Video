@@ -321,6 +321,98 @@ async def generate_image_prompts(
     return all_prompts
 
 
+async def generate_video_prompts(
+    llm_service,
+    narrations: List[str],
+    min_words: int = 30,
+    max_words: int = 60,
+    batch_size: int = 10,
+    max_retries: int = 3,
+    progress_callback: Optional[callable] = None
+) -> List[str]:
+    """
+    Generate video prompts from narrations (with batching and retry)
+    
+    Args:
+        llm_service: LLM service instance
+        narrations: List of narrations
+        min_words: Min video prompt length
+        max_words: Max video prompt length
+        batch_size: Max narrations per batch (default: 10)
+        max_retries: Max retry attempts per batch (default: 3)
+        progress_callback: Optional callback(completed, total, message) for progress updates
+    
+    Returns:
+        List of video prompts (base prompts, without prefix applied)
+    """
+    from pixelle_video.prompts.video_generation import build_video_prompt_prompt
+    
+    logger.info(f"Generating video prompts for {len(narrations)} narrations (batch_size={batch_size})")
+    
+    # Split narrations into batches
+    batches = [narrations[i:i + batch_size] for i in range(0, len(narrations), batch_size)]
+    logger.info(f"Split into {len(batches)} batches")
+    
+    all_prompts = []
+    
+    # Process each batch
+    for batch_idx, batch_narrations in enumerate(batches, 1):
+        logger.info(f"Processing batch {batch_idx}/{len(batches)} ({len(batch_narrations)} narrations)")
+        
+        # Retry logic for this batch
+        for attempt in range(1, max_retries + 1):
+            try:
+                # Generate prompts for this batch
+                prompt = build_video_prompt_prompt(
+                    narrations=batch_narrations,
+                    min_words=min_words,
+                    max_words=max_words
+                )
+                
+                response = await llm_service(
+                    prompt=prompt,
+                    temperature=0.7,
+                    max_tokens=8192
+                )
+                
+                logger.debug(f"Batch {batch_idx} attempt {attempt}: LLM response length: {len(response)} chars")
+                
+                # Parse JSON
+                result = _parse_json(response)
+                
+                if "video_prompts" not in result:
+                    raise KeyError("Invalid response format: missing 'video_prompts'")
+                
+                batch_prompts = result["video_prompts"]
+                
+                # Validate batch result
+                if len(batch_prompts) != len(batch_narrations):
+                    raise ValueError(
+                        f"Prompt count mismatch: expected {len(batch_narrations)}, got {len(batch_prompts)}"
+                    )
+                
+                # Success - add to all_prompts
+                all_prompts.extend(batch_prompts)
+                logger.info(f"✓ Batch {batch_idx} completed: {len(batch_prompts)} video prompts")
+                
+                # Report progress
+                if progress_callback:
+                    completed = len(all_prompts)
+                    total = len(narrations)
+                    progress_callback(completed, total, f"Batch {batch_idx}/{len(batches)} completed")
+                
+                break  # Success, move to next batch
+            
+            except Exception as e:
+                logger.warning(f"✗ Batch {batch_idx} attempt {attempt} failed: {e}")
+                if attempt >= max_retries:
+                    raise
+                logger.info(f"Retrying batch {batch_idx}...")
+    
+    logger.info(f"✅ Generated {len(all_prompts)} video prompts")
+    return all_prompts
+
+
 def _parse_json(text: str) -> dict:
     """
     Parse JSON from text, with fallback to extract JSON from markdown code blocks

@@ -94,8 +94,7 @@ class StandardPipeline(BasePipeline):
         max_image_prompt_words: int = 60,
         
         # === Image Parameters ===
-        image_width: int = 1024,
-        image_height: int = 1024,
+        # Note: image_width and image_height are now auto-determined from template meta tags
         image_workflow: Optional[str] = None,
         
         # === Video Parameters ===
@@ -151,9 +150,8 @@ class StandardPipeline(BasePipeline):
             min_image_prompt_words: Min image prompt length
             max_image_prompt_words: Max image prompt length
             
-            image_width: Generated image width (default 1024)
-            image_height: Generated image height (default 1024)
             image_workflow: Image workflow filename (e.g., "image_flux.json", None = use default)
+                           Note: Image/video size is now auto-determined from template meta tags
             
             video_fps: Video frame rate (default 30)
             
@@ -239,6 +237,16 @@ class StandardPipeline(BasePipeline):
             template_config = self.core.config.get("template", {})
             frame_template = template_config.get("default_template", "1080x1920/default.html")
         
+        # Read media size from template meta tags
+        from pixelle_video.services.frame_html import HTMLFrameGenerator
+        from pixelle_video.utils.template_util import resolve_template_path
+        
+        template_path = resolve_template_path(frame_template)
+        temp_generator = HTMLFrameGenerator(template_path)
+        image_width, image_height = temp_generator.get_media_size()
+        
+        logger.info(f"📐 Media size from template: {image_width}x{image_height}")
+        
         # Create storyboard config
         config = StoryboardConfig(
             task_id=task_id,
@@ -269,11 +277,13 @@ class StandardPipeline(BasePipeline):
         )
         
         # ========== Step 0.8: Check template requirements ==========
-        template_requires_image = self._check_template_requires_image(config.frame_template)
-        if template_requires_image:
+        template_media_type = self._check_template_media_type(config.frame_template)
+        if template_media_type == "video":
+            logger.info(f"🎬 Template requires video generation")
+        elif template_media_type == "image":
             logger.info(f"📸 Template requires image generation")
-        else:
-            logger.info(f"⚡ Template does not require images - skipping image generation pipeline")
+        else:  # static
+            logger.info(f"⚡ Static template - skipping media generation pipeline")
             logger.info(f"   💡 Benefits: Faster generation + Lower cost + No ComfyUI dependency")
         
         try:
@@ -294,8 +304,61 @@ class StandardPipeline(BasePipeline):
                 logger.info(f"✅ Split script into {len(narrations)} segments (by lines)")
                 logger.info(f"   Note: n_scenes={n_scenes} is ignored in fixed mode")
             
-            # ========== Step 2: Generate image prompts (conditional) ==========
-            if template_requires_image:
+            # ========== Step 2: Generate media prompts (conditional) ==========
+            if template_media_type == "video":
+                # Video template: generate video prompts
+                self._report_progress(progress_callback, "generating_video_prompts", 0.15)
+                
+                from pixelle_video.utils.content_generators import generate_video_prompts
+                
+                # Override prompt_prefix if provided
+                original_prefix = None
+                if prompt_prefix is not None:
+                    image_config = self.core.config.get("comfyui", {}).get("image", {})
+                    original_prefix = image_config.get("prompt_prefix")
+                    image_config["prompt_prefix"] = prompt_prefix
+                    logger.info(f"Using custom prompt_prefix: '{prompt_prefix}'")
+                
+                try:
+                    # Create progress callback wrapper for video prompt generation
+                    def video_prompt_progress(completed: int, total: int, message: str):
+                        batch_progress = completed / total if total > 0 else 0
+                        overall_progress = 0.15 + (batch_progress * 0.15)
+                        self._report_progress(
+                            progress_callback,
+                            "generating_video_prompts",
+                            overall_progress,
+                            extra_info=message
+                        )
+                    
+                    # Generate base video prompts
+                    base_image_prompts = await generate_video_prompts(
+                        self.llm,
+                        narrations=narrations,
+                        min_words=min_image_prompt_words,
+                        max_words=max_image_prompt_words,
+                        progress_callback=video_prompt_progress
+                    )
+                    
+                    # Apply prompt prefix
+                    from pixelle_video.utils.prompt_helper import build_image_prompt
+                    image_config = self.core.config.get("comfyui", {}).get("image", {})
+                    prompt_prefix_to_use = prompt_prefix if prompt_prefix is not None else image_config.get("prompt_prefix", "")
+                    
+                    image_prompts = []
+                    for base_prompt in base_image_prompts:
+                        final_prompt = build_image_prompt(base_prompt, prompt_prefix_to_use)
+                        image_prompts.append(final_prompt)
+                    
+                finally:
+                    # Restore original prompt_prefix
+                    if original_prefix is not None:
+                        image_config["prompt_prefix"] = original_prefix
+                
+                logger.info(f"✅ Generated {len(image_prompts)} video prompts")
+            
+            elif template_media_type == "image":
+                # Image template: generate image prompts
                 self._report_progress(progress_callback, "generating_image_prompts", 0.15)
                 
                 # Override prompt_prefix if provided
@@ -343,12 +406,13 @@ class StandardPipeline(BasePipeline):
                         image_config["prompt_prefix"] = original_prefix
                 
                 logger.info(f"✅ Generated {len(image_prompts)} image prompts")
-            else:
-                # Skip image prompt generation
+            
+            else:  # text
+                # Text-only template: skip media prompt generation
                 image_prompts = [None] * len(narrations)
                 self._report_progress(progress_callback, "preparing_frames", 0.15)
-                logger.info(f"⚡ Skipped image prompt generation (template doesn't need images)")
-                logger.info(f"   💡 Savings: {len(narrations)} LLM calls + {len(narrations)} image generations")
+                logger.info(f"⚡ Skipped media prompt generation (text-only template)")
+                logger.info(f"   💡 Savings: {len(narrations)} LLM calls + {len(narrations)} media generations")
             
             # ========== Step 3: Create frames ==========
             for i, (narration, image_prompt) in enumerate(zip(narrations, image_prompts)):
@@ -452,29 +516,32 @@ class StandardPipeline(BasePipeline):
             logger.error(f"❌ Video generation failed: {e}")
             raise
     
-    def _check_template_requires_image(self, frame_template: str) -> bool:
+    def _check_template_media_type(self, frame_template: str) -> str:
         """
-        Check if template requires image generation
+        Check template media type requirement
         
         This is checked at pipeline level to avoid unnecessary:
-        - LLM calls (generating image_prompts)
-        - Image generation API calls
+        - LLM calls (generating media prompts)
+        - Media generation API calls
         - ComfyUI dependency
         
+        Template naming convention:
+        - static_*.html: Static style template (returns "static")
+        - image_*.html: Image template (returns "image")
+        - video_*.html: Video template (returns "video")
+        
         Args:
-            frame_template: Template path (e.g., "1080x1920/default.html")
+            frame_template: Template path (e.g., "1080x1920/image_default.html" or "1080x1920/video_default.html")
         
         Returns:
-            True if template contains {{image}}, False otherwise
+            "static", "image", or "video"
         """
-        from pixelle_video.services.frame_html import HTMLFrameGenerator
-        from pixelle_video.utils.template_util import resolve_template_path
+        from pixelle_video.utils.template_util import get_template_type
         
-        template_path = resolve_template_path(frame_template)
-        generator = HTMLFrameGenerator(template_path)
+        # Determine type by template filename prefix
+        template_name = Path(frame_template).name
+        template_type = get_template_type(template_name)
         
-        requires = generator.requires_image()
-        logger.debug(f"Template '{frame_template}' requires_image={requires}")
-        
-        return requires
+        logger.debug(f"Template '{frame_template}' is {template_type} template")
+        return template_type
 

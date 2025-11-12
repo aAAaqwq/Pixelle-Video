@@ -18,6 +18,7 @@ import os
 from pathlib import Path
 from typing import List, Tuple, Optional, Literal
 from pydantic import BaseModel, Field
+import logging
 
 from pixelle_video.utils.os_util import (
     get_resource_path,
@@ -25,6 +26,8 @@ from pixelle_video.utils.os_util import (
     list_resource_dirs,
     resource_exists
 )
+
+logger = logging.getLogger(__name__)
 
 
 def parse_template_size(template_path: str) -> Tuple[int, int]:
@@ -316,7 +319,7 @@ def resolve_template_path(template_input: Optional[str]) -> str:
     
     Args:
         template_input: Can be:
-            - None: Use default "1080x1920/default.html"
+            - None: Use default "1080x1920/image_default.html"
             - "template.html": Use default size + this template
             - "1080x1920/template.html": Full relative path
             - "templates/1080x1920/template.html": Absolute-ish path (legacy)
@@ -330,15 +333,15 @@ def resolve_template_path(template_input: Optional[str]) -> str:
     
     Examples:
         >>> resolve_template_path(None)
-        'templates/1080x1920/default.html'
-        >>> resolve_template_path("modern.html")
-        'templates/1080x1920/modern.html'
-        >>> resolve_template_path("1920x1080/default.html")
-        'templates/1920x1080/default.html'
+        'templates/1080x1920/image_default.html'
+        >>> resolve_template_path("image_modern.html")
+        'templates/1080x1920/image_modern.html'
+        >>> resolve_template_path("1920x1080/image_default.html")
+        'templates/1920x1080/image_default.html'
     """
     # Default case
     if template_input is None:
-        template_input = "1080x1920/default.html"
+        template_input = "1080x1920/image_default.html"
     
     # Parse input to extract size and template name
     size = None
@@ -359,6 +362,18 @@ def resolve_template_path(template_input: Optional[str]) -> str:
         size = "1080x1920"
         template_name = template_input
     
+    # Backward compatibility: migrate "default.html" to "image_default.html"
+    if template_name == "default.html":
+        migrated_name = "image_default.html"
+        try:
+            # Try migrated name first
+            path = get_resource_path("templates", size, migrated_name)
+            logger.info(f"Backward compatibility: migrated '{template_input}' to '{size}/{migrated_name}'")
+            return path
+        except FileNotFoundError:
+            # Fall through to try original name
+            logger.warning(f"Migrated template '{size}/{migrated_name}' not found, trying original name")
+    
     # Use resource API to resolve path (custom > default)
     try:
         return get_resource_path("templates", size, template_name)
@@ -367,6 +382,120 @@ def resolve_template_path(template_input: Optional[str]) -> str:
         raise FileNotFoundError(
             f"Template not found: {size}/{template_name}\n"
             f"Available sizes: {available_sizes}\n"
-            f"Hint: Use format 'SIZExSIZE/template.html' (e.g., '1080x1920/default.html')"
+            f"Hint: Use format 'SIZExSIZE/template.html' (e.g., '1080x1920/image_default.html')"
         )
+
+
+def get_template_type(template_name: str) -> Literal['static', 'image', 'video']:
+    """
+    Detect template type from template filename
+    
+    Template naming convention:
+    - static_*.html: Static style templates (no AI-generated media)
+    - image_*.html: Templates requiring AI-generated images
+    - video_*.html: Templates requiring AI-generated videos
+    
+    Args:
+        template_name: Template filename like "image_default.html" or "video_simple.html"
+    
+    Returns:
+        Template type: 'static', 'image', or 'video'
+    
+    Examples:
+        >>> get_template_type("static_simple.html")
+        'static'
+        >>> get_template_type("image_default.html")
+        'image'
+        >>> get_template_type("video_simple.html")
+        'video'
+    """
+    name = Path(template_name).name
+    
+    if name.startswith("static_"):
+        return "static"
+    elif name.startswith("video_"):
+        return "video"
+    elif name.startswith("image_"):
+        return "image"
+    else:
+        # Fallback: try to detect from legacy names
+        logger.warning(
+            f"Template '{template_name}' doesn't follow naming convention (static_/image_/video_). "
+            f"Defaulting to 'image' type."
+        )
+        return "image"
+
+
+def filter_templates_by_type(
+    templates: List[TemplateInfo], 
+    template_type: Literal['static', 'image', 'video']
+) -> List[TemplateInfo]:
+    """
+    Filter templates by type
+    
+    Args:
+        templates: List of TemplateInfo objects
+        template_type: Type to filter by ('static', 'image', or 'video')
+    
+    Returns:
+        Filtered list of TemplateInfo objects
+    
+    Examples:
+        >>> all_templates = get_all_templates_with_info()
+        >>> image_templates = filter_templates_by_type(all_templates, 'image')
+        >>> len(image_templates) > 0
+        True
+    """
+    filtered = []
+    for t in templates:
+        template_name = t.display_info.name
+        if get_template_type(template_name) == template_type:
+            filtered.append(t)
+    return filtered
+
+
+def get_templates_grouped_by_size_and_type(
+    template_type: Optional[Literal['static', 'image', 'video']] = None
+) -> dict:
+    """
+    Get templates grouped by size, optionally filtered by type
+    
+    Args:
+        template_type: Optional type filter ('static', 'image', or 'video')
+    
+    Returns:
+        Dict with size as key, list of TemplateInfo as value
+        Ordered by orientation priority: portrait > landscape > square
+    
+    Examples:
+        >>> # Get all templates
+        >>> all_grouped = get_templates_grouped_by_size_and_type()
+        
+        >>> # Get only image templates
+        >>> image_grouped = get_templates_grouped_by_size_and_type('image')
+    """
+    from collections import defaultdict
+    
+    templates = get_all_templates_with_info()
+    
+    # Filter by type if specified
+    if template_type is not None:
+        templates = filter_templates_by_type(templates, template_type)
+    
+    grouped = defaultdict(list)
+    
+    for t in templates:
+        grouped[t.display_info.size].append(t)
+    
+    # Sort groups by orientation priority: portrait > landscape > square
+    orientation_priority = {'portrait': 0, 'landscape': 1, 'square': 2}
+    
+    sorted_grouped = {}
+    for size in sorted(grouped.keys(), key=lambda s: (
+        orientation_priority.get(grouped[s][0].display_info.orientation, 3),
+        s
+    )):
+        sorted_grouped[size] = sorted(grouped[size], key=lambda t: t.display_info.name)
+    
+    return sorted_grouped
 

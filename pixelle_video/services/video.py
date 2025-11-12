@@ -224,20 +224,88 @@ class VideoService:
                    -map "[v]" -map "[a]" output.mp4
         """
         try:
-            inputs = [ffmpeg.input(v) for v in videos]
-            (
-                ffmpeg
-                .concat(*inputs, v=1, a=1)
-                .output(output)
-                .overwrite_output()
-                .run(capture_stdout=True, capture_stderr=True)
+            # Build filter_complex string manually
+            n = len(videos)
+            
+            # Build input stream labels: [0:v][0:a][1:v][1:a]...
+            stream_spec = "".join([f"[{i}:v][{i}:a]" for i in range(n)])
+            filter_complex = f"{stream_spec}concat=n={n}:v=1:a=1[v][a]"
+            
+            # Build ffmpeg command
+            cmd = ['ffmpeg']
+            for video in videos:
+                cmd.extend(['-i', video])
+            cmd.extend([
+                '-filter_complex', filter_complex,
+                '-map', '[v]',
+                '-map', '[a]',
+                '-y',  # Overwrite output
+                output
+            ])
+            
+            # Run command
+            import subprocess
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                check=True
             )
+            
             logger.success(f"Videos concatenated successfully: {output}")
             return output
-        except ffmpeg.Error as e:
-            error_msg = e.stderr.decode() if e.stderr else str(e)
+        except subprocess.CalledProcessError as e:
+            error_msg = e.stderr if e.stderr else str(e)
             logger.error(f"FFmpeg concat filter error: {error_msg}")
             raise RuntimeError(f"Failed to concatenate videos: {error_msg}")
+        except Exception as e:
+            logger.error(f"Concatenation error: {e}")
+            raise RuntimeError(f"Failed to concatenate videos: {e}")
+    
+    def _get_video_duration(self, video: str) -> float:
+        """Get video duration in seconds"""
+        try:
+            probe = ffmpeg.probe(video)
+            duration = float(probe['format']['duration'])
+            return duration
+        except Exception as e:
+            logger.warning(f"Failed to get video duration: {e}")
+            return 0.0
+    
+    def _get_audio_duration(self, audio: str) -> float:
+        """Get audio duration in seconds"""
+        try:
+            probe = ffmpeg.probe(audio)
+            duration = float(probe['format']['duration'])
+            return duration
+        except Exception as e:
+            logger.warning(f"Failed to get audio duration: {e}, using estimate")
+            # Fallback: estimate based on file size (very rough)
+            import os
+            file_size = os.path.getsize(audio)
+            # Assume ~16kbps for MP3, so 2KB per second
+            estimated_duration = file_size / 2000
+            return max(1.0, estimated_duration)  # At least 1 second
+    
+    def has_audio_stream(self, video: str) -> bool:
+        """
+        Check if video has audio stream
+        
+        Args:
+            video: Video file path
+        
+        Returns:
+            True if video has audio stream, False otherwise
+        """
+        try:
+            probe = ffmpeg.probe(video)
+            audio_streams = [s for s in probe.get('streams', []) if s['codec_type'] == 'audio']
+            has_audio = len(audio_streams) > 0
+            logger.debug(f"Video {video} has_audio={has_audio}")
+            return has_audio
+        except Exception as e:
+            logger.warning(f"Failed to probe video audio streams: {e}, assuming no audio")
+            return False
     
     def merge_audio_video(
         self,
@@ -247,9 +315,18 @@ class VideoService:
         replace_audio: bool = True,
         audio_volume: float = 1.0,
         video_volume: float = 0.0,
+        pad_strategy: str = "freeze",  # "freeze" (freeze last frame) or "black" (black screen)
     ) -> str:
         """
-        Merge audio with video
+        Merge audio with video, using the longer duration
+        
+        The output video duration will be the maximum of video and audio duration.
+        If audio is longer than video, the video will be padded using the specified strategy.
+        
+        Automatically handles videos with or without audio streams.
+        - If video has no audio: adds the audio track
+        - If video has audio and replace_audio=True: replaces with new audio
+        - If video has audio and replace_audio=False: mixes both audio tracks
         
         Args:
             video: Video file path
@@ -259,6 +336,9 @@ class VideoService:
             audio_volume: Volume of the new audio (0.0 to 1.0+)
             video_volume: Volume of original video audio (0.0 to 1.0+)
                          Only used when replace_audio=False
+            pad_strategy: Strategy to pad video if audio is longer
+                         - "freeze": Freeze last frame (default)
+                         - "black": Fill with black screen
         
         Returns:
             Path to the output video file
@@ -267,28 +347,115 @@ class VideoService:
             RuntimeError: If FFmpeg execution fails
         
         Note:
-            - When replace_audio=True, video's original audio is removed
-            - When replace_audio=False, original and new audio are mixed
-            - Audio is trimmed/extended to match video duration
+            - Uses the longer duration between video and audio
+            - When audio is longer, video is padded using pad_strategy
+            - When video is longer, audio is looped or extended
+            - Automatically detects if video has audio
+            - When video is silent, audio is added regardless of replace_audio
+            - When replace_audio=True and video has audio, original audio is removed
+            - When replace_audio=False and video has audio, original and new audio are mixed
         """
+        # Get durations of video and audio
+        video_duration = self._get_video_duration(video)
+        audio_duration = self._get_audio_duration(audio)
+        
+        logger.info(f"Video duration: {video_duration:.2f}s, Audio duration: {audio_duration:.2f}s")
+        
+        # Determine target duration (max of both)
+        target_duration = max(video_duration, audio_duration)
+        logger.info(f"Target output duration: {target_duration:.2f}s")
+        
+        # Check if video has audio stream
+        video_has_audio = self.has_audio_stream(video)
+        
+        # Prepare video stream (potentially with padding)
+        input_video = ffmpeg.input(video)
+        video_stream = input_video.video
+        
+        # Pad video if audio is longer
+        if audio_duration > video_duration:
+            pad_duration = audio_duration - video_duration
+            logger.info(f"Audio is longer, padding video by {pad_duration:.2f}s using '{pad_strategy}' strategy")
+            
+            if pad_strategy == "freeze":
+                # Freeze last frame: tpad filter
+                video_stream = video_stream.filter('tpad', stop_mode='clone', stop_duration=pad_duration)
+            else:  # black
+                # Generate black frames for padding duration
+                from pixelle_video.utils.os_util import get_temp_path
+                import os
+                
+                # Get video properties
+                probe = ffmpeg.probe(video)
+                video_info = next(s for s in probe['streams'] if s['codec_type'] == 'video')
+                width = int(video_info['width'])
+                height = int(video_info['height'])
+                fps_str = video_info['r_frame_rate']
+                fps_num, fps_den = map(int, fps_str.split('/'))
+                fps = fps_num / fps_den if fps_den != 0 else 30
+                
+                # Create black video for padding
+                black_video_path = get_temp_path(f"black_pad_{os.path.basename(output)}")
+                black_input = ffmpeg.input(
+                    f'color=c=black:s={width}x{height}:r={fps}',
+                    f='lavfi',
+                    t=pad_duration
+                )
+                
+                # Concatenate original video with black padding
+                video_stream = ffmpeg.concat(video_stream, black_input.video, v=1, a=0)
+        
+        # Prepare audio stream (pad if needed to match target duration)
+        input_audio = ffmpeg.input(audio)
+        audio_stream = input_audio.audio.filter('volume', audio_volume)
+        
+        # Pad audio with silence if video is longer
+        if video_duration > audio_duration:
+            pad_duration = video_duration - audio_duration
+            logger.info(f"Video is longer, padding audio with {pad_duration:.2f}s silence")
+            # Use apad to add silence at the end
+            audio_stream = audio_stream.filter('apad', whole_dur=target_duration)
+        
+        if not video_has_audio:
+            logger.info(f"Video has no audio stream, adding audio track")
+            # Video is silent, just add the audio
+            try:
+                (
+                    ffmpeg
+                    .output(
+                        video_stream,
+                        audio_stream,
+                        output,
+                        vcodec='libx264',  # Re-encode video if padded
+                        acodec='aac',
+                        audio_bitrate='192k'
+                    )
+                    .overwrite_output()
+                    .run(capture_stdout=True, capture_stderr=True)
+                )
+                
+                logger.success(f"Audio added to silent video: {output}")
+                return output
+            except ffmpeg.Error as e:
+                error_msg = e.stderr.decode() if e.stderr else str(e)
+                logger.error(f"FFmpeg error adding audio to silent video: {error_msg}")
+                raise RuntimeError(f"Failed to add audio to video: {error_msg}")
+        
+        # Video has audio, proceed with merging
         logger.info(f"Merging audio with video (replace={replace_audio})")
         
         try:
-            input_video = ffmpeg.input(video)
-            input_audio = ffmpeg.input(audio)
-            
             if replace_audio:
                 # Replace audio: use only new audio, ignore original
                 (
                     ffmpeg
                     .output(
-                        input_video.video,
-                        input_audio.audio.filter('volume', audio_volume),
+                        video_stream,
+                        audio_stream,
                         output,
-                        vcodec='copy',
+                        vcodec='libx264',  # Re-encode video if padded
                         acodec='aac',
-                        audio_bitrate='192k',
-                        shortest=None
+                        audio_bitrate='192k'
                     )
                     .overwrite_output()
                     .run(capture_stdout=True, capture_stderr=True)
@@ -298,20 +465,20 @@ class VideoService:
                 mixed_audio = ffmpeg.filter(
                     [
                         input_video.audio.filter('volume', video_volume),
-                        input_audio.audio.filter('volume', audio_volume)
+                        audio_stream
                     ],
                     'amix',
                     inputs=2,
-                    duration='first'
+                    duration='longest'  # Use longest audio
                 )
                 
                 (
                     ffmpeg
                     .output(
-                        input_video.video,
+                        video_stream,
                         mixed_audio,
                         output,
-                        vcodec='copy',
+                        vcodec='libx264',  # Re-encode video if padded
                         acodec='aac',
                         audio_bitrate='192k'
                     )
@@ -325,6 +492,92 @@ class VideoService:
             error_msg = e.stderr.decode() if e.stderr else str(e)
             logger.error(f"FFmpeg merge error: {error_msg}")
             raise RuntimeError(f"Failed to merge audio and video: {error_msg}")
+    
+    def overlay_image_on_video(
+        self,
+        video: str,
+        overlay_image: str,
+        output: str,
+        scale_mode: str = "contain"
+    ) -> str:
+        """
+        Overlay a transparent image on top of video
+        
+        Args:
+            video: Base video file path
+            overlay_image: Transparent overlay image path (e.g., rendered HTML with transparent background)
+            output: Output video file path
+            scale_mode: How to scale the base video to fit the overlay size
+                - "contain": Scale video to fit within overlay dimensions (letterbox/pillarbox)
+                - "cover": Scale video to cover overlay dimensions (may crop)
+                - "stretch": Stretch video to exact overlay dimensions
+        
+        Returns:
+            Path to the output video file
+        
+        Raises:
+            RuntimeError: If FFmpeg execution fails
+        
+        Note:
+            - Overlay image should have transparent background
+            - Video is scaled to match overlay dimensions based on scale_mode
+            - Final video size matches overlay image size
+            - Video codec is re-encoded to support overlay
+        """
+        logger.info(f"Overlaying image on video (scale_mode={scale_mode})")
+        
+        try:
+            # Get overlay image dimensions
+            overlay_probe = ffmpeg.probe(overlay_image)
+            overlay_stream = next(s for s in overlay_probe['streams'] if s['codec_type'] == 'video')
+            overlay_width = int(overlay_stream['width'])
+            overlay_height = int(overlay_stream['height'])
+            
+            logger.debug(f"Overlay dimensions: {overlay_width}x{overlay_height}")
+            
+            input_video = ffmpeg.input(video)
+            input_overlay = ffmpeg.input(overlay_image)
+            
+            # Scale video to fit overlay size using scale_mode
+            if scale_mode == "contain":
+                # Scale to fit (letterbox/pillarbox if aspect ratio differs)
+                # Use scale filter with force_original_aspect_ratio=decrease and pad to center
+                scaled_video = (
+                    input_video
+                    .filter('scale', overlay_width, overlay_height, force_original_aspect_ratio='decrease')
+                    .filter('pad', overlay_width, overlay_height, '(ow-iw)/2', '(oh-ih)/2', color='black')
+                )
+            elif scale_mode == "cover":
+                # Scale to cover (crop if aspect ratio differs)
+                scaled_video = (
+                    input_video
+                    .filter('scale', overlay_width, overlay_height, force_original_aspect_ratio='increase')
+                    .filter('crop', overlay_width, overlay_height)
+                )
+            else:  # stretch
+                # Stretch to exact dimensions
+                scaled_video = input_video.filter('scale', overlay_width, overlay_height)
+            
+            # Overlay the transparent image on top of the scaled video
+            output_stream = ffmpeg.overlay(scaled_video, input_overlay)
+            
+            (
+                ffmpeg
+                .output(output_stream, output, 
+                        vcodec='libx264',
+                        pix_fmt='yuv420p',
+                        preset='medium',
+                        crf=23)
+                .overwrite_output()
+                .run(capture_stdout=True, capture_stderr=True)
+            )
+            
+            logger.success(f"Image overlaid on video: {output}")
+            return output
+        except ffmpeg.Error as e:
+            error_msg = e.stderr.decode() if e.stderr else str(e)
+            logger.error(f"FFmpeg overlay error: {error_msg}")
+            raise RuntimeError(f"Failed to overlay image on video: {error_msg}")
     
     def create_video_from_image(
         self,

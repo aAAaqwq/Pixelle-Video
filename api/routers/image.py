@@ -43,18 +43,27 @@ async def image_generate(
     try:
         logger.info(f"Image generation request: {request.prompt[:50]}...")
         
-        # Call image service
-        image_path = await pixelle_video.image(
+        # Call media service (backward compatible with image API)
+        media_result = await pixelle_video.media(
             prompt=request.prompt,
             width=request.width,
             height=request.height,
             workflow=request.workflow
         )
         
+        # For backward compatibility, only support image results in /image endpoint
+        if media_result.is_video:
+            raise HTTPException(
+                status_code=400,
+                detail="Video workflow used. Please use /media/generate endpoint for video generation."
+            )
+        
         return ImageGenerateResponse(
-            image_path=image_path
+            image_path=media_result.url
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Image generation error: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -92,8 +92,7 @@ class CustomPipeline(BasePipeline):
         ref_audio: Optional[str] = None,
         
         image_workflow: Optional[str] = None,
-        image_width: int = 1024,
-        image_height: int = 1024,
+        # Note: image_width and image_height are now auto-determined from template
         
         frame_template: Optional[str] = None,
         video_fps: int = 30,
@@ -118,9 +117,10 @@ class CustomPipeline(BasePipeline):
             VideoGenerationResult
         
         Image Generation Logic:
-            - If template has {{image}} → automatically generates images
-            - If template has no {{image}} → skips image generation (faster, cheaper)
-            - To customize: Override the template_requires_image logic in your subclass
+            - image_*.html templates → automatically generates images
+            - video_*.html templates → automatically generates videos
+            - static_*.html templates → skips media generation (faster, cheaper)
+            - To customize: Override the template type detection logic in your subclass
         """
         logger.info("Starting CustomPipeline")
         logger.info(f"Input text length: {len(text)} chars")
@@ -152,19 +152,27 @@ class CustomPipeline(BasePipeline):
             frame_template = template_config.get("default_template", "1080x1920/default.html")
         
         # ========== Step 0.5: Check template requirements ==========
-        # Detect if template requires {{image}} parameter
-        # This allows skipping the entire image generation pipeline for text-only templates
+        # Detect template type by filename prefix
+        from pathlib import Path
         from pixelle_video.services.frame_html import HTMLFrameGenerator
-        from pixelle_video.utils.template_util import resolve_template_path
+        from pixelle_video.utils.template_util import resolve_template_path, get_template_type
         
+        template_name = Path(frame_template).name
+        template_type = get_template_type(template_name)
+        template_requires_image = (template_type == "image")
+        
+        # Read media size from template meta tags
         template_path = resolve_template_path(frame_template)
         generator = HTMLFrameGenerator(template_path)
-        template_requires_image = generator.requires_image()
+        image_width, image_height = generator.get_media_size()
+        logger.info(f"📐 Media size from template: {image_width}x{image_height}")
         
-        if template_requires_image:
+        if template_type == "image":
             logger.info(f"📸 Template requires image generation")
-        else:
-            logger.info(f"⚡ Template does not require images - skipping image generation pipeline")
+        elif template_type == "video":
+            logger.info(f"🎬 Template requires video generation")
+        else:  # static
+            logger.info(f"⚡ Static template - skipping media generation pipeline")
             logger.info(f"   💡 Benefits: Faster generation + Lower cost + No ComfyUI dependency")
         
         # ========== Step 1: Process content (CUSTOMIZE THIS) ==========
@@ -194,8 +202,8 @@ class CustomPipeline(BasePipeline):
         # ========== Step 2: Generate image prompts (CONDITIONAL - CUSTOMIZE THIS) ==========
         self._report_progress(progress_callback, "generating_image_prompts", 0.25)
         
-        # IMPORTANT: Check if template actually needs images
-        # If your template doesn't use {{image}}, you can skip this entire step!
+        # IMPORTANT: Check if template is image type
+        # If your template is static_*.html, you can skip this entire step!
         if template_requires_image:
             # Template requires images - generate image prompts using LLM
             from pixelle_video.utils.content_generators import generate_image_prompts
