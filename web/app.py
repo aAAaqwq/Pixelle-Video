@@ -29,6 +29,7 @@ if str(_project_root) not in sys.path:
 import asyncio
 import base64
 import os
+import tomllib
 
 import streamlit as st
 from loguru import logger
@@ -54,6 +55,19 @@ st.set_page_config(
 def run_async(coro):
     """Run async coroutine in sync context"""
     return asyncio.run(coro)
+
+
+def get_project_version():
+    """Get project version from pyproject.toml"""
+    try:
+        pyproject_path = _project_root / "pyproject.toml"
+        if pyproject_path.exists():
+            with open(pyproject_path, "rb") as f:
+                pyproject_data = tomllib.load(f)
+                return pyproject_data.get("project", {}).get("version", "Unknown")
+    except Exception as e:
+        logger.warning(f"Failed to read version from pyproject.toml: {e}")
+    return "Unknown"
 
 
 def safe_rerun():
@@ -458,6 +472,26 @@ def main():
             
             # Use full filename for bgm_path (including extension)
             bgm_path = None if bgm_choice == tr("bgm.none") else bgm_choice
+        
+        # ====================================================================
+        # Version Info & GitHub Section
+        # ====================================================================
+        with st.container(border=True):
+            st.markdown(f"**{tr('version.title')}**")
+            version = get_project_version()
+            github_url = "https://github.com/AIDC-AI/Pixelle-Video"
+            
+            # Version and GitHub link in one line
+            github_url = "https://github.com/AIDC-AI/Pixelle-Video"
+            badge_url = "https://img.shields.io/github/stars/AIDC-AI/Pixelle-Video"
+
+            st.markdown(
+                f'{tr("version.current")}: `{version}` &nbsp;&nbsp; '
+                f'<a href="{github_url}" target="_blank">'
+                f'<img src="{badge_url}" alt="GitHub stars" style="vertical-align: middle;">'
+                f'</a>',
+                unsafe_allow_html=True)
+
     
     # ========================================================================
     # Middle Column: TTS, Image Settings & Template

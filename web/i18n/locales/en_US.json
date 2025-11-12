@@ -256,7 +256,12 @@
     "help.how": "Customization",
     "help.note": "Note",
     
-    "language.select": "🌐 Language"
+    "language.select": "🌐 Language",
+    
+    "version.title": "📦 Version Info",
+    "version.current": "Current Version",
+    
+    "github.title": "⭐ Open Source Support"
   }
 }
 

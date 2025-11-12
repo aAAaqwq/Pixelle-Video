@@ -256,7 +256,12 @@
     "help.how": "自定义方式",
     "help.note": "注意",
     
-    "language.select": "🌐 语言"
+    "language.select": "🌐 语言",
+    
+    "version.title": "📦 版本信息",
+    "version.current": "当前版本",
+    
+    "github.title": "⭐ 开源支持"
   }
 }
 
