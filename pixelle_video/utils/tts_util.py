@@ -20,13 +20,14 @@ Currently, TTS service uses ComfyUI workflows only.
 import asyncio
 import ssl
 import random
+import certifi
 import edge_tts as edge_tts_sdk
 from loguru import logger
 from aiohttp import WSServerHandshakeError, ClientResponseError
 
 
-# Global flag for SSL verification (set to False for development only)
-_SSL_VERIFY_ENABLED = False
+# Use certifi bundle for SSL verification instead of disabling it
+_USE_CERTIFI_SSL = True
 
 # Retry configuration for Edge TTS (to handle 401 errors)
 _RETRY_COUNT = 5       # Default retry count (increased from 3 to 5)
@@ -117,20 +118,18 @@ async def edge_tts(
                 logger.info(f"🔄 Retrying Edge TTS (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
                 await asyncio.sleep(retry_delay)
             
-            # Monkey patch ssl.create_default_context if SSL verification is disabled
-            if not _SSL_VERIFY_ENABLED:
-                if attempt == 0:  # Only log warning once
-                    logger.warning("SSL verification is disabled for development. This is NOT recommended for production!")
+            # Use certifi SSL context for proper certificate verification
+            if _USE_CERTIFI_SSL:
+                if attempt == 0:  # Only log info once
+                    logger.debug("Using certifi SSL certificates for secure Edge TTS connection")
                 original_create_default_context = ssl.create_default_context
                 
-                def create_unverified_context(*args, **kwargs):
-                    ctx = original_create_default_context(*args, **kwargs)
-                    ctx.check_hostname = False
-                    ctx.verify_mode = ssl.CERT_NONE
-                    return ctx
+                def create_certifi_context(*args, **kwargs):
+                    # Build SSL context that uses certifi bundle (resolves Windows / missing CA issues)
+                    return original_create_default_context(cafile=certifi.where())
                 
                 # Temporarily replace the function
-                ssl.create_default_context = create_unverified_context
+                ssl.create_default_context = create_certifi_context
             
             try:
                 # Create communicate instance
@@ -190,7 +189,7 @@ async def edge_tts(
             
             finally:
                 # Restore original function if we patched it
-                if not _SSL_VERIFY_ENABLED:
+                if _USE_CERTIFI_SSL:
                     ssl.create_default_context = original_create_default_context
         
         # Should not reach here, but just in case
@@ -275,19 +274,17 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
                 logger.info(f"🔄 Retrying list voices (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
                 await asyncio.sleep(retry_delay)
             
-            # Monkey patch SSL if verification is disabled
-            if not _SSL_VERIFY_ENABLED:
-                if attempt == 0:  # Only log warning once
-                    logger.warning("SSL verification is disabled for development. This is NOT recommended for production!")
+            # Use certifi SSL context for proper certificate verification
+            if _USE_CERTIFI_SSL:
+                if attempt == 0:  # Only log info once
+                    logger.debug("Using certifi SSL certificates for secure Edge TTS connection")
                 original_create_default_context = ssl.create_default_context
                 
-                def create_unverified_context(*args, **kwargs):
-                    ctx = original_create_default_context(*args, **kwargs)
-                    ctx.check_hostname = False
-                    ctx.verify_mode = ssl.CERT_NONE
-                    return ctx
+                def create_certifi_context(*args, **kwargs):
+                    # Build SSL context that uses certifi bundle (resolves Windows / missing CA issues)
+                    return original_create_default_context(cafile=certifi.where())
                 
-                ssl.create_default_context = create_unverified_context
+                ssl.create_default_context = create_certifi_context
             
             try:
                 # Get all voices
@@ -331,7 +328,7 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
             
             finally:
                 # Restore original function if we patched it
-                if not _SSL_VERIFY_ENABLED:
+                if _USE_CERTIFI_SSL:
                     ssl.create_default_context = original_create_default_context
         
         # Should not reach here, but just in case
