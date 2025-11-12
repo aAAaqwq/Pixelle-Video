@@ -24,7 +24,7 @@ LLM_PRESETS: List[Dict[str, Any]] = [
         "name": "Qwen",
         "base_url": "https://dashscope.aliyuncs.com/compatible-mode/v1",
         "model": "qwen-max",
-        "api_key_url": "https://dashscope.console.aliyun.com/apiKey",
+        "api_key_url": "https://bailian.console.aliyun.com/?tab=model#/api-key",
     },
     {
         "name": "OpenAI",
