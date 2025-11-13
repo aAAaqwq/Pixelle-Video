@@ -864,7 +864,6 @@ def main():
             st.session_state['template_media_height'] = media_height
             
             # Detect template media type
-            from pathlib import Path
             from pixelle_video.utils.template_util import get_template_type
             
             template_name = Path(frame_template).name
