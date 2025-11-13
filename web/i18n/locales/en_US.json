@@ -126,6 +126,8 @@
     
     "bgm.selector": "Music Selection",
     "bgm.none": "🔇 No BGM",
+    "bgm.volume": "Volume",
+    "bgm.volume_help": "Adjust background music volume (0.0 = muted, 1.0 = original volume)",
     "bgm.preview": "▶ Preview Music",
     "bgm.preview_failed": "❌ Music file not found: {file}",
     "bgm.what": "Adds background music to your video, making it more atmospheric and professional",

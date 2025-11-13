@@ -457,6 +457,21 @@ def main():
                 label_visibility="collapsed"
             )
             
+            # BGM volume slider (only show when BGM is selected)
+            if bgm_choice != tr("bgm.none"):
+                bgm_volume = st.slider(
+                    tr("bgm.volume"),
+                    min_value=0.0,
+                    max_value=0.5,
+                    value=0.2,
+                    step=0.01,
+                    format="%.2f",
+                    key="bgm_volume_slider",
+                    help=tr("bgm.volume_help")
+                )
+            else:
+                bgm_volume = 0.2  # Default value when no BGM selected
+            
             # BGM preview button (only if BGM is not "None")
             if bgm_choice != tr("bgm.none"):
                 if st.button(tr("bgm.preview"), key="preview_bgm", use_container_width=True):
@@ -1280,6 +1295,7 @@ def main():
                         "frame_template": frame_template,
                         "prompt_prefix": prompt_prefix,
                         "bgm_path": bgm_path,
+                        "bgm_volume": bgm_volume if bgm_path else 0.2,
                         "progress_callback": update_progress,
                     }
                     

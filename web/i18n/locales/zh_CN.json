@@ -126,6 +126,8 @@
     
     "bgm.selector": "音乐选择",
     "bgm.none": "🔇 无背景音乐",
+    "bgm.volume": "音量",
+    "bgm.volume_help": "调整背景音乐的音量（0.0 = 静音，1.0 = 原始音量）",
     "bgm.preview": "▶ 试听音乐",
     "bgm.preview_failed": "❌ 音乐文件未找到：{file}",
     "bgm.what": "为视频添加背景音乐，让视频更有氛围感和专业性",
