@@ -3,12 +3,8 @@
 <p align="center"><a href="README_EN.md">English</a> | <b>中文</b></p>
 
 <p align="center">
-  <a href="https://www.bilibili.com/video/BV1QHC7BVEq7" target="_blank">
-    <img src="https://img.shields.io/badge/🎥 视频教程-EA4C89" alt="视频教程">
-  </a>
-  <a href="https://aidc-ai.github.io/Pixelle-Video/zh" target="_blank">
-    <img src="https://img.shields.io/badge/📘 使用文档-4A90E2" alt="使用文档">
-  </a>
+  <a href="https://www.bilibili.com/video/BV1QHC7BVEq7" target="_blank"><img src="https://img.shields.io/badge/🎥 视频教程-EA4C89" alt="视频教程"></a>
+  <a href="https://aidc-ai.github.io/Pixelle-Video/zh" target="_blank"><img src="https://img.shields.io/badge/📘 使用文档-4A90E2" alt="使用文档"></a>
   <a href="https://github.com/AIDC-AI/Pixelle-Video/stargazers"><img src="https://img.shields.io/github/stars/AIDC-AI/Pixelle-Video.svg" alt="Stargazers"></a>
   <a href="https://github.com/AIDC-AI/Pixelle-Video/issues"><img src="https://img.shields.io/github/issues/AIDC-AI/Pixelle-Video.svg" alt="Issues"></a>
   <a href="https://github.com/AIDC-AI/Pixelle-Video/network/members"><img src="https://img.shields.io/github/forks/AIDC-AI/Pixelle-Video.svg" alt="Forks"></a>
