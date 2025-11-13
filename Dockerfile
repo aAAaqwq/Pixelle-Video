@@ -51,12 +51,17 @@ COPY pixelle_video ./pixelle_video
 # Install Python dependencies using uv with configurable index URL
 # Auto-select China mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
 # Set longer timeout and reduce concurrent downloads for stability
+# IMPORTANT: UV requires BOTH environment variable AND --index-url for proper mirror usage
 RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.org/simple" ]; then \
         export UV_HTTP_TIMEOUT=300 && \
-        uv sync --frozen --no-dev --index-url https://mirrors.aliyun.com/pypi/simple/; \
+        export UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/ && \
+        export UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple/ && \
+        uv sync --frozen --no-dev; \
     else \
         export UV_HTTP_TIMEOUT=300 && \
-        uv sync --frozen --no-dev --index-url $UV_INDEX_URL; \
+        export UV_INDEX_URL=$UV_INDEX_URL && \
+        export UV_DEFAULT_INDEX=$UV_INDEX_URL && \
+        uv sync --frozen --no-dev; \
     fi
 
 # Copy rest of application code
