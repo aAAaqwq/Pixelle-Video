@@ -30,7 +30,7 @@ from aiohttp import WSServerHandshakeError, ClientResponseError
 _USE_CERTIFI_SSL = True
 
 # Retry configuration for Edge TTS (to handle 401 errors)
-_RETRY_COUNT = 5       # Default retry count (increased from 3 to 5)
+_RETRY_COUNT = 10       # Default retry count (increased from 3 to 5)
 _RETRY_BASE_DELAY = 1.0     # Base retry delay in seconds (for exponential backoff)
 _MAX_RETRY_DELAY = 10.0     # Maximum retry delay in seconds
 
@@ -38,8 +38,27 @@ _MAX_RETRY_DELAY = 10.0     # Maximum retry delay in seconds
 _REQUEST_DELAY = 0.5        # Minimum delay before each request (seconds)
 _MAX_CONCURRENT_REQUESTS = 3  # Maximum concurrent requests
 
-# Global semaphore for rate limiting
-_request_semaphore = asyncio.Semaphore(_MAX_CONCURRENT_REQUESTS)
+# Global semaphore for rate limiting (created per event loop)
+_request_semaphore = None
+_semaphore_loop = None
+
+
+def _get_request_semaphore():
+    """Get or create request semaphore for current event loop"""
+    global _request_semaphore, _semaphore_loop
+    
+    try:
+        current_loop = asyncio.get_running_loop()
+    except RuntimeError:
+        # No running loop
+        return asyncio.Semaphore(_MAX_CONCURRENT_REQUESTS)
+    
+    # If semaphore doesn't exist or belongs to different loop, create new one
+    if _request_semaphore is None or _semaphore_loop != current_loop:
+        _request_semaphore = asyncio.Semaphore(_MAX_CONCURRENT_REQUESTS)
+        _semaphore_loop = current_loop
+    
+    return _request_semaphore
 
 
 async def edge_tts(
@@ -98,7 +117,8 @@ async def edge_tts(
     logger.debug(f"Calling Edge TTS with voice: {voice}, rate: {rate}, retry_count: {retry_count}")
     
     # Use semaphore to limit concurrent requests
-    async with _request_semaphore:
+    request_semaphore = _get_request_semaphore()
+    async with request_semaphore:
         # Add a small random delay before each request to avoid rate limiting
         pre_delay = _REQUEST_DELAY + random.uniform(0, 0.3)
         logger.debug(f"Waiting {pre_delay:.2f}s before request (rate limiting)")
@@ -118,20 +138,17 @@ async def edge_tts(
                 logger.info(f"🔄 Retrying Edge TTS (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
                 await asyncio.sleep(retry_delay)
             
-            # Use certifi SSL context for proper certificate verification
-            if _USE_CERTIFI_SSL:
-                if attempt == 0:  # Only log info once
-                    logger.debug("Using certifi SSL certificates for secure Edge TTS connection")
-                original_create_default_context = ssl.create_default_context
-                
-                def create_certifi_context(*args, **kwargs):
-                    # Build SSL context that uses certifi bundle (resolves Windows / missing CA issues)
-                    return original_create_default_context(cafile=certifi.where())
-                
-                # Temporarily replace the function
-                ssl.create_default_context = create_certifi_context
-            
             try:
+                # Create communicate instance with certifi SSL context
+                if _USE_CERTIFI_SSL:
+                    if attempt == 0:  # Only log info once
+                        logger.debug("Using certifi SSL certificates for secure Edge TTS connection")
+                    # Create SSL context with certifi bundle
+                    import certifi
+                    ssl_context = ssl.create_default_context(cafile=certifi.where())
+                else:
+                    ssl_context = None
+                
                 # Create communicate instance
                 communicate = edge_tts_sdk.Communicate(
                     text=text,
@@ -186,11 +203,6 @@ async def edge_tts(
                 # Other errors - don't retry, raise immediately
                 logger.error(f"Edge TTS error (non-retryable): {type(e).__name__} - {e}")
                 raise
-            
-            finally:
-                # Restore original function if we patched it
-                if _USE_CERTIFI_SSL:
-                    ssl.create_default_context = original_create_default_context
         
         # Should not reach here, but just in case
         if last_error:
@@ -255,7 +267,8 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
     logger.debug(f"Fetching Edge TTS voices, locale filter: {locale}, retry_count: {retry_count}")
     
     # Use semaphore to limit concurrent requests
-    async with _request_semaphore:
+    request_semaphore = _get_request_semaphore()
+    async with request_semaphore:
         # Add a small random delay before each request to avoid rate limiting
         pre_delay = _REQUEST_DELAY + random.uniform(0, 0.3)
         logger.debug(f"Waiting {pre_delay:.2f}s before request (rate limiting)")
@@ -274,20 +287,8 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
                 logger.info(f"🔄 Retrying list voices (attempt {attempt + 1}/{retry_count + 1}) after {retry_delay:.2f}s delay...")
                 await asyncio.sleep(retry_delay)
             
-            # Use certifi SSL context for proper certificate verification
-            if _USE_CERTIFI_SSL:
-                if attempt == 0:  # Only log info once
-                    logger.debug("Using certifi SSL certificates for secure Edge TTS connection")
-                original_create_default_context = ssl.create_default_context
-                
-                def create_certifi_context(*args, **kwargs):
-                    # Build SSL context that uses certifi bundle (resolves Windows / missing CA issues)
-                    return original_create_default_context(cafile=certifi.where())
-                
-                ssl.create_default_context = create_certifi_context
-            
             try:
-                # Get all voices
+                # Get all voices (edge-tts handles SSL internally)
                 voices = await edge_tts_sdk.list_voices()
                 
                 # Filter by locale if specified
@@ -325,11 +326,6 @@ async def list_voices(locale: str = None, retry_count: int = _RETRY_COUNT, retry
                 # Other errors - don't retry, raise immediately
                 logger.error(f"List voices error (non-retryable): {type(e).__name__} - {e}")
                 raise
-            
-            finally:
-                # Restore original function if we patched it
-                if _USE_CERTIFI_SSL:
-                    ssl.create_default_context = original_create_default_context
         
         # Should not reach here, but just in case
         if last_error:
