@@ -3,14 +3,11 @@ version: '3.8'
 # Build Arguments Configuration
 # You can override these by setting environment variables before running docker-compose
 #
-# Example for China environment (auto uses Tsinghua/Aliyun mirrors):
+# Example for China environment (auto uses Tsinghua mirror):
 #   USE_CN_MIRROR=true docker-compose up -d
 #
 # Example for international environment (default):
 #   docker-compose up -d
-#
-# Advanced: Use custom PyPI mirror:
-#   UV_INDEX_URL=https://mirrors.cloud.tencent.com/pypi/simple/ docker-compose up -d
 
 services:
   # API Service - FastAPI backend
@@ -20,7 +17,6 @@ services:
       dockerfile: Dockerfile
       args:
         USE_CN_MIRROR: ${USE_CN_MIRROR:-false}
-        UV_INDEX_URL: ${UV_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
     container_name: pixelle-video-api
     command: uv run python api/app.py --host 0.0.0.0 --port 8000
     ports:
@@ -59,7 +55,6 @@ services:
       dockerfile: Dockerfile
       args:
         USE_CN_MIRROR: ${USE_CN_MIRROR:-false}
-        UV_INDEX_URL: ${UV_INDEX_URL:-https://pypi.tuna.tsinghua.edu.cn/simple}
     container_name: pixelle-video-web
     command: uv run streamlit run web/app.py --server.port 8501 --server.address 0.0.0.0
     ports:

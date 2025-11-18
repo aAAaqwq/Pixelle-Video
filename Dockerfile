@@ -5,9 +5,7 @@ FROM python:3.11-slim
 
 # Build arguments for mirror configuration
 # USE_CN_MIRROR: whether to use China mirrors (true/false)
-# UV_INDEX_URL: Python package index URL (defaults to Tsinghua when USE_CN_MIRROR=true)
 ARG USE_CN_MIRROR=false
-ARG UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 
 # Set working directory
 WORKDIR /app
@@ -53,7 +51,7 @@ COPY pixelle_video ./pixelle_video
 # Only create config when USE_CN_MIRROR=true, otherwise use default PyPI
 RUN if [ "$USE_CN_MIRROR" = "true" ]; then \
         echo '[[index]]' > uv.toml && \
-        echo "url = \"$UV_INDEX_URL\"" >> uv.toml && \
+        echo 'url = "https://pypi.tuna.tsinghua.edu.cn/simple"' >> uv.toml && \
         echo 'default = true' >> uv.toml; \
     fi && \
     export UV_HTTP_TIMEOUT=300 && \
