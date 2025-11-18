@@ -7,7 +7,7 @@ FROM python:3.11-slim
 # USE_CN_MIRROR: whether to use China mirrors (true/false)
 # UV_INDEX_URL: Python package index URL (defaults to Aliyun when USE_CN_MIRROR=true)
 ARG USE_CN_MIRROR=false
-ARG UV_INDEX_URL=https://pypi.org/simple
+ARG UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 
 # Set working directory
 WORKDIR /app
@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y \
 # For China: use pip to install uv from mirror (faster and more stable)
 # For International: use official installer script
 RUN if [ "$USE_CN_MIRROR" = "true" ]; then \
-        pip install --no-cache-dir -i https://mirrors.aliyun.com/pypi/simple/ uv; \
+        pip install --no-cache-dir -i https://pypi.tuna.tsinghua.edu.cn/simple/ uv; \
     else \
         curl -LsSf https://astral.sh/uv/install.sh | sh; \
     fi
@@ -52,10 +52,10 @@ COPY pixelle_video ./pixelle_video
 # Auto-select China mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
 # Set longer timeout and reduce concurrent downloads for stability
 # IMPORTANT: UV requires BOTH environment variable AND --index-url for proper mirror usage
-RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.org/simple" ]; then \
+RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.tuna.tsinghua.edu.cn/simple" ]; then \
         export UV_HTTP_TIMEOUT=300 && \
-        export UV_INDEX_URL=https://mirrors.aliyun.com/pypi/simple/ && \
-        export UV_DEFAULT_INDEX=https://mirrors.aliyun.com/pypi/simple/ && \
+        export UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple/ && \
+        export UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple/ && \
         uv sync --frozen --no-dev; \
     else \
         export UV_HTTP_TIMEOUT=300 && \
