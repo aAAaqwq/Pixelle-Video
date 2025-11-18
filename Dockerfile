@@ -5,7 +5,7 @@ FROM python:3.11-slim
 
 # Build arguments for mirror configuration
 # USE_CN_MIRROR: whether to use China mirrors (true/false)
-# UV_INDEX_URL: Python package index URL (defaults to Aliyun when USE_CN_MIRROR=true)
+# UV_INDEX_URL: Python package index URL (defaults to Tsinghua when USE_CN_MIRROR=true)
 ARG USE_CN_MIRROR=false
 ARG UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple
 
@@ -50,18 +50,14 @@ COPY pixelle_video ./pixelle_video
 
 # Install Python dependencies using uv with configurable index URL
 # Auto-select China mirror when USE_CN_MIRROR=true and UV_INDEX_URL is default
-# Set longer timeout and reduce concurrent downloads for stability
-# IMPORTANT: UV requires BOTH environment variable AND --index-url for proper mirror usage
+# Set longer timeout and use --index-url parameter for proper mirror usage
+# Note: UV_INDEX_URL is deprecated, use UV_DEFAULT_INDEX instead
 RUN if [ "$USE_CN_MIRROR" = "true" ] && [ "$UV_INDEX_URL" = "https://pypi.tuna.tsinghua.edu.cn/simple" ]; then \
         export UV_HTTP_TIMEOUT=300 && \
-        export UV_INDEX_URL=https://pypi.tuna.tsinghua.edu.cn/simple/ && \
-        export UV_DEFAULT_INDEX=https://pypi.tuna.tsinghua.edu.cn/simple/ && \
-        uv sync --frozen --no-dev; \
+        uv sync --frozen --no-dev --index-url https://pypi.tuna.tsinghua.edu.cn/simple; \
     else \
         export UV_HTTP_TIMEOUT=300 && \
-        export UV_INDEX_URL=$UV_INDEX_URL && \
-        export UV_DEFAULT_INDEX=$UV_INDEX_URL && \
-        uv sync --frozen --no-dev; \
+        uv sync --frozen --no-dev --index-url $UV_INDEX_URL; \
     fi
 
 # Copy rest of application code
