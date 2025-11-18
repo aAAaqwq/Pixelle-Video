@@ -110,7 +110,7 @@
 
     ---
 
-    ![satirical_cartoon](../../images/1080x1920/satirical_cartoon.png)
+    ![satirical_cartoon](../../images/1080x1920/satirical_cartoon.jpg)
     
     80年代讽刺漫画风格，适合精神类小故事
 
@@ -118,7 +118,7 @@
 
     ---
 
-    ![simple_black](../../images/1080x1920/simple_black.png)
+    ![simple_black](../../images/1080x1920/simple_black.jpg)
     
     极简黑色背景，适合心灵鸡汤类内容
 
@@ -126,7 +126,7 @@
 
     ---
 
-    ![simple_line_drawing](../../images/1080x1920/simple_line_drawing.png)
+    ![simple_line_drawing](../../images/1080x1920/simple_line_drawing.jpg)
     
     简笔画，适合认知成长类内容
 </div>
@@ -155,6 +155,29 @@
     
     暗黑科技风格，适合技术、游戏内容
 
+-   **Film**
+
+    ---
+
+    ![film](../../images/1920x1080/film.jpg)
+    
+    电影风格，沉浸式体验
+
+-   **Full**
+
+    ---
+
+    ![full](../../images/1920x1080/full.jpg)
+    
+    全屏显示，适合书单号
+
+-   **Book**
+
+    ---
+
+    ![book](../../images/1920x1080/book.jpg)
+    
+    图书解读，适合科普类内容
 </div>
 
 ---

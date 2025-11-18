@@ -110,7 +110,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![satirical_cartoon](../../images/1080x1920/satirical_cartoon.png)
+    ![satirical_cartoon](../../images/1080x1920/satirical_cartoon.jpg)
     
     80s satirical cartoon style for spiritual tales
 
@@ -118,7 +118,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![simple_black](../../images/1080x1920/simple_black.png)
+    ![simple_black](../../images/1080x1920/simple_black.jpg)
     
     Simple black background, suitable for inspirational content
 
@@ -126,9 +126,33 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![simple_line_drawing](../../images/1080x1920/simple_line_drawing.png)
+    ![simple_line_drawing](../../images/1080x1920/simple_line_drawing.jpg)
     
     Simple line drawing style for cognitive growth content
+
+-   **Film**
+
+    ---
+
+    ![film](../../images/1920x1080/film.jpg)
+    
+    Film style, immersive experience
+
+-   **Full**
+
+    ---
+
+    ![full](../../images/1920x1080/full.jpg)
+    
+    Full screen display, suitable for book lists
+
+-   **Book**
+
+    ---
+
+    ![book](../../images/1920x1080/book.jpg)
+    
+    Book style, suitable for book lists
 </div>
 
 ---
