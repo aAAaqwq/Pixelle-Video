@@ -21,60 +21,152 @@ from web.utils.async_helpers import get_project_version
 
 
 def render_content_input():
-    """Render content input section (left column)"""
+    """Render content input section (left column) with batch support"""
     with st.container(border=True):
         st.markdown(f"**{tr('section.content_input')}**")
         
-        # Processing mode selection
-        mode = st.radio(
-            "Processing Mode",
-            ["generate", "fixed"],
-            horizontal=True,
-            format_func=lambda x: tr(f"mode.{x}"),
-            label_visibility="collapsed"
+        # ====================================================================
+        # Step 1: Batch mode toggle (highest priority)
+        # ====================================================================
+        batch_mode = st.checkbox(
+            tr("batch.mode_label"),
+            value=False,
+            help=tr("batch.mode_help")
         )
         
-        # Text input (unified for both modes)
-        text_placeholder = tr("input.topic_placeholder") if mode == "generate" else tr("input.content_placeholder")
-        text_height = 120 if mode == "generate" else 200
-        text_help = tr("input.text_help_generate") if mode == "generate" else tr("input.text_help_fixed")
+        if not batch_mode:
+            # ================================================================
+            # Single task mode (original logic, unchanged)
+            # ================================================================
+            # Processing mode selection
+            mode = st.radio(
+                "Processing Mode",
+                ["generate", "fixed"],
+                horizontal=True,
+                format_func=lambda x: tr(f"mode.{x}"),
+                label_visibility="collapsed"
+            )
+            
+            # Text input (unified for both modes)
+            text_placeholder = tr("input.topic_placeholder") if mode == "generate" else tr("input.content_placeholder")
+            text_height = 120 if mode == "generate" else 200
+            text_help = tr("input.text_help_generate") if mode == "generate" else tr("input.text_help_fixed")
+            
+            text = st.text_area(
+                tr("input.text"),
+                placeholder=text_placeholder,
+                height=text_height,
+                help=text_help
+            )
+            
+            # Title input (optional for both modes)
+            title = st.text_input(
+                tr("input.title"),
+                placeholder=tr("input.title_placeholder"),
+                help=tr("input.title_help")
+            )
+            
+            # Number of scenes (only show in generate mode)
+            if mode == "generate":
+                n_scenes = st.slider(
+                    tr("video.frames"),
+                    min_value=3,
+                    max_value=30,
+                    value=5,
+                    help=tr("video.frames_help"),
+                    label_visibility="collapsed"
+                )
+                st.caption(tr("video.frames_label", n=n_scenes))
+            else:
+                # Fixed mode: n_scenes is ignored, set default value
+                n_scenes = 5
+                st.info(tr("video.frames_fixed_mode_hint"))
+            
+            return {
+                "batch_mode": False,
+                "mode": mode,
+                "text": text,
+                "title": title,
+                "n_scenes": n_scenes
+            }
         
-        text = st.text_area(
-            tr("input.text"),
-            placeholder=text_placeholder,
-            height=text_height,
-            help=text_help
-        )
-        
-        # Title input (optional for both modes)
-        title = st.text_input(
-            tr("input.title"),
-            placeholder=tr("input.title_placeholder"),
-            help=tr("input.title_help")
-        )
-        
-        # Number of scenes (only show in generate mode)
-        if mode == "generate":
+        else:
+            # ================================================================
+            # Batch mode (simplified YAGNI version)
+            # ================================================================
+            st.markdown(f"**{tr('batch.section_title')}**")
+            
+            # Batch rules info
+            st.info(f"""
+**{tr('batch.rules_title')}**
+- ✅ {tr('batch.rule_1')}
+- ✅ {tr('batch.rule_2')}
+- ✅ {tr('batch.rule_3')}
+            """)
+            
+            # Batch topics input
+            text_input = st.text_area(
+                tr("batch.topics_label"),
+                height=300,
+                placeholder=tr("batch.topics_placeholder"),
+                help=tr("batch.topics_help")
+            )
+            
+            # Split topics by newline
+            if text_input:
+                # Simple split by newline, filter empty lines
+                topics = [
+                    line.strip() 
+                    for line in text_input.strip().split('\n') 
+                    if line.strip()
+                ]
+                
+                if topics:
+                    # Check count limit
+                    if len(topics) > 100:
+                        st.error(tr("batch.count_error", count=len(topics)))
+                        topics = []
+                    else:
+                        st.success(tr("batch.count_success", count=len(topics)))
+                        
+                        # Preview topics list
+                        with st.expander(tr("batch.preview_title"), expanded=False):
+                            for i, topic in enumerate(topics, 1):
+                                st.markdown(f"`{i}.` {topic}")
+                else:
+                    topics = []
+            else:
+                topics = []
+            
+            st.markdown("---")
+            
+            # Title prefix (optional)
+            title_prefix = st.text_input(
+                tr("batch.title_prefix_label"),
+                placeholder=tr("batch.title_prefix_placeholder"),
+                help=tr("batch.title_prefix_help")
+            )
+            
+            # Number of scenes (unified for all videos)
             n_scenes = st.slider(
-                tr("video.frames"),
+                tr("batch.n_scenes_label"),
                 min_value=3,
                 max_value=30,
                 value=5,
-                help=tr("video.frames_help"),
-                label_visibility="collapsed"
+                help=tr("batch.n_scenes_help")
             )
-            st.caption(tr("video.frames_label", n=n_scenes))
-        else:
-            # Fixed mode: n_scenes is ignored, set default value
-            n_scenes = 5
-            st.info(tr("video.frames_fixed_mode_hint"))
-    
-    return {
-        "mode": mode,
-        "text": text,
-        "title": title,
-        "n_scenes": n_scenes
-    }
+            st.caption(tr("batch.n_scenes_caption", n=n_scenes))
+            
+            # Config info
+            st.info(f"📌 {tr('batch.config_info')}")
+            
+            return {
+                "batch_mode": True,
+                "topics": topics,
+                "mode": "generate",  # Fixed to AI generate content
+                "title_prefix": title_prefix,
+                "n_scenes": n_scenes,
+            }
 
 
 def render_bgm_section():

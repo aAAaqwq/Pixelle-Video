@@ -29,6 +29,19 @@ from pixelle_video.config import config_manager
 
 def render_output_preview(pixelle_video, video_params):
     """Render output preview section (right column)"""
+    # Check if batch mode
+    is_batch = video_params.get("batch_mode", False)
+    
+    if is_batch:
+        # Batch generation mode
+        render_batch_output(pixelle_video, video_params)
+    else:
+        # Single video generation mode (original logic)
+        render_single_output(pixelle_video, video_params)
+
+
+def render_single_output(pixelle_video, video_params):
+    """Render single video generation output (original logic, unchanged)"""
     # Extract parameters from video_params dict
     text = video_params.get("text", "")
     mode = video_params.get("mode", "generate")
@@ -193,4 +206,179 @@ def render_output_preview(pixelle_video, video_params):
                 st.error(tr("status.error", error=str(e)))
                 logger.exception(e)
                 st.stop()
+
+
+def render_batch_output(pixelle_video, video_params):
+    """Render batch generation output (minimal, redirect to History)"""
+    topics = video_params.get("topics", [])
+    
+    with st.container(border=True):
+        st.markdown(f"**{tr('batch.section_generation')}**")
+        
+        # Check if topics are provided
+        if not topics:
+            st.warning(tr("batch.no_topics"))
+            return
+        
+        # Check system configuration
+        if not config_manager.validate():
+            st.warning(tr("settings.not_configured"))
+            return
+        
+        batch_count = len(topics)
+        
+        # Display batch info
+        st.info(tr("batch.prepare_info", count=batch_count))
+        
+        # Estimated time (optional)
+        estimated_minutes = batch_count * 3  # Assume 3 minutes per video
+        st.caption(tr("batch.estimated_time", minutes=estimated_minutes))
+        
+        # Generate button with batch semantics
+        if st.button(
+            tr("batch.generate_button", count=batch_count),
+            type="primary",
+            use_container_width=True,
+            help=tr("batch.generate_help")
+        ):
+            # Prepare shared config
+            shared_config = {
+                "title_prefix": video_params.get("title_prefix"),
+                "n_scenes": video_params.get("n_scenes", 5),
+                "image_workflow": video_params.get("image_workflow"),
+                "frame_template": video_params.get("frame_template"),
+                "prompt_prefix": video_params.get("prompt_prefix", ""),
+                "bgm_path": video_params.get("bgm_path"),
+                "bgm_volume": video_params.get("bgm_volume", 0.2),
+                "tts_inference_mode": video_params.get("tts_inference_mode", "local"),
+            }
+            
+            # Add TTS parameters
+            if shared_config["tts_inference_mode"] == "local":
+                shared_config["tts_voice"] = video_params.get("tts_voice")
+                shared_config["tts_speed"] = video_params.get("tts_speed")
+            else:
+                shared_config["tts_workflow"] = video_params.get("tts_workflow")
+                if video_params.get("ref_audio"):
+                    shared_config["ref_audio"] = str(video_params["ref_audio"])
+            
+            # Add template parameters
+            if video_params.get("template_params"):
+                shared_config["template_params"] = video_params["template_params"]
+            
+            # UI containers
+            overall_progress_container = st.container()
+            current_task_container = st.container()
+            
+            # Overall progress UI
+            overall_progress_bar = overall_progress_container.progress(0)
+            overall_status = overall_progress_container.empty()
+            
+            # Current task progress UI
+            current_task_title = current_task_container.empty()
+            current_task_progress = current_task_container.progress(0)
+            current_task_status = current_task_container.empty()
+            
+            # Overall progress callback
+            def update_overall_progress(current, total, topic):
+                progress = (current - 1) / total
+                overall_progress_bar.progress(progress)
+                overall_status.markdown(
+                    f"📊 **{tr('batch.overall_progress')}**: {current}/{total} ({int(progress * 100)}%)"
+                )
+            
+            # Single task progress callback factory
+            def make_task_progress_callback(task_idx, topic):
+                def callback(event: ProgressEvent):
+                    # Display current task title
+                    current_task_title.markdown(f"🎬 **{tr('batch.current_task')} {task_idx}**: {topic}")
+                    
+                    # Update task detailed progress
+                    if event.event_type == "frame_step":
+                        action_key = f"progress.step_{event.action}"
+                        action_text = tr(action_key)
+                        message = tr(
+                            "progress.frame_step",
+                            current=event.frame_current,
+                            total=event.frame_total,
+                            step=event.step,
+                            action=action_text
+                        )
+                    elif event.event_type == "processing_frame":
+                        message = tr(
+                            "progress.frame",
+                            current=event.frame_current,
+                            total=event.frame_total
+                        )
+                    else:
+                        message = tr(f"progress.{event.event_type}")
+                    
+                    current_task_progress.progress(event.progress)
+                    current_task_status.text(message)
+                
+                return callback
+            
+            # Execute batch generation
+            from web.utils.batch_manager import SimpleBatchManager
+            import time
+            
+            batch_manager = SimpleBatchManager()
+            start_time = time.time()
+            
+            batch_result = batch_manager.execute_batch(
+                pixelle_video=pixelle_video,
+                topics=topics,
+                shared_config=shared_config,
+                overall_progress_callback=update_overall_progress,
+                task_progress_callback_factory=make_task_progress_callback
+            )
+            
+            total_time = time.time() - start_time
+            
+            # Clear progress displays
+            overall_progress_bar.progress(1.0)
+            overall_status.markdown(f"✅ **{tr('batch.completed')}**")
+            current_task_title.empty()
+            current_task_progress.empty()
+            current_task_status.empty()
+            
+            # Display results summary
+            st.markdown("---")
+            st.markdown(f"**{tr('batch.results_title')}**")
+            
+            col1, col2, col3 = st.columns(3)
+            col1.metric(tr("batch.total"), batch_result["total_count"])
+            col2.metric(f"✅ {tr('batch.success')}", batch_result["success_count"])
+            col3.metric(f"❌ {tr('batch.failed')}", batch_result["failed_count"])
+            
+            # Display total time
+            minutes = int(total_time / 60)
+            seconds = int(total_time % 60)
+            st.caption(f"⏱️ {tr('batch.total_time')}: {minutes}{tr('batch.minutes')}{seconds}{tr('batch.seconds')}")
+            
+            # Redirect to History page
+            st.markdown("---")
+            st.success(tr("batch.success_message"))
+            st.info(tr("batch.view_in_history"))
+            
+            # Button to go to History page
+            if st.button(
+                f"📚 {tr('batch.goto_history')}",
+                type="secondary",
+                use_container_width=True
+            ):
+                st.switch_page("pages/2_📚_History.py")
+            
+            # Show failed tasks if any
+            if batch_result["errors"]:
+                st.markdown("---")
+                st.markdown(f"#### {tr('batch.failed_list')}")
+                
+                for item in batch_result["errors"]:
+                    with st.expander(f"🔴 {tr('batch.task')} {item['index']}: {item['topic']}", expanded=False):
+                        st.error(f"**{tr('batch.error')}**: {item['error']}")
+                        
+                        # Detailed error (collapsed)
+                        with st.expander(tr("batch.error_detail")):
+                            st.code(item['traceback'], language="python")
     
