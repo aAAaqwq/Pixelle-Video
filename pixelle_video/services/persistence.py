@@ -66,6 +66,10 @@ class PersistenceService:
         """
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(exist_ok=True)
+        
+        # Index file for fast listing
+        self.index_file = self.output_dir / ".index.json"
+        self._ensure_index()
     
     def get_task_dir(self, task_id: str) -> Path:
         """Get task directory path"""
@@ -123,6 +127,9 @@ class PersistenceService:
                 json.dump(metadata, f, indent=2, ensure_ascii=False)
             
             logger.debug(f"Saved task metadata: {task_id}")
+            
+            # Update index
+            await self._update_index_for_task(task_id, metadata)
             
         except Exception as e:
             logger.error(f"Failed to save task metadata {task_id}: {e}")
@@ -457,4 +464,249 @@ class PersistenceService:
             publication_year=data.get("publication_year"),
             cover_url=data.get("cover_url"),
         )
+    
+    # ========================================================================
+    # Index Management (for fast listing)
+    # ========================================================================
+    
+    def _ensure_index(self):
+        """Ensure index file exists, create if not"""
+        if not self.index_file.exists():
+            self._save_index({"version": "1.0", "tasks": []})
+    
+    def _load_index(self) -> Dict[str, Any]:
+        """Load index from file"""
+        try:
+            with open(self.index_file, "r", encoding="utf-8") as f:
+                return json.load(f)
+        except Exception as e:
+            logger.error(f"Failed to load index: {e}")
+            return {"version": "1.0", "tasks": []}
+    
+    def _save_index(self, index_data: Dict[str, Any]):
+        """Save index to file"""
+        try:
+            index_data["last_updated"] = datetime.now().isoformat()
+            with open(self.index_file, "w", encoding="utf-8") as f:
+                json.dump(index_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to save index: {e}")
+    
+    async def _update_index_for_task(self, task_id: str, metadata: Dict[str, Any]):
+        """Update index entry for a specific task"""
+        index = self._load_index()
+        
+        # Try to get title from multiple sources
+        title = metadata.get("input", {}).get("title")
+        if not title or title == "":
+            # Try to get title from storyboard if input title is empty
+            storyboard = await self.load_storyboard(task_id)
+            if storyboard and storyboard.title:
+                title = storyboard.title
+            else:
+                # Fall back to using input text preview
+                input_text = metadata.get("input", {}).get("text", "")
+                if input_text:
+                    # Use first 30 characters of input text as title
+                    title = input_text[:30] + ("..." if len(input_text) > 30 else "")
+                else:
+                    title = "Untitled"
+        
+        # Extract key info for index
+        index_entry = {
+            "task_id": task_id,
+            "created_at": metadata.get("created_at"),
+            "completed_at": metadata.get("completed_at"),
+            "status": metadata.get("status", "unknown"),
+            "title": title,
+            "duration": metadata.get("result", {}).get("duration", 0),
+            "n_frames": metadata.get("result", {}).get("n_frames", 0),
+            "file_size": metadata.get("result", {}).get("file_size", 0),
+            "video_path": metadata.get("result", {}).get("video_path"),
+        }
+        
+        # Update or append
+        tasks = index.get("tasks", [])
+        existing_idx = next((i for i, t in enumerate(tasks) if t["task_id"] == task_id), None)
+        
+        if existing_idx is not None:
+            tasks[existing_idx] = index_entry
+        else:
+            tasks.append(index_entry)
+        
+        index["tasks"] = tasks
+        self._save_index(index)
+    
+    async def rebuild_index(self):
+        """Rebuild index by scanning all task directories"""
+        logger.info("Rebuilding task index...")
+        index = {"version": "1.0", "tasks": []}
+        
+        # Scan all directories
+        for task_dir in self.output_dir.iterdir():
+            if not task_dir.is_dir() or task_dir.name.startswith("."):
+                continue
+            
+            task_id = task_dir.name
+            metadata = await self.load_task_metadata(task_id)
+            
+            if metadata:
+                # Try to get title from multiple sources
+                title = metadata.get("input", {}).get("title")
+                if not title or title == "":
+                    # Try to get title from storyboard if input title is empty
+                    storyboard = await self.load_storyboard(task_id)
+                    if storyboard and storyboard.title:
+                        title = storyboard.title
+                    else:
+                        # Fall back to using input text preview
+                        input_text = metadata.get("input", {}).get("text", "")
+                        if input_text:
+                            # Use first 30 characters of input text as title
+                            title = input_text[:30] + ("..." if len(input_text) > 30 else "")
+                        else:
+                            title = "Untitled"
+                
+                # Add to index
+                index["tasks"].append({
+                    "task_id": task_id,
+                    "created_at": metadata.get("created_at"),
+                    "completed_at": metadata.get("completed_at"),
+                    "status": metadata.get("status", "unknown"),
+                    "title": title,
+                    "duration": metadata.get("result", {}).get("duration", 0),
+                    "n_frames": metadata.get("result", {}).get("n_frames", 0),
+                    "file_size": metadata.get("result", {}).get("file_size", 0),
+                    "video_path": metadata.get("result", {}).get("video_path"),
+                })
+        
+        self._save_index(index)
+        logger.info(f"Index rebuilt: {len(index['tasks'])} tasks")
+    
+    # ========================================================================
+    # Paginated Listing
+    # ========================================================================
+    
+    async def list_tasks_paginated(
+        self,
+        page: int = 1,
+        page_size: int = 20,
+        status: Optional[str] = None,
+        sort_by: str = "created_at",
+        sort_order: str = "desc"
+    ) -> Dict[str, Any]:
+        """
+        List tasks with pagination
+        
+        Args:
+            page: Page number (1-indexed)
+            page_size: Items per page
+            status: Filter by status (optional)
+            sort_by: Sort field (created_at, completed_at, title, duration)
+            sort_order: Sort order (asc, desc)
+        
+        Returns:
+            {
+                "tasks": [...],          # List of task summaries
+                "total": 100,            # Total matching tasks
+                "page": 1,               # Current page
+                "page_size": 20,         # Items per page
+                "total_pages": 5         # Total pages
+            }
+        """
+        index = self._load_index()
+        tasks = index.get("tasks", [])
+        
+        # Filter by status
+        if status:
+            tasks = [t for t in tasks if t.get("status") == status]
+        
+        # Sort
+        reverse = (sort_order == "desc")
+        if sort_by in ["created_at", "completed_at"]:
+            tasks.sort(
+                key=lambda t: datetime.fromisoformat(t.get(sort_by, "1970-01-01T00:00:00")),
+                reverse=reverse
+            )
+        elif sort_by in ["title", "duration", "n_frames"]:
+            tasks.sort(key=lambda t: t.get(sort_by, ""), reverse=reverse)
+        
+        # Paginate
+        total = len(tasks)
+        total_pages = (total + page_size - 1) // page_size
+        start_idx = (page - 1) * page_size
+        end_idx = start_idx + page_size
+        page_tasks = tasks[start_idx:end_idx]
+        
+        return {
+            "tasks": page_tasks,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages,
+        }
+    
+    # ========================================================================
+    # Statistics
+    # ========================================================================
+    
+    async def get_statistics(self) -> Dict[str, Any]:
+        """
+        Get statistics about all tasks
+        
+        Returns:
+            {
+                "total_tasks": 100,
+                "completed": 95,
+                "failed": 5,
+                "total_duration": 3600.5,  # seconds
+                "total_size": 1024000000,  # bytes
+            }
+        """
+        index = self._load_index()
+        tasks = index.get("tasks", [])
+        
+        stats = {
+            "total_tasks": len(tasks),
+            "completed": len([t for t in tasks if t.get("status") == "completed"]),
+            "failed": len([t for t in tasks if t.get("status") == "failed"]),
+            "total_duration": sum(t.get("duration", 0) for t in tasks),
+            "total_size": sum(t.get("file_size", 0) for t in tasks),
+        }
+        
+        return stats
+    
+    # ========================================================================
+    # Delete Task
+    # ========================================================================
+    
+    async def delete_task(self, task_id: str) -> bool:
+        """
+        Delete a task and all its files
+        
+        Args:
+            task_id: Task ID to delete
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            import shutil
+            
+            task_dir = self.get_task_dir(task_id)
+            if task_dir.exists():
+                shutil.rmtree(task_dir)
+                logger.info(f"Deleted task directory: {task_dir}")
+            
+            # Update index
+            index = self._load_index()
+            tasks = index.get("tasks", [])
+            tasks = [t for t in tasks if t["task_id"] != task_id]
+            index["tasks"] = tasks
+            self._save_index(index)
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete task {task_id}: {e}")
+            return False
 

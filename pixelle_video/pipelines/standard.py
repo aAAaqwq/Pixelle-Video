@@ -556,13 +556,18 @@ class StandardPipeline(BasePipeline):
                 return
             
             # Build metadata
+            # If user didn't provide a title, use the generated one from storyboard
+            input_with_title = input_params.copy()
+            if not input_with_title.get("title"):
+                input_with_title["title"] = storyboard.title
+            
             metadata = {
                 "task_id": task_id,
                 "created_at": storyboard.created_at.isoformat() if storyboard.created_at else None,
                 "completed_at": storyboard.completed_at.isoformat() if storyboard.completed_at else None,
                 "status": "completed",
                 
-                "input": input_params,
+                "input": input_with_title,
                 
                 "result": {
                     "video_path": result.video_path,
