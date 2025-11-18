@@ -27,6 +27,15 @@ Just input a **topic**, and Pixelle-Video will automatically:
 ![Web UI Interface](resources/webui_en.png)
 
 
+## 📋 Changelog
+
+### 2025-11-18
+
+- Optimized RunningHub service calls with parallel processing for significantly faster speed
+- Added history page to view and manage all generated videos
+- Support creating multiple video tasks at once for efficient batch production
+
+
 ## ✨ Key Features
 
 - ✅ **Fully Automatic Generation** - Input a topic, automatically generate complete video
