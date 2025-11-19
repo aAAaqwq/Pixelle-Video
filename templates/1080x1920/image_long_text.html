@@ -86,6 +86,16 @@
         .content p {
             margin-bottom: 0;
         }
+
+        .author {
+            position: absolute;
+            font-size: 24px;
+            font-family: 'Liu Jian Mao Cao', 'ZCOOL KuaiLe', cursive;
+            color: #333;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
     </style>
 </head>
 <body>
@@ -94,5 +104,8 @@
     
     <!-- 正文 -->
     <div class="content">{{text}}</div>
+
+    <!-- 作者 -->
+    <div class="author">{{author=@Pixelle.AI}}</div>
 </body>
 </html>
