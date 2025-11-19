@@ -45,10 +45,11 @@ async def get_pixelle_video() -> PixelleVideoCore:
 
 
 async def shutdown_pixelle_video():
-    """Shutdown Pixelle-Video instance"""
+    """Shutdown Pixelle-Video instance and cleanup resources"""
     global _pixelle_video_instance
     if _pixelle_video_instance:
         logger.info("Shutting down Pixelle-Video...")
+        await _pixelle_video_instance.cleanup()
         _pixelle_video_instance = None
 
 

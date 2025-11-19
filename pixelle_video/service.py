@@ -16,9 +16,12 @@ Pixelle-Video Core - Service Layer
 Provides unified access to all capabilities (LLM, TTS, Image, etc.)
 """
 
+import hashlib
+import json
 from typing import Optional
 
 from loguru import logger
+from comfykit import ComfyKit
 
 from pixelle_video.config import config_manager
 from pixelle_video.services.llm_service import LLMService
@@ -76,6 +79,10 @@ class PixelleVideoCore:
         self.config = config_manager.config.to_dict()
         self._initialized = False
         
+        # ComfyKit lazy initialization (created on first use, recreated on config change)
+        self._comfykit: Optional[ComfyKit] = None
+        self._comfykit_config_hash: Optional[str] = None
+        
         # Core services (initialized in initialize())
         self.llm: Optional[LLMService] = None
         self.tts: Optional[TTSService] = None
@@ -91,11 +98,81 @@ class PixelleVideoCore:
         # Default pipeline callable (for backward compatibility)
         self.generate_video = None
     
+    def _get_comfykit_config(self) -> dict:
+        """
+        Get current ComfyKit configuration from config_manager
+        
+        Returns:
+            ComfyKit configuration dict
+        """
+        # Reload config from global config_manager (to support hot reload)
+        self.config = config_manager.config.to_dict()
+        
+        comfyui_config = self.config.get("comfyui", {})
+        kit_config = {}
+        
+        if comfyui_config.get("comfyui_url"):
+            kit_config["comfyui_url"] = comfyui_config["comfyui_url"]
+        if comfyui_config.get("runninghub_api_key"):
+            kit_config["runninghub_api_key"] = comfyui_config["runninghub_api_key"]
+        
+        return kit_config
+    
+    def _compute_comfykit_config_hash(self, config: dict) -> str:
+        """
+        Compute hash of ComfyKit configuration for change detection
+        
+        Args:
+            config: ComfyKit configuration dict
+        
+        Returns:
+            MD5 hash of config
+        """
+        # Sort keys for consistent hash
+        config_str = json.dumps(config, sort_keys=True)
+        return hashlib.md5(config_str.encode()).hexdigest()
+    
+    async def _get_or_create_comfykit(self) -> ComfyKit:
+        """
+        Get or create ComfyKit instance (lazy initialization with config change detection)
+        
+        This method:
+        1. Creates ComfyKit on first use (lazy initialization)
+        2. Detects configuration changes and recreates instance if needed
+        3. Ensures proper cleanup of old instances
+        
+        Returns:
+            ComfyKit instance
+        """
+        current_config = self._get_comfykit_config()
+        current_hash = self._compute_comfykit_config_hash(current_config)
+        
+        # Check if we need to create or recreate ComfyKit
+        if self._comfykit is None or self._comfykit_config_hash != current_hash:
+            # Close old instance if exists
+            if self._comfykit is not None:
+                logger.info("🔄 ComfyUI configuration changed, recreating ComfyKit instance...")
+                try:
+                    await self._comfykit.close()
+                except Exception as e:
+                    logger.warning(f"Failed to close old ComfyKit instance: {e}")
+                self._comfykit = None
+            
+            # Create new instance with current config
+            logger.info("✨ Creating ComfyKit instance...")
+            logger.debug(f"ComfyKit config: {current_config}")
+            self._comfykit = ComfyKit(**current_config)
+            self._comfykit_config_hash = current_hash
+            logger.info("✅ ComfyKit instance created")
+        
+        return self._comfykit
+    
     async def initialize(self):
         """
         Initialize core capabilities
         
         This initializes all services and must be called before using any capabilities.
+        Note: ComfyKit is NOT initialized here - it's lazily initialized on first use.
         
         Example:
             await pixelle_video.initialize()
@@ -106,10 +183,10 @@ class PixelleVideoCore:
         
         logger.info("🚀 Initializing Pixelle-Video...")
         
-        # 1. Initialize core services
+        # 1. Initialize core services (ComfyKit will be lazy-loaded later)
         self.llm = LLMService(self.config)
-        self.tts = TTSService(self.config)
-        self.media = MediaService(self.config)
+        self.tts = TTSService(self.config, self)
+        self.media = MediaService(self.config, self)
         self.video = VideoService()
         self.frame_processor = FrameProcessor(self)
         self.persistence = PersistenceService(output_dir="output")
@@ -127,6 +204,33 @@ class PixelleVideoCore:
         
         self._initialized = True
         logger.info("✅ Pixelle-Video initialized successfully\n")
+    
+    async def cleanup(self):
+        """
+        Cleanup resources (close ComfyKit session)
+        
+        Example:
+            await pixelle_video.cleanup()
+        """
+        if self._comfykit:
+            logger.info("🧹 Closing ComfyKit session...")
+            try:
+                await self._comfykit.close()
+                logger.info("✅ ComfyKit session closed")
+            except Exception as e:
+                logger.error(f"Failed to close ComfyKit: {e}")
+            finally:
+                self._comfykit = None
+                self._comfykit_config_hash = None
+    
+    async def __aenter__(self):
+        """Async context manager entry"""
+        await self.initialize()
+        return self
+    
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit"""
+        await self.cleanup()
     
     def _create_generate_video_wrapper(self):
         """

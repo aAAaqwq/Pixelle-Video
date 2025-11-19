@@ -45,13 +45,14 @@ class ComfyBaseService:
     DEFAULT_WORKFLOW: str = ""  # Must be overridden by subclass
     WORKFLOWS_DIR: str = "workflows"
     
-    def __init__(self, config: dict, service_name: str):
+    def __init__(self, config: dict, service_name: str, core=None):
         """
         Initialize ComfyUI base service
         
         Args:
             config: Full application config dict
             service_name: Service name in config (e.g., "tts", "image")
+            core: PixelleVideoCore instance (for accessing shared ComfyKit)
         """
         # Service-specific config (e.g., config["comfyui"]["tts"])
         comfyui_config = config.get("comfyui", {})
@@ -62,6 +63,9 @@ class ComfyBaseService:
         
         self.service_name = service_name
         self._workflows_cache: Optional[List[str]] = None
+        
+        # Reference to core (for accessing shared ComfyKit)
+        self.core = core
     
     def _scan_workflows(self) -> List[Dict[str, Any]]:
         """

@@ -40,13 +40,50 @@ def init_i18n():
 
 
 def get_pixelle_video():
-    """Get initialized Pixelle-Video instance (no caching - always fresh)"""
-    from pixelle_video.service import PixelleVideoCore
+    """
+    Get initialized Pixelle-Video instance with proper caching and cleanup
     
-    logger.info("Initializing Pixelle-Video...")
-    pixelle_video = PixelleVideoCore()
-    run_async(pixelle_video.initialize())
-    logger.info("Pixelle-Video initialized")
+    Uses st.session_state to cache the instance per user session.
+    ComfyKit is lazily initialized and automatically recreated on config changes.
+    """
+    from pixelle_video.service import PixelleVideoCore
+    from pixelle_video.config import config_manager
+    
+    # Compute config hash for change detection
+    import hashlib
+    import json
+    config_dict = config_manager.config.to_dict()
+    # Only track ComfyUI config for hash (other config changes don't need core recreation)
+    comfyui_config = config_dict.get("comfyui", {})
+    config_hash = hashlib.md5(json.dumps(comfyui_config, sort_keys=True).encode()).hexdigest()
+    
+    # Check if we need to create or recreate core instance
+    need_recreate = False
+    if 'pixelle_video' not in st.session_state:
+        need_recreate = True
+        logger.info("Creating new PixelleVideoCore instance (first time)")
+    elif st.session_state.get('pixelle_video_config_hash') != config_hash:
+        need_recreate = True
+        logger.info("Configuration changed, recreating PixelleVideoCore instance")
+        # Cleanup old instance
+        old_core = st.session_state.pixelle_video
+        try:
+            run_async(old_core.cleanup())
+        except Exception as e:
+            logger.warning(f"Failed to cleanup old PixelleVideoCore: {e}")
+    
+    if need_recreate:
+        # Create and initialize new instance
+        pixelle_video = PixelleVideoCore()
+        run_async(pixelle_video.initialize())
+        
+        # Cache in session state
+        st.session_state.pixelle_video = pixelle_video
+        st.session_state.pixelle_video_config_hash = config_hash
+        logger.info("✅ PixelleVideoCore initialized and cached")
+    else:
+        pixelle_video = st.session_state.pixelle_video
+        logger.debug("Reusing cached PixelleVideoCore instance")
     
     return pixelle_video
 

@@ -55,14 +55,15 @@ class MediaService(ComfyBaseService):
     DEFAULT_WORKFLOW = None  # No hardcoded default, must be configured
     WORKFLOWS_DIR = "workflows"
     
-    def __init__(self, config: dict):
+    def __init__(self, config: dict, core=None):
         """
         Initialize media service
         
         Args:
             config: Full application config dict
+            core: PixelleVideoCore instance (for accessing shared ComfyKit)
         """
-        super().__init__(config, service_name="image")  # Keep "image" for config compatibility
+        super().__init__(config, service_name="image", core=core)  # Keep "image" for config compatibility
     
     def _scan_workflows(self):
         """
@@ -194,13 +195,7 @@ class MediaService(ComfyBaseService):
         # 1. Resolve workflow (returns structured info)
         workflow_info = self._resolve_workflow(workflow=workflow)
         
-        # 2. Prepare ComfyKit config (supports both selfhost and runninghub)
-        kit_config = self._prepare_comfykit_config(
-            comfyui_url=comfyui_url,
-            runninghub_api_key=runninghub_api_key
-        )
-        
-        # 3. Build workflow parameters
+        # 2. Build workflow parameters (ComfyKit config is now managed by core)
         workflow_params = {"prompt": prompt}
         
         # Add optional parameters
@@ -224,9 +219,10 @@ class MediaService(ComfyBaseService):
         
         logger.debug(f"Workflow parameters: {workflow_params}")
         
-        # 4. Execute workflow (ComfyKit auto-detects based on input type)
+        # 4. Execute workflow using shared ComfyKit instance from core
         try:
-            kit = ComfyKit(**kit_config)
+            # Get shared ComfyKit instance (lazy initialization + config hot-reload)
+            kit = await self.core._get_or_create_comfykit()
             
             # Determine what to pass to ComfyKit based on source
             if workflow_info["source"] == "runninghub" and "workflow_id" in workflow_info:
