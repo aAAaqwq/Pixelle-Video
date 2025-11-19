@@ -244,23 +244,30 @@ def render_batch_output(pixelle_video, video_params):
             # Prepare shared config
             shared_config = {
                 "title_prefix": video_params.get("title_prefix"),
-                "n_scenes": video_params.get("n_scenes", 5),
+                "n_scenes": video_params.get("n_scenes") or 5,
                 "image_workflow": video_params.get("image_workflow"),
                 "frame_template": video_params.get("frame_template"),
-                "prompt_prefix": video_params.get("prompt_prefix", ""),
+                "prompt_prefix": video_params.get("prompt_prefix") or "",
                 "bgm_path": video_params.get("bgm_path"),
-                "bgm_volume": video_params.get("bgm_volume", 0.2),
-                "tts_inference_mode": video_params.get("tts_inference_mode", "local"),
+                "bgm_volume": video_params.get("bgm_volume") or 0.2,
+                "tts_inference_mode": video_params.get("tts_inference_mode") or "local",
             }
             
-            # Add TTS parameters
+            # Add TTS parameters based on mode (only add non-None values)
             if shared_config["tts_inference_mode"] == "local":
-                shared_config["tts_voice"] = video_params.get("tts_voice")
-                shared_config["tts_speed"] = video_params.get("tts_speed")
-            else:
-                shared_config["tts_workflow"] = video_params.get("tts_workflow")
-                if video_params.get("ref_audio"):
-                    shared_config["ref_audio"] = str(video_params["ref_audio"])
+                tts_voice = video_params.get("tts_voice")
+                tts_speed = video_params.get("tts_speed")
+                if tts_voice:
+                    shared_config["tts_voice"] = tts_voice
+                if tts_speed:
+                    shared_config["tts_speed"] = tts_speed
+            else:  # comfyui
+                tts_workflow = video_params.get("tts_workflow")
+                if tts_workflow:
+                    shared_config["tts_workflow"] = tts_workflow
+                ref_audio = video_params.get("ref_audio")
+                if ref_audio:
+                    shared_config["ref_audio"] = str(ref_audio)
             
             # Add template parameters
             if video_params.get("template_params"):

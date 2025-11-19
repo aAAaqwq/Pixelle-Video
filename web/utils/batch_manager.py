@@ -91,9 +91,10 @@ class SimpleBatchManager:
                     "mode": "generate",  # Fixed mode
                 }
                 
-                # Merge shared config, excluding title_prefix
+                # Merge shared config, excluding title_prefix and None values
+                # Filter out None values to avoid interfering with parameter logic in generate_video
                 for key, value in shared_config.items():
-                    if key != "title_prefix":
+                    if key != "title_prefix" and value is not None:
                         task_params[key] = value
                 
                 # Generate title using title_prefix
