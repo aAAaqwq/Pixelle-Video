@@ -361,7 +361,7 @@ Scan the QR codes below to join our communities for latest updates and technical
 
 | Discord Community | WeChat Group |
 | ---- | ---- |
-| ![Discord Community](docs/discord.png) | ![WeChat Group](docs/wechat.png) |
+| ![Discord Community](resources/discord.png) | ![WeChat Group](resources/wechat.png) |
 
 
 ## 📢 Feedback and Support

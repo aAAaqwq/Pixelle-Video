@@ -362,7 +362,7 @@ Pixelle-Video 的设计受到以下优秀开源项目的启发：
 
 | 微信群 | Discord 社区 |
 | ---- | ---- |
-| ![微信群](docs/wechat.png) | ![Discord 社区](docs/discord.png) |
+| ![微信群](resources/wechat.png) | ![Discord 社区](resources/discord.png) |
 
 
 ## 📢 反馈与支持
