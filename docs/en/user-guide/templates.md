@@ -130,27 +130,11 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
     
     Simple line drawing style for cognitive growth content
 
--   **Film**
-
-    ---
-
-    ![film](../../images/1920x1080/film.jpg)
-    
-    Film style, immersive experience
-
--   **Full**
-
-    ---
-
-    ![full](../../images/1920x1080/full.jpg)
-    
-    Full screen display, suitable for book lists
-
 -   **Book**
 
     ---
 
-    ![book](../../images/1920x1080/book.jpg)
+    ![book](../../images/1080x1920/book.jpg)
     
     Book style, suitable for book lists
 </div>
@@ -178,6 +162,30 @@ Suitable for YouTube, Bilibili, and other video platforms.
     ![wide_darktech](../../images/1920x1080/wide_darktech.jpg)
     
     Dark tech style, suitable for technology and gaming content
+
+-   **Film**
+
+    ---
+
+    ![film](../../images/1920x1080/film.jpg)
+    
+    Film style, immersive experience
+
+-   **Full**
+
+    ---
+
+    ![full](../../images/1920x1080/full.jpg)
+    
+    Full screen display, suitable for book lists
+
+-   **Book**
+
+    ---
+
+    ![book](../../images/1920x1080/book.jpg)
+    
+    Book style, suitable for book lists
 
 </div>
 
