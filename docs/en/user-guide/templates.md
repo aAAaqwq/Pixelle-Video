@@ -145,6 +145,14 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
     ![long_text](../../images/1080x1920/long_text.jpg)
     
     Long text style, suitable for inspirational content
+
+-   **Excerpt**
+
+    ---
+
+    ![excerpt](../../images/1080x1920/excerpt.jpg)
+    
+    Excerpt style, suitable for quotes and book excerpts
 </div>
 
 ---

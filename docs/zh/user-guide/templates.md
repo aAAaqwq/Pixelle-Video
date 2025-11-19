@@ -146,6 +146,14 @@
     ![long_text](../../images/1080x1920/long_text.jpg)
     
     长文本，适合励志鸡汤类内容
+
+-   **Excerpt**
+
+    ---
+
+    ![excerpt](../../images/1080x1920/excerpt.jpg)
+    
+    图文摘抄，适合图文摘抄，名人名言
 ---
 
 ### 横屏模板 (1920x1080)
