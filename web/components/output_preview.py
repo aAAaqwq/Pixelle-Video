@@ -372,13 +372,28 @@ def render_batch_output(pixelle_video, video_params):
             st.success(tr("batch.success_message"))
             st.info(tr("batch.view_in_history"))
             
-            # Button to go to History page
-            if st.button(
-                f"📚 {tr('batch.goto_history')}",
-                type="secondary",
-                use_container_width=True
-            ):
-                st.switch_page("pages/2_📚_History.py")
+            # Button to go to History page using JavaScript URL navigation
+            st.markdown(
+                f"""
+                <a href="/History" target="_blank">
+                    <button style="
+                        width: 100%;
+                        padding: 0.5rem 1rem;
+                        background-color: white;
+                        color: rgb(49, 51, 63);
+                        border: 1px solid rgba(49, 51, 63, 0.2);
+                        border-radius: 0.5rem;
+                        cursor: pointer;
+                        font-size: 1rem;
+                        font-weight: 400;
+                        text-align: center;
+                    ">
+                        📚 {tr('batch.goto_history')}
+                    </button>
+                </a>
+                """,
+                unsafe_allow_html=True
+            )
             
             # Show failed tasks if any
             if batch_result["errors"]:
