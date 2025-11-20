@@ -56,15 +56,14 @@ async def render_frame(
     try:
         logger.info(f"Frame render request: template={request.template}")
         
-        # Resolve template path (handles both "default.html" and "1080x1920/default.html")
+        # Resolve template path (returns absolute path with "templates/" or "data/templates/" prefix)
         template_path = resolve_template_path(request.template)
-        full_template_path = f"templates/{template_path}"
         
         # Parse template size
-        width, height = parse_template_size(full_template_path)
+        width, height = parse_template_size(template_path)
         
         # Create HTML frame generator
-        generator = HTMLFrameGenerator(full_template_path)
+        generator = HTMLFrameGenerator(template_path)
         
         # Generate frame
         frame_path = await generator.generate_frame(

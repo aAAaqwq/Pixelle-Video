@@ -100,8 +100,8 @@ async def list_image_workflows(pixelle_video: PixelleVideoDep):
     ```
     """
     try:
-        # Get all workflows from image service
-        all_workflows = pixelle_video.image.list_workflows()
+        # Get all workflows from media service (image generation is handled by media service)
+        all_workflows = pixelle_video.media.list_workflows()
         
         # Filter to image workflows only (filename starts with "image_")
         image_workflows = [
