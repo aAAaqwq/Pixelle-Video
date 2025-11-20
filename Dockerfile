@@ -64,8 +64,8 @@ COPY templates ./templates
 COPY workflows ./workflows
 COPY resources ./resources
 
-# Create output and data directories
-RUN mkdir -p /app/output /app/data
+# Create output, data and temp directories
+RUN mkdir -p /app/output /app/data /app/temp
 
 # Set environment variables for html2image to use chromium
 ENV BROWSER_EXECUTABLE_PATH=/usr/bin/chromium
