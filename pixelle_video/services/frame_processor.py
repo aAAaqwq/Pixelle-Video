@@ -187,7 +187,7 @@ class FrameProcessor:
         
         # Determine media type based on workflow
         # video_ prefix in workflow name indicates video generation
-        workflow_name = config.image_workflow or ""
+        workflow_name = config.media_workflow or ""
         is_video_workflow = "video_" in workflow_name.lower()
         media_type = "video" if is_video_workflow else "image"
         
@@ -196,10 +196,10 @@ class FrameProcessor:
         # Call Media generation (with optional preset)
         media_result = await self.core.media(
             prompt=frame.image_prompt,
-            workflow=config.image_workflow,  # Pass workflow from config (None = use default)
+            workflow=config.media_workflow,  # Pass workflow from config (None = use default)
             media_type=media_type,
-            width=config.image_width,
-            height=config.image_height
+            width=config.media_width,
+            height=config.media_height
         )
         
         # Store media type
