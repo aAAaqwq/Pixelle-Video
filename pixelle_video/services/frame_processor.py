@@ -14,6 +14,10 @@
 Frame processor - Process single frame through complete pipeline
 
 Orchestrates: TTS → Image Generation → Frame Composition → Video Segment
+
+Key Feature:
+- TTS-driven video duration: Audio duration from TTS is passed to video generation workflows
+  to ensure perfect sync between audio and video (no padding, no trimming needed)
 """
 
 from typing import Callable, Optional
@@ -193,14 +197,23 @@ class FrameProcessor:
         
         logger.debug(f"  → Media type: {media_type} (workflow: {workflow_name})")
         
-        # Call Media generation (with optional preset)
-        media_result = await self.core.media(
-            prompt=frame.image_prompt,
-            workflow=config.media_workflow,  # Pass workflow from config (None = use default)
-            media_type=media_type,
-            width=config.media_width,
-            height=config.media_height
-        )
+        # Build media generation parameters
+        media_params = {
+            "prompt": frame.image_prompt,
+            "workflow": config.media_workflow,  # Pass workflow from config (None = use default)
+            "media_type": media_type,
+            "width": config.media_width,
+            "height": config.media_height
+        }
+        
+        # For video workflows: pass audio duration as target video duration
+        # This ensures video length matches audio length from the source
+        if is_video_workflow and frame.duration:
+            media_params["duration"] = frame.duration
+            logger.info(f"  → Generating video with target duration: {frame.duration:.2f}s (from TTS audio)")
+        
+        # Call Media generation
+        media_result = await self.core.media(**media_params)
         
         # Store media type
         frame.media_type = media_result.media_type
