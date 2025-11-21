@@ -161,6 +161,14 @@
     ![health_preservation](../../images/1080x1920/health_preservation.jpg)
     
     养生窍门，适合养生科普内容
+
+-   **Life Insights**
+
+    ---
+
+    ![life_insights_light](../../images/1080x1920/life_insights_light.jpg)
+    
+    人生感悟，传递温暖与力量
 </div>
 
 ---
