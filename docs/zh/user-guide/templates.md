@@ -102,7 +102,7 @@
 
     ---
 
-    ![simple](../../images/1080x1920/simple.png)
+    ![simple](../../images/1080x1920/simple.jpg)
     
     极简风格，突出内容本身
 
@@ -169,6 +169,14 @@
     ![life_insights_light](../../images/1080x1920/life_insights_light.jpg)
     
     人生感悟，传递温暖与力量
+
+-   **Full**
+
+    ---
+
+    ![full](../../images/1080x1920/full.jpg)
+    
+    全屏模版，适合书单号
 </div>
 
 ---
