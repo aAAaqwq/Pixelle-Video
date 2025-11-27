@@ -153,6 +153,7 @@ class FrameProcessor:
             "text": frame.narration,
             "inference_mode": config.tts_inference_mode,
             "output_path": output_path,
+            "index": frame.index + 1,  # 1-based index for workflow
         }
         
         if config.tts_inference_mode == "local":
@@ -203,7 +204,8 @@ class FrameProcessor:
             "workflow": config.media_workflow,  # Pass workflow from config (None = use default)
             "media_type": media_type,
             "width": config.media_width,
-            "height": config.media_height
+            "height": config.media_height,
+            "index": frame.index + 1,  # 1-based index for workflow
         }
         
         # For video workflows: pass audio duration as target video duration
@@ -297,6 +299,9 @@ class FrameProcessor:
             ext["content_author"] = content_metadata.author or ""
             ext["content_subtitle"] = content_metadata.subtitle or ""
             ext["content_genre"] = content_metadata.genre or ""
+        
+        # Add frame index (1-based)
+        ext["index"] = frame.index + 1
         
         # Add custom template parameters
         if config.template_params:
