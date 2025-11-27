@@ -521,12 +521,21 @@ def render_style_config(pixelle_video):
                         template_path = resolve_template_path(frame_template)
                         generator = HTMLFrameGenerator(template_path)
                         
-                        # Generate preview (use custom parameters from video generation section)
+                        # Build ext dict with auto-injected parameters (same as FrameProcessor)
+                        ext = {
+                            "index": 1,  # Preview uses index 1
+                        }
+                        
+                        # Add custom parameters from user input
+                        if custom_values_for_video:
+                            ext.update(custom_values_for_video)
+                        
+                        # Generate preview
                         preview_path = run_async(generator.generate_frame(
                             title=preview_title,
                             text=preview_text,
                             image=preview_image,
-                            ext=custom_values_for_video if custom_values_for_video else None
+                            ext=ext
                         ))
                         
                         # Display preview

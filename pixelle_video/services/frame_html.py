@@ -200,9 +200,8 @@ class HTMLFrameGenerator:
                 }
             }
         """
-        # Preset parameters that should be ignored
-        PRESET_PARAMS = {'title', 'text', 'image', 'content_title', 'content_author', 
-                        'content_subtitle', 'content_genre'}
+        # Preset parameters that should be ignored (auto-injected by system)
+        PRESET_PARAMS = {'title', 'text', 'image', 'index'}
         
         # Pattern: {{param_name:type=default}} or {{param_name=default}} or {{param_name:type}} or {{param_name}}
         # Param name: must start with letter or underscore, can contain letters, digits, underscores

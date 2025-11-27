@@ -293,15 +293,9 @@ class FrameProcessor:
         content_metadata = storyboard.content_metadata if storyboard else None
         
         # Build ext data
-        ext = {}
-        if content_metadata:
-            ext["content_title"] = content_metadata.title or ""
-            ext["content_author"] = content_metadata.author or ""
-            ext["content_subtitle"] = content_metadata.subtitle or ""
-            ext["content_genre"] = content_metadata.genre or ""
-        
-        # Add frame index (1-based)
-        ext["index"] = frame.index + 1
+        ext = {
+            "index": frame.index + 1,
+        }
         
         # Add custom template parameters
         if config.template_params:
