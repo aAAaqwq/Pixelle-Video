@@ -6,7 +6,7 @@
     <meta name="template:media-width" content="1024">
     <meta name="template:media-height" content="1024">
     <meta name="viewport" content="width=1080, height=1920">
-    <title>疗愈 - 1080x1920</title>
+    <title>疗愈 动态 - 1080x1920</title>
     <!-- Google Fonts - 中文字体 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,10 +31,7 @@
             font-family: 'Noto Serif SC', serif;
             color: #2a2a2a;
             position: relative;
-            background: #e8e5e0;
-            background-image: url("{{image}}");
-            background-size: cover;
-            background-position: center;
+            background: transparent;
             display: flex;
             flex-direction: column;
         }
@@ -49,6 +46,18 @@
             -webkit-backdrop-filter: blur(5x);
             z-index: 0;
         } */
+
+        /* Video overlay - 相对于main-container居中 */
+        .video-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
+            /* background: #f00; */
+            z-index: -1;
+        }
 
         /* 顶部标题 */
         .title {
@@ -128,6 +137,10 @@
 </head>
 
 <body>
+    <div class="video-overlay">
+
+    </div>
+
     <div class="title">
         <div class="title-content">{{title}}</div>
     </div>
