@@ -177,6 +177,14 @@
     ![full](../../images/1080x1920/full.jpg)
     
     全屏模版，适合书单号
+
+-   **Healing**
+
+    ---
+
+    ![healing](../../images/1080x1920/healing.jpg)
+    
+    治愈模版，适合疗愈类内容
 </div>
 
 ---

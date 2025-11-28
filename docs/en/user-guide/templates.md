@@ -177,6 +177,14 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
     ![full](../../images/1080x1920/full_en.jpg)
     
     Full screen display, suitable for book lists
+
+-   **Healing**
+
+    ---
+
+    ![healing](../../images/1080x1920/healing_en.jpg)
+    
+    Healing style, suitable for therapeutic content
 </div>
 
 ---
