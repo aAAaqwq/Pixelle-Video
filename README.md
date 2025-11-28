@@ -73,34 +73,51 @@ Pixelle-Video 采用模块化设计，整个视频生成流程清晰简洁：
 <table>
 <tr>
 <td width="33%">
-<h3>🏛️ 历史文化类 - 固定画面</h3>
-<video src="https://github.com/user-attachments/assets/56e0a018-fa99-47eb-a97f-fc2fa8915724" controls width="100%"></video>
-<p align="center"><b>资治通鉴</b></p>
+<h3>🌄 人文纪实类 - 视频默认模版</h3>
+<video src="https://github.com/user-attachments/assets/e6716c1d-78de-453d-84c2-10873c8c595f" controls width="100%"></video>
+<p align="center"><b>旅行路上的风景让人流连忘返</b></p>
 </td>
 <td width="33%">
-<h3>💡 个人成长类 - 克隆音色</h3>
-<video src="https://github.com/user-attachments/assets/1bad9a49-df83-4905-9cc8-9a7640e9c7d8" controls width="100%"></video>
-<p align="center"><b>如何提升自己</b></p>
+<h3>🔍 文化解构类 - 视频默认模版</h3>
+<video src="https://github.com/user-attachments/assets/f5de75f6-135a-4ab4-9f5f-079f649764d5" controls width="100%"></video>
+<p align="center"><b>Santa ID</b></p>
 </td>
 <td width="33%">
-<h3>🤔 深度思考类 - 默认模板</h3>
-<video src="https://github.com/user-attachments/assets/663b705a-2aea-44bc-b266-4bb27aa255a8" controls width="100%"></video>
-<p align="center"><b>如何理解反脆弱</b></p>
+<h3>🔭 科学思辨类 - 视频默认模版</h3>
+<video src="https://github.com/user-attachments/assets/ceb8b0df-8331-4e1f-88e7-db5b295a1c1d" controls width="100%"></video>
+<p align="center"><b>为什么我们还没有找到外星文明？</b></p>
 </td>
 </tr>
 <tr>
 <td width="33%">
-<h3>🌅 情感类 - 克隆音色</h3>
+<h3>🌱 个人成长类 - 克隆音色</h3>
+<video src="https://github.com/user-attachments/assets/1bad9a49-df83-4905-9cc8-9a7640e9c7d8" controls width="100%"></video>
+<p align="center"><b>如何提升自己</b></p>
+</td>
+<td width="33%">
+<h3>🧠 深度思考类 - 默认模板</h3>
+<video src="https://github.com/user-attachments/assets/663b705a-2aea-44bc-b266-4bb27aa255a8" controls width="100%"></video>
+<p align="center"><b>如何理解反脆弱</b></p>
+</td>
+<td width="33%">
+<h3>🏯 历史文化类 - 固定画面</h3>
+<video src="https://github.com/user-attachments/assets/56e0a018-fa99-47eb-a97f-fc2fa8915724" controls width="100%"></video>
+<p align="center"><b>资治通鉴</b></p>
+</td>
+</tr>
+<tr>
+<td width="33%">
+<h3>☀️ 情感类 - 克隆音色</h3>
 <video src="https://github.com/user-attachments/assets/4687df95-dd21-4a7b-b01e-f33a7b646644" controls width="100%"></video>
 <p align="center"><b>冬日暖阳</b></p>
 </td>
 <td width="33%">
-<h3>📖 小说解说类 - 自创脚本</h3>
+<h3>📜 小说解说类 - 自创脚本</h3>
 <video src="https://github.com/user-attachments/assets/d354465e-3fa8-40b4-93e9-61ad75ef0697" controls width="100%"></video>
 <p align="center"><b>斗破苍穹</b></p>
 </td>
 <td width="33%">
-<h3>📚 知识科普类 - Qwen生图</h3>
+<h3>🧬 知识科普类 - Qwen生图</h3>
 <video src="https://github.com/user-attachments/assets/8ac21768-41ce-4d41-acdd-e3dd3eb9725a" controls width="100%"></video>
 <p align="center"><b>养生知识</b></p>
 </td>
