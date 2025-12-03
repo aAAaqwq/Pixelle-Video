@@ -31,9 +31,6 @@ from web.state.session import init_session_state, init_i18n, get_pixelle_video
 # Import components
 from web.components.header import render_header
 from web.components.settings import render_advanced_settings
-from web.components.content_input import render_content_input, render_bgm_section, render_version_info
-from web.components.style_config import render_style_config
-from web.components.output_preview import render_output_preview
 
 # Page config
 st.set_page_config(
@@ -59,42 +56,28 @@ def main():
     # Render system configuration (LLM + ComfyUI)
     render_advanced_settings()
     
-    # Three-column layout
-    left_col, middle_col, right_col = st.columns([1, 1, 1])
+    # ========================================================================
+    # Pipeline Selection & Delegation
+    # ========================================================================
+    from web.pipelines import get_all_pipeline_uis
     
-    # ========================================================================
-    # Left Column: Content Input & BGM
-    # ========================================================================
-    with left_col:
-        # Content input (mode, text, title, n_scenes)
-        content_params = render_content_input()
-        
-        # BGM selection (bgm_path, bgm_volume)
-        bgm_params = render_bgm_section()
-        
-        # Version info & GitHub link
-        render_version_info()
+    # Get all registered pipelines
+    pipelines = get_all_pipeline_uis()
     
-    # ========================================================================
-    # Middle Column: Style Configuration
-    # ========================================================================
-    with middle_col:
-        # Style configuration (TTS, template, workflow, etc.)
-        style_params = render_style_config(pixelle_video)
+    # Use Tabs for pipeline selection
+    # Note: st.tabs returns a list of containers, one for each tab
+    tab_labels = [f"{p.icon} {p.display_name}" for p in pipelines]
+    tabs = st.tabs(tab_labels)
     
-    # ========================================================================
-    # Right Column: Output Preview
-    # ========================================================================
-    with right_col:
-        # Combine all parameters
-        video_params = {
-            **content_params,
-            **bgm_params,
-            **style_params
-        }
-        
-        # Render output preview (generate button, progress, video preview)
-        render_output_preview(pixelle_video, video_params)
+    # Render each pipeline in its corresponding tab
+    for i, pipeline in enumerate(pipelines):
+        with tabs[i]:
+            # Show description if available
+            if pipeline.description:
+                st.caption(pipeline.description)
+            
+            # Delegate rendering
+            pipeline.render(pixelle_video)
 
 
 if __name__ == "__main__":

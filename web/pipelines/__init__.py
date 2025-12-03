@@ -11,22 +11,25 @@
 # limitations under the License.
 
 """
-Pixelle-Video Pipelines
+Pipeline UI Package
 
-Video generation pipelines with different strategies and workflows.
-Each pipeline implements a specific video generation approach.
+Exports registry functions and automatically registers available pipelines.
 """
 
-from pixelle_video.pipelines.base import BasePipeline
-from pixelle_video.pipelines.linear import LinearVideoPipeline, PipelineContext
-from pixelle_video.pipelines.standard import StandardPipeline
-from pixelle_video.pipelines.custom import CustomPipeline
+from web.pipelines.base import (
+    PipelineUI,
+    register_pipeline_ui,
+    get_pipeline_ui,
+    get_all_pipeline_uis
+)
+
+# Import all pipeline UI modules to ensure they register themselves
+from web.pipelines import standard
+from web.pipelines import demo
 
 __all__ = [
-    "BasePipeline",
-    "LinearVideoPipeline",
-    "PipelineContext",
-    "StandardPipeline",
-    "CustomPipeline",
+    "PipelineUI",
+    "register_pipeline_ui",
+    "get_pipeline_ui",
+    "get_all_pipeline_uis"
 ]
-

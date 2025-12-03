@@ -3,7 +3,6 @@
   "t": {
     "app.title": "⚡ Pixelle-Video - AI 全自动短视频引擎",
     "app.subtitle": "Pixelle.AI 提供支持",
-    
     "section.content_input": "📝 视频脚本",
     "section.bgm": "🎵 背景音乐",
     "section.tts": "🎤 配音合成",
@@ -12,29 +11,22 @@
     "section.media": "🎨 媒体生成",
     "section.template": "📐 分镜模板",
     "section.video_generation": "🎬 生成视频",
-    
     "input_mode.topic": "💡 主题",
     "input_mode.custom": "✍️ 自定义内容",
-    
     "mode.generate": "💡 AI 创作",
     "mode.fixed": "✍️ 自行创作",
-    
     "input.topic": "主题",
     "input.topic_placeholder": "AI 自动创作指定数量的旁白\n例如：如何增加被动收入、How to build passive income",
     "input.topic_help": "输入一个主题，AI 将根据主题生成内容",
-    
     "input.text": "文本输入",
     "input.text_help_generate": "输入主题或话题（AI 将创作旁白）",
     "input.text_help_fixed": "输入完整的旁白脚本（直接使用，不做改写，每行一个旁白）",
-    
     "input.content": "内容",
     "input.content_placeholder": "直接使用，不做改写，每行一个旁白\n例如：\n大家好，今天跟你分享三个学习技巧\n第一个技巧是专注力训练，每天冥想10分钟\n第二个技巧是主动回忆，学完立即复述",
     "input.content_help": "提供您自己的内容用于视频生成",
-    
     "input.title": "标题（可选）",
     "input.title_placeholder": "视频标题（留空则自动生成）",
     "input.title_help": "可选：自定义视频标题",
-    
     "voice.title": "🎤 语音选择",
     "voice.male_professional": "🎤 男声-专业",
     "voice.male_young": "🎙️ 男声-年轻",
@@ -43,7 +35,6 @@
     "voice.preview": "▶ 试听语音",
     "voice.previewing": "正在生成语音预览...",
     "voice.preview_failed": "预览失败：{error}",
-    
     "style.workflow": "工作流选择",
     "style.workflow_what": "决定视频中每帧插图的生成方式和效果（如使用 FLUX、SD 等模型）",
     "style.workflow_how": "将导出的 image_xxx.json 工作流文件（API格式）放入 workflows/selfhost/（本地 ComfyUI）或 workflows/runninghub/（云端）文件夹",
@@ -75,7 +66,6 @@
     "style.preview_failed_general": "预览图片生成失败",
     "style.final_prompt_label": "最终提示词",
     "style.generated_prompt": "生成的提示词：{prompt}",
-    
     "template.selector": "模板选择",
     "template.select": "选择模板",
     "template.select_help": "选择模板和视频尺寸",
@@ -95,7 +85,6 @@
     "template.type.static_hint": "使用模板自带样式，无需AI生成媒体。可在模板中自定义背景图片等参数。",
     "template.type.image_hint": "AI自动根据文案内容生成与之匹配的插图，插图尺寸由模板决定。",
     "template.type.video_hint": "AI自动根据文案内容生成与之匹配的视频片段，视频尺寸由模板决定。",
-    
     "orientation.portrait": "竖屏",
     "orientation.landscape": "横屏",
     "orientation.square": "方形",
@@ -114,16 +103,13 @@
     "template.preview_image_help": "支持本地路径或 URL",
     "template.preview_caption": "模板预览：{template}",
     "template.custom_parameters": "自定义参数",
-    
     "image.not_required": "当前模板不需要插图生成",
     "image.not_required_hint": "您选择的模板是纯文本模板，无需生成图片。这将：⚡ 加快生成速度 💰 降低生成成本",
-    
     "video.title": "🎬 视频设置",
     "video.frames": "分镜数",
     "video.frames_help": "更多分镜 = 更长视频",
     "video.frames_label": "分镜数：{n}",
     "video.frames_fixed_mode_hint": "💡 固定模式：分镜数由脚本实际段落数决定",
-    
     "bgm.selector": "音乐选择",
     "bgm.none": "🔇 无背景音乐",
     "bgm.volume": "音量",
@@ -132,13 +118,11 @@
     "bgm.preview_failed": "❌ 音乐文件未找到：{file}",
     "bgm.what": "为视频添加背景音乐，让视频更有氛围感和专业性",
     "bgm.how": "将音频文件（MP3/WAV/FLAC 等）放入 bgm/ 文件夹即可自动识别",
-    
     "btn.generate": "🎬 生成视频",
     "btn.save_config": "💾 保存配置",
     "btn.reset_config": "🔄 重置默认",
     "btn.save_and_start": "保存并开始",
     "btn.test_connection": "测试连接",
-    
     "status.initializing": "🔧 正在初始化...",
     "status.generating": "🚀 正在生成视频...",
     "status.success": "✅ 视频生成成功！",
@@ -149,7 +133,6 @@
     "status.config_reset": "✅ 配置已重置为默认值",
     "status.connection_success": "✅ 连接成功",
     "status.connection_failed": "❌ 连接失败",
-    
     "progress.generating_title": "生成标题...",
     "progress.generating_narrations": "生成旁白...",
     "progress.splitting_script": "切分脚本...",
@@ -167,11 +150,9 @@
     "progress.concatenating": "正在拼接视频...",
     "progress.finalizing": "完成中...",
     "progress.completed": "✅ 生成完成",
-    
     "error.input_required": "❌ 请提供主题或内容",
     "error.api_key_required": "❌ 请填写 API Key",
     "error.missing_field": "请填写 {field}",
-    
     "info.duration": "时长",
     "info.file_size": "文件大小",
     "info.frames": "分镜数",
@@ -180,7 +161,6 @@
     "info.video_information": "📊 视频信息",
     "info.no_video_yet": "生成视频后，预览将显示在这里",
     "info.generation_time": "生成耗时",
-    
     "settings.title": "⚙️ 系统配置（必需）",
     "settings.not_configured": "⚠️ 请先完成系统配置才能生成视频",
     "settings.llm.title": "🤖 大语言模型",
@@ -193,7 +173,6 @@
     "settings.llm.base_url_help": "API 服务地址",
     "settings.llm.model": "Model",
     "settings.llm.model_help": "模型名称",
-    
     "settings.comfyui.title": "🔧 ComfyUI 配置",
     "settings.comfyui.local_title": "本地/自建 ComfyUI",
     "settings.comfyui.cloud_title": "RunningHub 云端",
@@ -203,17 +182,14 @@
     "settings.comfyui.runninghub_api_key_help": "访问 https://runninghub.ai 注册并获取 API Key",
     "settings.comfyui.runninghub_hint": "没有本地 ComfyUI？可用 RunningHub 云端：",
     "settings.comfyui.runninghub_get_api_key": "点此获取 RunningHub API Key",
-    
     "tts.inference_mode": "合成方式",
     "tts.mode.local": "本地合成",
     "tts.mode.comfyui": "ComfyUI 合成",
     "tts.mode.local_hint": "💡 使用 Edge TTS，无需配置，开箱即用（请确保网络环境可用）",
     "tts.mode.comfyui_hint": "⚙️ 使用 ComfyUI 工作流，灵活强大",
-    
     "tts.voice_selector": "音色选择",
     "tts.speed": "语速",
     "tts.speed_label": "{speed}x",
-    
     "tts.voice.zh_CN_XiaoxiaoNeural": "女声-温柔（晓晓）",
     "tts.voice.zh_CN_XiaoyiNeural": "女声-甜美（晓伊）",
     "tts.voice.zh_CN_YunjianNeural": "男声-专业（云健）",
@@ -228,7 +204,6 @@
     "tts.voice.en_US_DavisNeural": "男声-友好（Davis）",
     "tts.voice.en_GB_SoniaNeural": "女声-英式（Sonia）",
     "tts.voice.en_GB_RyanNeural": "男声-英式（Ryan）",
-    
     "tts.selector": "工作流选择",
     "tts.what": "将旁白文本转换为真人般的自然语音（部分工作流支持参考音频克隆声音）",
     "tts.how": "将导出的 tts_xxx.json 工作流文件（API格式）放入 workflows/selfhost/（本地 ComfyUI）或 workflows/runninghub/（云端）文件夹",
@@ -241,29 +216,21 @@
     "tts.previewing": "正在生成 TTS 预览...",
     "tts.preview_success": "✅ 预览生成成功！",
     "tts.preview_failed": "❌ 预览失败：{error}",
-    
     "welcome.first_time": "🎉 欢迎使用 Pixelle-Video！请先完成基础配置",
     "welcome.config_hint": "💡 首次使用需要配置 API Key，后续可以在高级设置中修改",
-    
     "wizard.llm_required": "🤖 大语言模型配置（必需）",
     "wizard.image_optional": "🎨 图像生成配置（可选）",
     "wizard.image_hint": "💡 如果不配置图像生成，将使用默认模板（无 AI 生图）",
     "wizard.configure_image": "配置图像生成（推荐）",
-    
     "label.required": "（必需）",
     "label.optional": "（可选）",
-    
     "help.feature_description": "💡 功能说明",
     "help.what": "作用",
     "help.how": "自定义方式",
-    
     "language.select": "🌐 语言",
-    
     "version.title": "📦 版本信息",
     "version.current": "当前版本",
-    
     "github.title": "⭐ 开源支持",
-    
     "history.page_title": "📚 生成历史",
     "history.total_tasks": "总任务数",
     "history.completed_count": "已完成",
@@ -321,7 +288,6 @@
     "history.action.delete_success": "✅ 任务已删除",
     "history.action.delete_failed": "❌ 删除失败：{error}",
     "history.page_info": "第 {page} 页 / 共 {total_pages} 页",
-    
     "batch.mode_label": "🔢 批量生成模式",
     "batch.mode_help": "批量生成多个视频，每行一个主题",
     "batch.section_title": "批量主题输入",
@@ -364,7 +330,9 @@
     "batch.failed_list": "❌ 失败的任务",
     "batch.task": "任务",
     "batch.error": "错误信息",
-    "batch.error_detail": "查看详细错误堆栈"
+    "batch.error_detail": "查看详细错误堆栈",
+    "pipeline.standard.name": "标准视频",
+    "pipeline.demo.name": "演示功能",
+    "pipeline.demo.description": "具有自定义布局的演示 Pipeline"
   }
 }
-

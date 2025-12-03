@@ -3,7 +3,6 @@
   "t": {
     "app.title": "⚡ Pixelle-Video - AI Auto Short Video Engine",
     "app.subtitle": "Powered by Pixelle.AI",
-    
     "section.content_input": "📝 Video Script",
     "section.bgm": "🎵 Background Music",
     "section.tts": "🎤 Voiceover",
@@ -12,29 +11,22 @@
     "section.media": "🎨 Media Generation",
     "section.template": "📐 Storyboard Template",
     "section.video_generation": "🎬 Generate Video",
-    
     "input_mode.topic": "💡 Topic",
     "input_mode.custom": "✍️ Custom Content",
-    
     "mode.generate": "💡 AI Creation",
     "mode.fixed": "✍️ Custom Script",
-    
     "input.topic": "Topic",
     "input.topic_placeholder": "AI automatically creates specified number of narrations\nExample: How to build passive income, 如何增加被动收入",
     "input.topic_help": "Enter a topic, AI will generate content based on it",
-    
     "input.text": "Text Input",
     "input.text_help_generate": "Enter topic or theme (AI will create narrations)",
     "input.text_help_fixed": "Enter complete narration script (used directly without modification, one narration per line)",
-    
     "input.content": "Content",
     "input.content_placeholder": "Used directly without modification, one narration per line\nExample:\nHello everyone, today I'll share three study tips\nThe first tip is focus training, meditate for 10 minutes daily\nThe second tip is active recall, review immediately after learning",
     "input.content_help": "Provide your own content for video generation",
-    
     "input.title": "Title (Optional)",
     "input.title_placeholder": "Video title (auto-generated if empty)",
     "input.title_help": "Optional: Custom title for the video",
-    
     "voice.title": "🎤 Voice Selection",
     "voice.male_professional": "🎤 Male-Professional",
     "voice.male_young": "🎙️ Male-Young",
@@ -43,7 +35,6 @@
     "voice.preview": "▶ Preview Voice",
     "voice.previewing": "Generating voice preview...",
     "voice.preview_failed": "Preview failed: {error}",
-    
     "style.workflow": "Workflow Selection",
     "style.workflow_what": "Determines how each frame's illustration is generated and its effect (e.g., using FLUX, SD models)",
     "style.workflow_how": "Place the exported image_xxx.json workflow file(API format) into the workflows/selfhost/ folder (for local ComfyUI) or the workflows/runninghub/ folder (for cloud)",
@@ -75,7 +66,6 @@
     "style.preview_failed_general": "Failed to generate preview image",
     "style.final_prompt_label": "Final Prompt",
     "style.generated_prompt": "Generated prompt: {prompt}",
-    
     "template.selector": "Template Selection",
     "template.select": "Select Template",
     "template.select_help": "Select template and video size",
@@ -95,7 +85,6 @@
     "template.type.static_hint": "Uses template's built-in styles, no AI-generated media required. You can customize background images and other parameters in the template.",
     "template.type.image_hint": "AI automatically generates illustrations matching the narration content. Image size is determined by the template.",
     "template.type.video_hint": "AI automatically generates video clips matching the narration content. Video size is determined by the template.",
-    
     "orientation.portrait": "Portrait",
     "orientation.landscape": "Landscape",
     "orientation.square": "Square",
@@ -114,16 +103,13 @@
     "template.preview_image_help": "Supports local path or URL",
     "template.preview_caption": "Template Preview: {template}",
     "template.custom_parameters": "Custom Parameters",
-    
     "image.not_required": "Current template does not require image generation",
     "image.not_required_hint": "The selected template is text-only and does not need images. Benefits: ⚡ Faster generation 💰 Lower cost",
-    
     "video.title": "🎬 Video Settings",
     "video.frames": "Scenes",
     "video.frames_help": "More scenes = longer video",
     "video.frames_label": "Scenes: {n}",
     "video.frames_fixed_mode_hint": "💡 Fixed mode: scene count is determined by actual script segments",
-    
     "bgm.selector": "Music Selection",
     "bgm.none": "🔇 No BGM",
     "bgm.volume": "Volume",
@@ -132,13 +118,11 @@
     "bgm.preview_failed": "❌ Music file not found: {file}",
     "bgm.what": "Adds background music to your video, making it more atmospheric and professional",
     "bgm.how": "Place audio files (MP3/WAV/FLAC, etc.) in the bgm/ folder for automatic detection",
-    
     "btn.generate": "🎬 Generate Video",
     "btn.save_config": "💾 Save Configuration",
     "btn.reset_config": "🔄 Reset to Default",
     "btn.save_and_start": "Save and Start",
     "btn.test_connection": "Test Connection",
-    
     "status.initializing": "🔧 Initializing...",
     "status.generating": "🚀 Generating video...",
     "status.success": "✅ Video generated successfully!",
@@ -149,7 +133,6 @@
     "status.config_reset": "✅ Configuration reset to default",
     "status.connection_success": "✅ Connected",
     "status.connection_failed": "❌ Connection failed",
-    
     "progress.generating_title": "Generating title...",
     "progress.generating_narrations": "Generating narrations...",
     "progress.splitting_script": "Splitting script...",
@@ -167,11 +150,9 @@
     "progress.concatenating": "Concatenating video...",
     "progress.finalizing": "Finalizing...",
     "progress.completed": "✅ Completed",
-    
     "error.input_required": "❌ Please provide topic or content",
     "error.api_key_required": "❌ Please enter API Key",
     "error.missing_field": "Please enter {field}",
-    
     "info.duration": "Duration",
     "info.file_size": "File Size",
     "info.frames": "Scenes",
@@ -180,7 +161,6 @@
     "info.video_information": "📊 Video Information",
     "info.no_video_yet": "Video preview will appear here after generation",
     "info.generation_time": "Generation Time",
-    
     "settings.title": "⚙️ System Configuration (Required)",
     "settings.not_configured": "⚠️ Please complete system configuration before generating videos",
     "settings.llm.title": "🤖 Large Language Model",
@@ -193,7 +173,6 @@
     "settings.llm.base_url_help": "API service address",
     "settings.llm.model": "Model",
     "settings.llm.model_help": "Model name",
-    
     "settings.comfyui.title": "🔧 ComfyUI Configuration",
     "settings.comfyui.local_title": "Local/Self-hosted ComfyUI",
     "settings.comfyui.cloud_title": "RunningHub Cloud",
@@ -203,17 +182,14 @@
     "settings.comfyui.runninghub_api_key_help": "Visit https://runninghub.ai to register and get API Key",
     "settings.comfyui.runninghub_hint": "No local ComfyUI? Use RunningHub Cloud:",
     "settings.comfyui.runninghub_get_api_key": "Get RunningHub API Key",
-    
     "tts.inference_mode": "Synthesis Mode",
     "tts.mode.local": "Local Synthesis",
     "tts.mode.comfyui": "ComfyUI Synthesis",
     "tts.mode.local_hint": "💡 Using Edge TTS, no configuration required, ready to use",
     "tts.mode.comfyui_hint": "⚙️ Using ComfyUI workflows, flexible and powerful",
-    
     "tts.voice_selector": "Voice Selection",
     "tts.speed": "Speed",
     "tts.speed_label": "{speed}x",
-    
     "tts.voice.zh_CN_XiaoxiaoNeural": "zh-CN-XiaoxiaoNeural",
     "tts.voice.zh_CN_XiaoyiNeural": "zh-CN-XiaoyiNeural",
     "tts.voice.zh_CN_YunjianNeural": "zh-CN-YunjianNeural",
@@ -228,7 +204,6 @@
     "tts.voice.en_US_DavisNeural": "en-US-DavisNeural",
     "tts.voice.en_GB_SoniaNeural": "en-GB-SoniaNeural",
     "tts.voice.en_GB_RyanNeural": "en-GB-RyanNeural",
-    
     "tts.selector": "Workflow Selection",
     "tts.what": "Converts narration text to natural human-like speech (some workflows support reference audio for voice cloning)",
     "tts.how": "Place the exported tts_xxx.json workflow file(API format) into the workflows/selfhost/ folder (for local ComfyUI) or the workflows/runninghub/ folder (for cloud)",
@@ -241,29 +216,21 @@
     "tts.previewing": "Generating TTS preview...",
     "tts.preview_success": "✅ Preview generated successfully!",
     "tts.preview_failed": "❌ Preview failed: {error}",
-    
     "welcome.first_time": "🎉 Welcome to Pixelle-Video! Please complete basic configuration",
     "welcome.config_hint": "💡 First-time setup requires API Key configuration, you can modify it in advanced settings later",
-    
     "wizard.llm_required": "🤖 Large Language Model Configuration (Required)",
     "wizard.image_optional": "🎨 Image Generation Configuration (Optional)",
     "wizard.image_hint": "💡 If not configured, default template will be used (no AI image generation)",
     "wizard.configure_image": "Configure Image Generation (Recommended)",
-    
     "label.required": "(Required)",
     "label.optional": "(Optional)",
-    
     "help.feature_description": "💡 Feature Description",
     "help.what": "Purpose",
     "help.how": "Customization",
-    
     "language.select": "🌐 Language",
-    
     "version.title": "📦 Version Info",
     "version.current": "Current Version",
-    
     "github.title": "⭐ Open Source Support",
-    
     "history.page_title": "📚 Generation History",
     "history.total_tasks": "Total Tasks",
     "history.completed_count": "Completed",
@@ -321,7 +288,6 @@
     "history.action.delete_success": "✅ Task deleted",
     "history.action.delete_failed": "❌ Deletion failed: {error}",
     "history.page_info": "Page {page} / {total_pages}",
-    
     "batch.mode_label": "🔢 Batch Generation Mode",
     "batch.mode_help": "Generate multiple videos, one topic per line",
     "batch.section_title": "Batch Topics Input",
@@ -364,7 +330,9 @@
     "batch.failed_list": "❌ Failed Tasks",
     "batch.task": "Task",
     "batch.error": "Error",
-    "batch.error_detail": "View detailed error stack"
+    "batch.error_detail": "View detailed error stack",
+    "pipeline.standard.name": "Standard Video",
+    "pipeline.demo.name": "Demo Feature",
+    "pipeline.demo.description": "A demo pipeline with a custom layout"
   }
 }
-
