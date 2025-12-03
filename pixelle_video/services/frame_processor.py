@@ -73,23 +73,29 @@ class FrameProcessor:
         frame_num = frame.index + 1
         
         # Determine if this frame needs image generation
-        needs_image = frame.image_prompt is not None
+        # If image_path is already set (e.g. asset-based pipeline), we consider it "needs image" but skip generation
+        has_existing_image = frame.image_path is not None
+        needs_generation = frame.image_prompt is not None
         
         try:
             # Step 1: Generate audio (TTS)
-            if progress_callback:
-                progress_callback(ProgressEvent(
-                    event_type="frame_step",
-                    progress=0.0,
-                    frame_current=frame_num,
-                    frame_total=total_frames,
-                    step=1,
-                    action="audio"
-                ))
-            await self._step_generate_audio(frame, config)
+            if not frame.audio_path:
+                if progress_callback:
+                    progress_callback(ProgressEvent(
+                        event_type="frame_step",
+                        progress=0.0,
+                        frame_current=frame_num,
+                        frame_total=total_frames,
+                        step=1,
+                        action="audio"
+                    ))
+                await self._step_generate_audio(frame, config)
+            else:
+                logger.debug(f"  1/4: Using existing audio: {frame.audio_path}")
             
             # Step 2: Generate media (image or video, conditional)
-            if needs_image:
+            # Step 2: Generate media (image or video, conditional)
+            if needs_generation:
                 if progress_callback:
                     progress_callback(ProgressEvent(
                         event_type="frame_step",
@@ -100,16 +106,18 @@ class FrameProcessor:
                         action="media"
                     ))
                 await self._step_generate_media(frame, config)
+            elif has_existing_image:
+                logger.debug(f"  2/4: Using existing image: {frame.image_path}")
             else:
                 frame.image_path = None
                 frame.media_type = None
                 logger.debug(f"  2/4: Skipped media generation (not required by template)")
-            
+        
             # Step 3: Compose frame (add subtitle)
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
-                    progress=0.50 if needs_image else 0.33,
+                    progress=0.50 if (needs_generation or has_existing_image) else 0.33,
                     frame_current=frame_num,
                     frame_total=total_frames,
                     step=3,
@@ -121,17 +129,18 @@ class FrameProcessor:
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
-                    progress=0.75 if needs_image else 0.67,
+                    progress=0.75 if (needs_generation or has_existing_image) else 0.67,
                     frame_current=frame_num,
                     frame_total=total_frames,
                     step=4,
                     action="video"
                 ))
+            
             await self._step_create_video_segment(frame, config)
             
             logger.info(f"✅ Frame {frame.index} completed")
             return frame
-            
+
         except Exception as e:
             logger.error(f"❌ Failed to process frame {frame.index}: {e}")
             raise
@@ -303,6 +312,9 @@ class FrameProcessor:
         
         # Generate frame using HTML (size is auto-parsed from template path)
         generator = HTMLFrameGenerator(template_path)
+        
+        logger.debug(f"Generating frame with image: '{frame.image_path}' (type: {type(frame.image_path)})")
+        
         composed_path = await generator.generate_frame(
             title=storyboard.title,
             text=frame.narration,

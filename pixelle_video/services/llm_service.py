@@ -12,13 +12,20 @@
 
 """
 LLM (Large Language Model) Service - Direct OpenAI SDK implementation
+
+Supports structured output via response_type parameter (Pydantic model).
 """
 
-import os
-from typing import Optional
+import json
+import re
+from typing import Optional, Type, TypeVar, Union
 
 from openai import AsyncOpenAI
+from pydantic import BaseModel
 from loguru import logger
+
+
+T = TypeVar("T", bound=BaseModel)
 
 
 class LLMService:
@@ -114,8 +121,9 @@ class LLMService:
         model: Optional[str] = None,
         temperature: float = 0.7,
         max_tokens: int = 2000,
+        response_type: Optional[Type[T]] = None,
         **kwargs
-    ) -> str:
+    ) -> Union[str, T]:
         """
         Generate text using LLM
         
@@ -126,24 +134,28 @@ class LLMService:
             model: Model name (optional, uses config if not provided)
             temperature: Sampling temperature (0.0-2.0). Lower is more deterministic.
             max_tokens: Maximum tokens to generate
+            response_type: Optional Pydantic model class for structured output.
+                          If provided, returns parsed model instance instead of string.
             **kwargs: Additional provider-specific parameters
         
         Returns:
-            Generated text
+            Generated text (str) or parsed Pydantic model instance (if response_type provided)
         
         Examples:
-            # Use config from config.yaml
+            # Basic text generation
             answer = await pixelle_video.llm("Explain atomic habits")
             
-            # Override with custom parameters
-            answer = await pixelle_video.llm(
-                prompt="Explain atomic habits in 3 sentences",
-                api_key="sk-custom-key",
-                base_url="https://api.custom.com/v1",
-                model="custom-model",
-                temperature=0.7,
-                max_tokens=500
+            # Structured output with Pydantic model
+            class MovieReview(BaseModel):
+                title: str
+                rating: int
+                summary: str
+            
+            review = await pixelle_video.llm(
+                prompt="Review the movie Inception",
+                response_type=MovieReview
             )
+            print(review.title)  # Structured access
         """
         # Create client (new instance each time to support parameter overrides)
         client = self._create_client(api_key=api_key, base_url=base_url)
@@ -155,25 +167,143 @@ class LLMService:
             or "gpt-3.5-turbo"  # Default fallback
         )
         
-        logger.debug(f"LLM call: model={final_model}, base_url={client.base_url}")
+        logger.debug(f"LLM call: model={final_model}, base_url={client.base_url}, response_type={response_type}")
         
         try:
-            response = await client.chat.completions.create(
-                model=final_model,
+            if response_type is not None:
+                # Structured output mode - try beta.chat.completions.parse first
+                return await self._call_with_structured_output(
+                    client=client,
+                    model=final_model,
+                    prompt=prompt,
+                    response_type=response_type,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    **kwargs
+                )
+            else:
+                # Standard text output mode
+                response = await client.chat.completions.create(
+                    model=final_model,
+                    messages=[{"role": "user", "content": prompt}],
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                    **kwargs
+                )
+                
+                result = response.choices[0].message.content
+                logger.debug(f"LLM response length: {len(result)} chars")
+                
+                return result
+        
+        except Exception as e:
+            logger.error(f"LLM call error (model={final_model}, base_url={client.base_url}): {e}")
+            raise
+    
+    async def _call_with_structured_output(
+        self,
+        client: AsyncOpenAI,
+        model: str,
+        prompt: str,
+        response_type: Type[T],
+        temperature: float,
+        max_tokens: int,
+        **kwargs
+    ) -> T:
+        """
+        Call LLM with structured output support
+        
+        Tries OpenAI beta.chat.completions.parse first, falls back to JSON parsing
+        if the provider doesn't support structured outputs.
+        
+        Args:
+            client: OpenAI client
+            model: Model name
+            prompt: The prompt
+            response_type: Pydantic model class
+            temperature: Sampling temperature
+            max_tokens: Max tokens
+            **kwargs: Additional parameters
+        
+        Returns:
+            Parsed Pydantic model instance
+        """
+        # Try OpenAI structured output API first (beta.chat.completions.parse)
+        try:
+            response = await client.beta.chat.completions.parse(
+                model=model,
                 messages=[{"role": "user", "content": prompt}],
+                response_format=response_type,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 **kwargs
             )
             
-            result = response.choices[0].message.content
-            logger.debug(f"LLM response length: {len(result)} chars")
+            parsed = response.choices[0].message.parsed
+            if parsed is not None:
+                logger.debug(f"Structured output parsed successfully via beta API")
+                return parsed
             
-            return result
-        
+            # If parsed is None, fall through to fallback
+            logger.warning("Structured output API returned None, falling back to JSON parsing")
+            content = response.choices[0].message.content
+            
         except Exception as e:
-            logger.error(f"LLM call error (model={final_model}, base_url={client.base_url}): {e}")
-            raise
+            # If beta API not supported, fall back to JSON mode
+            logger.debug(f"Structured output API not available ({e}), falling back to JSON parsing")
+            
+            response = await client.chat.completions.create(
+                model=model,
+                messages=[{"role": "user", "content": prompt}],
+                temperature=temperature,
+                max_tokens=max_tokens,
+                **kwargs
+            )
+            content = response.choices[0].message.content
+        
+        # Fallback: Parse JSON from response content
+        return self._parse_response_as_model(content, response_type)
+    
+    def _parse_response_as_model(self, content: str, response_type: Type[T]) -> T:
+        """
+        Parse LLM response content as Pydantic model
+        
+        Args:
+            content: Raw LLM response text
+            response_type: Target Pydantic model class
+        
+        Returns:
+            Parsed model instance
+        """
+        # Try direct JSON parsing first
+        try:
+            data = json.loads(content)
+            return response_type.model_validate(data)
+        except json.JSONDecodeError:
+            pass
+        
+        # Try extracting from markdown code block
+        json_pattern = r'```(?:json)?\s*([\s\S]+?)\s*```'
+        match = re.search(json_pattern, content, re.DOTALL)
+        if match:
+            try:
+                data = json.loads(match.group(1))
+                return response_type.model_validate(data)
+            except json.JSONDecodeError:
+                pass
+        
+        # Try to find any JSON object in the text
+        brace_start = content.find('{')
+        brace_end = content.rfind('}')
+        if brace_start != -1 and brace_end > brace_start:
+            try:
+                json_str = content[brace_start:brace_end + 1]
+                data = json.loads(json_str)
+                return response_type.model_validate(data)
+            except json.JSONDecodeError:
+                pass
+        
+        raise ValueError(f"Failed to parse LLM response as {response_type.__name__}: {content[:200]}...")
     
     @property
     def active(self) -> str:

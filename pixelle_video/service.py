@@ -27,12 +27,14 @@ from pixelle_video.config import config_manager
 from pixelle_video.services.llm_service import LLMService
 from pixelle_video.services.tts_service import TTSService
 from pixelle_video.services.media import MediaService
+from pixelle_video.services.image_analysis import ImageAnalysisService
 from pixelle_video.services.video import VideoService
 from pixelle_video.services.frame_processor import FrameProcessor
 from pixelle_video.services.persistence import PersistenceService
 from pixelle_video.services.history_manager import HistoryManager
 from pixelle_video.pipelines.standard import StandardPipeline
 from pixelle_video.pipelines.custom import CustomPipeline
+from pixelle_video.pipelines.asset_based import AssetBasedPipeline
 
 
 class PixelleVideoCore:
@@ -184,9 +186,12 @@ class PixelleVideoCore:
         logger.info("🚀 Initializing Pixelle-Video...")
         
         # 1. Initialize core services (ComfyKit will be lazy-loaded later)
+        # Initialize services
         self.llm = LLMService(self.config)
-        self.tts = TTSService(self.config, self)
-        self.media = MediaService(self.config, self)
+        self.tts = TTSService(self.config, core=self)
+        self.media = MediaService(self.config, core=self)
+        self.image = self.media  # Alias for backward compatibility
+        self.image_analysis = ImageAnalysisService(self.config, core=self)
         self.video = VideoService()
         self.frame_processor = FrameProcessor(self)
         self.persistence = PersistenceService(output_dir="output")
@@ -196,6 +201,7 @@ class PixelleVideoCore:
         self.pipelines = {
             "standard": StandardPipeline(self),
             "custom": CustomPipeline(self),
+            "asset_based": AssetBasedPipeline(self),
         }
         logger.info(f"📹 Registered pipelines: {', '.join(self.pipelines.keys())}")
         
