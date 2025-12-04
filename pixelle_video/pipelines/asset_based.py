@@ -719,7 +719,13 @@ class AssetBasedPipeline(LinearVideoPipeline):
         # Collect video segments from storyboard frames
         scene_videos = [frame.video_segment_path for frame in context.storyboard.frames]
         
-        final_video_path = Path(context.task_dir) / f"{context.title}.mp4"
+        # Generate filename: use title if provided, otherwise use task_id or default name
+        if context.title:
+            filename = f"{context.title}.mp4"
+        else:
+            filename = f"{context.task_id}.mp4"  # Use task_id as filename when title is empty
+        
+        final_video_path = Path(context.task_dir) / filename
         
         # Get BGM parameters
         bgm_path = context.request.get("bgm_path")
