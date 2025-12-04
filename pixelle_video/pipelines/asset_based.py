@@ -472,7 +472,9 @@ Generate the video script now:"""
         context.narrations = all_narrations
         
         # Get template dimensions
-        template_name = "1080x1920/image_pure.html"
+        # Use asset_default.html template which supports both image and video assets
+        # (conditionally shows background image or provides transparent overlay)
+        template_name = "1080x1920/asset_default.html"
         # Extract dimensions from template name (e.g., "1080x1920")
         try:
             dims = template_name.split("/")[0].split("x")
@@ -524,9 +526,20 @@ Generate the video script now:"""
                 created_at=datetime.now()
             )
             
-            # Store matched asset path in the frame
-            frame.image_path = scene["matched_asset"]
-            frame.media_type = "image"
+            # Get asset path and determine actual media type from asset_index
+            asset_path = scene["matched_asset"]
+            asset_metadata = self.asset_index.get(asset_path, {})
+            asset_type = asset_metadata.get("type", "image")  # Default to image if not found
+            
+            # Set media type and path based on actual asset type
+            if asset_type == "video":
+                frame.media_type = "video"
+                frame.video_path = asset_path
+                logger.debug(f"Scene {i}: Using video asset: {Path(asset_path).name}")
+            else:
+                frame.media_type = "image"
+                frame.image_path = asset_path
+                logger.debug(f"Scene {i}: Using image asset: {Path(asset_path).name}")
             
             # Store scene info for later audio generation
             frame._scene_data = scene  # Temporary storage for multi-narration

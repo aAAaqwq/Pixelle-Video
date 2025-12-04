@@ -1,0 +1,63 @@
+{
+  "9": {
+    "inputs": {
+      "prompt": "详细描述这个视频，500字以内"
+    },
+    "class_type": "CR Prompt Text",
+    "_meta": {
+      "title": "⚙️ CR Prompt Text"
+    }
+  },
+  "14": {
+    "inputs": {
+      "video": "01_segment.mp4",
+      "force_rate": 0,
+      "custom_width": 0,
+      "custom_height": 0,
+      "frame_load_cap": 0,
+      "skip_first_frames": 0,
+      "select_every_nth": 1,
+      "format": "AnimateDiff"
+    },
+    "class_type": "VHS_LoadVideo",
+    "_meta": {
+      "title": "$video.video"
+    }
+  },
+  "18": {
+    "inputs": {
+      "text": "这是一个静态插画风格的宣传图或信息图表。画面中央是一位坐在办公桌前、面带微笑的年轻人，他正专注地使用笔记本电脑工作。他的身后是一扇大窗户，窗外透进温暖柔和的光线，营造出温馨舒适的居家氛围；窗边挂着浅色窗帘，墙上悬挂着一个黑色圆形时钟，指针指向约六点十分——暗示下班后的时间段。\n\n从年轻人头顶上方飘落许多金色硬币，每枚都印有美元符号“$”，象征被动收入源源不断流入。桌子两侧各摆放一盆高大的绿植（叶片宽大），增添自然气息与生活感。桌面简洁整洁，仅放一台银灰色笔记本和一个小花瓶作为装饰。\n\n图片顶部用粗体黑字写着标题：“如何新增被动收入”。底部则有一句引言式文案：“下班后时间其实能创造新收入”，强调利用业余时间实现财务自由的可能性。左下角标注了创作者信息：@Pixelle.AI，并注明其为开源多模态AI创意代理工具；右下角显示作品类型“Pixelle-Video”。\n\n整体色调以米黄、灰棕为主，配以橙金点缀，视觉上既专业又不失亲和力，适合用于财经类内容推广或个人理财教育场景。构图平衡对称，突出主题的同时传递积极向上的价值观——即通过智慧投资时间和技能，在非正式工时也能收获财富回报。",
+      "anything": [
+        "19",
+        0
+      ]
+    },
+    "class_type": "easy showAnything",
+    "_meta": {
+      "title": "Show Any"
+    }
+  },
+  "19": {
+    "inputs": {
+      "model_name": "Qwen3-VL-8B-Instruct",
+      "quantization": "None (FP16)",
+      "attention_mode": "auto",
+      "preset_prompt": "📹 Video Summary",
+      "custom_prompt": [
+        "9",
+        0
+      ],
+      "max_tokens": 1024,
+      "keep_model_loaded": true,
+      "seed": 582488656,
+      "video": [
+        "14",
+        0
+      ]
+    },
+    "class_type": "AILab_QwenVL",
+    "_meta": {
+      "title": "QwenVL"
+    }
+  }
+}

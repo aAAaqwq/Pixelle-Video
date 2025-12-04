@@ -73,8 +73,8 @@ class FrameProcessor:
         frame_num = frame.index + 1
         
         # Determine if this frame needs image generation
-        # If image_path is already set (e.g. asset-based pipeline), we consider it "needs image" but skip generation
-        has_existing_image = frame.image_path is not None
+        # If image_path or video_path is already set (e.g. asset-based pipeline), we consider it "has existing media" but skip generation
+        has_existing_media = frame.image_path is not None or frame.video_path is not None
         needs_generation = frame.image_prompt is not None
         
         try:
@@ -94,7 +94,6 @@ class FrameProcessor:
                 logger.debug(f"  1/4: Using existing audio: {frame.audio_path}")
             
             # Step 2: Generate media (image or video, conditional)
-            # Step 2: Generate media (image or video, conditional)
             if needs_generation:
                 if progress_callback:
                     progress_callback(ProgressEvent(
@@ -106,8 +105,12 @@ class FrameProcessor:
                         action="media"
                     ))
                 await self._step_generate_media(frame, config)
-            elif has_existing_image:
-                logger.debug(f"  2/4: Using existing image: {frame.image_path}")
+            elif has_existing_media:
+                # Log appropriate message based on media type
+                if frame.video_path:
+                    logger.debug(f"  2/4: Using existing video: {frame.video_path}")
+                else:
+                    logger.debug(f"  2/4: Using existing image: {frame.image_path}")
             else:
                 frame.image_path = None
                 frame.media_type = None
@@ -117,7 +120,7 @@ class FrameProcessor:
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
-                    progress=0.50 if (needs_generation or has_existing_image) else 0.33,
+                    progress=0.50 if (needs_generation or has_existing_media) else 0.33,
                     frame_current=frame_num,
                     frame_total=total_frames,
                     step=3,
@@ -129,7 +132,7 @@ class FrameProcessor:
             if progress_callback:
                 progress_callback(ProgressEvent(
                     event_type="frame_step",
-                    progress=0.75 if (needs_generation or has_existing_image) else 0.67,
+                    progress=0.75 if (needs_generation or has_existing_media) else 0.67,
                     frame_current=frame_num,
                     frame_total=total_frames,
                     step=4,
@@ -313,12 +316,14 @@ class FrameProcessor:
         # Generate frame using HTML (size is auto-parsed from template path)
         generator = HTMLFrameGenerator(template_path)
         
-        logger.debug(f"Generating frame with image: '{frame.image_path}' (type: {type(frame.image_path)})")
+        # Use video_path for video media, image_path for images
+        media_path = frame.video_path if frame.media_type == "video" else frame.image_path
+        logger.debug(f"Generating frame with media: '{media_path}' (type: {frame.media_type})")
         
         composed_path = await generator.generate_frame(
             title=storyboard.title,
             text=frame.narration,
-            image=frame.image_path,
+            image=media_path,  # HTMLFrameGenerator handles both image and video paths
             ext=ext,
             output_path=output_path
         )
@@ -372,7 +377,8 @@ class FrameProcessor:
                 os.unlink(temp_video_with_overlay)
         
         elif frame.media_type == "image" or frame.media_type is None:
-            # Image workflow: create video from image + audio
+            # Image workflow: Use composed image directly
+            # The asset_default.html template includes the image in the composition
             logger.debug(f"  → Using image-based composition")
             
             segment_path = video_service.create_video_from_image(

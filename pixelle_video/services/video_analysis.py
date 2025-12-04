@@ -32,9 +32,9 @@ class VideoAnalysisService(ComfyBaseService):
     Uses ComfyKit to execute video understanding workflows.
     Returns detailed textual descriptions of video content.
     
-    Convention: workflows follow {source}/video_understanding.json pattern
-    - runninghub/video_understanding.json (default, cloud-based)
-    - selfhost/video_understanding.json (local ComfyUI, future)
+    Convention: workflows follow {source}/analyse_video.json pattern
+    - runninghub/analyse_video.json (default, cloud-based)
+    - selfhost/analyse_video.json (local ComfyUI, future)
     
     Usage:
         # Use default (runninghub cloud)
@@ -50,7 +50,7 @@ class VideoAnalysisService(ComfyBaseService):
         workflows = pixelle_video.video_analysis.list_workflows()
     """
     
-    WORKFLOW_PREFIX = "video_understanding"
+    WORKFLOW_PREFIX = "analyse_video"
     WORKFLOWS_DIR = "workflows"
     
     def __init__(self, config: dict, core=None):
@@ -114,8 +114,8 @@ class VideoAnalysisService(ComfyBaseService):
         
         # 2. Resolve workflow path using convention
         if workflow is None:
-            # Use standardized naming: {source}/video_understanding.json
-            workflow = resolve_workflow_path("video_understanding", source)
+            # Use standardized naming: {source}/analyse_video.json
+            workflow = resolve_workflow_path("analyse_video", source)
             logger.info(f"Using {source} workflow: {workflow}")
         
         # 3. Resolve workflow (returns structured info)
