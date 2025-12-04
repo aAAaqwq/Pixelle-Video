@@ -308,6 +308,8 @@ class AssetBasedPipeline(LinearVideoPipeline):
         Returns:
             Updated context with generated script (scenes already have asset_path assigned)
         """
+        from pixelle_video.prompts.asset_script_generation import build_asset_script_prompt
+        
         logger.info("🤖 Generating video script with LLM...")
         
         # Emit progress for script generation (15% - 25%)
@@ -328,34 +330,13 @@ class AssetBasedPipeline(LinearVideoPipeline):
         
         assets_text = "\n".join(asset_info)
         
-        # Build title section for prompt (only if title is provided)
-        title_section = f"- Video Title: {title}\n" if title else ""
-        
-        prompt = f"""You are a video script writer. Generate a {duration}-second video script.
-
-## Requirements
-{title_section}- Intent: {intent}
-- Target Duration: {duration} seconds
-
-## Available Assets (use the exact path in your response)
-{assets_text}
-
-## Instructions
-1. Decide how many scenes are needed based on the target duration (typically 5-15 seconds per scene)
-2. For each scene, directly assign ONE asset from the available assets above
-3. Each scene can have 1-5 narration sentences
-4. Try to use all available assets, but it's OK to reuse if needed
-5. Total duration of all scenes should be approximately {duration} seconds
-{f"6. The narrations should align with the video title: {title}" if title else ""}
-
-## Output Requirements
-For each scene, provide:
-- scene_number: Sequential number starting from 1
-- asset_path: The EXACT path from the available assets list
-- narrations: Array of 1-5 narration sentences
-- duration: Estimated duration in seconds
-
-Generate the video script now:"""
+        # Build prompt using the centralized prompt function
+        prompt = build_asset_script_prompt(
+            intent=intent,
+            duration=duration,
+            assets_text=assets_text,
+            title=title
+        )
         
         # Call LLM with structured output
         script: VideoScript = await self.core.llm(
