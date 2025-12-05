@@ -1,7 +1,7 @@
 {
   "5": {
     "inputs": {
-      "image": "06.JPG"
+      "image": "IMG_20250829_201936.jpg"
     },
     "class_type": "LoadImage",
     "_meta": {
@@ -10,6 +10,7 @@
   },
   "6": {
     "inputs": {
+      "text": "A small, fluffy ginger kitten with large, wide green eyes sits upright on a glossy white tiled floor, its paws planted firmly as it stares intently forward, exuding an air of innocent curiosity; beside it rests a colorful striped cat tunnel in hues of red, blue, purple, and green, while soft indoor light reflects off the polished surface around it, illuminating the scene with gentle warmth and creating subtle highlights on the kitten’s fur and whiskers — capturing a quiet moment of stillness within a cozy home setting.",
       "anything": [
         "7",
         0
@@ -29,15 +30,33 @@
       "custom_prompt": "",
       "max_tokens": 512,
       "keep_model_loaded": true,
-      "seed": 1,
+      "seed": 3731918183,
       "image": [
-        "5",
+        "8",
         0
       ]
     },
     "class_type": "AILab_QwenVL",
     "_meta": {
       "title": "QwenVL"
+    }
+  },
+  "8": {
+    "inputs": {
+      "width": 1080,
+      "height": 1080,
+      "interpolation": "nearest",
+      "method": "keep proportion",
+      "condition": "downscale if bigger",
+      "multiple_of": 0,
+      "image": [
+        "5",
+        0
+      ]
+    },
+    "class_type": "ImageResize+",
+    "_meta": {
+      "title": "🔧 Image Resize"
     }
   }
 }
