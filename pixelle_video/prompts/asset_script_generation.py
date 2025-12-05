@@ -17,37 +17,38 @@ For generating video scripts based on user-provided assets.
 """
 
 
-ASSET_SCRIPT_GENERATION_PROMPT = """你是一位专业的视频脚本创作者。请基于用户提供的视频意图和可用素材，生成一个 {duration} 秒的视频脚本。
+ASSET_SCRIPT_GENERATION_PROMPT = """You are a professional video script creator. Based on the user's video intent and available assets, generate a {duration}-second video script. Before doing so, you need to detect the user's input language - if it's English, then all copy must be in English. Strictly follow the user's input language type as the standard, ensuring consistent and corresponding copy!
 
-## 需求信息
-{title_section}- 视频意图：{intent}
-- 目标时长：{duration} 秒
+## Requirements
+{title_section}- Video Intent: {intent}
+- Target Duration: {duration} seconds
 
-## 可用素材（请在输出中使用精确路径）
+## Available Assets (use exact paths in output)
 {assets_text}
 
-## 创作指南
-1. 根据目标时长决定需要多少个场景（通常每个场景 5-15 秒）
-2. 为每个场景从可用素材中直接分配一个素材
-3. 每个场景可以包含 1-3 句旁白
-4. 尽量使用所有可用素材，但如有需要可以复用素材
-5. 所有场景的总时长应约等于 {duration} 秒
+## Creation Guidelines
+1. Strictly output copy according to the user's input language type - if input is English, output must be English, and so on
+2. Determine the number of scenes based on target duration (typically 5-15 seconds per scene)
+3. Assign one asset from available assets to each scene
+4. Each scene can contain 1-3 narration sentences
+5. Try to use all available assets, but assets can be reused if needed
+6. Total duration of all scenes should approximately equal {duration} seconds
 {title_instruction}
 
-## 语言一致性要求（非常重要）
-- 旁白的语言必须与用户输入的视频意图保持一致
-- 如果视频意图是中文，则旁白必须是中文
-- 如果视频意图是英文，则旁白必须是英文
-- 除非视频意图中明确指定了输出语言，否则严格遵循意图的原始语言
+## Language Consistency Requirements (Strictly Enforce)
+- Narration language must match the user's input video intent
+- If video intent is in Chinese, narration must be in Chinese
+- If video intent is in English, narration must be in English
+- Unless the video intent explicitly specifies an output language, strictly follow the original language of the intent
 
-## 输出要求
-为每个场景提供：
-- scene_number: 场景编号（从 1 开始）
-- asset_path: 从可用素材列表中选择的精确路径
-- narrations: 包含 1-3 句旁白的数组
-- duration: 预估时长（秒）
+## Output Requirements
+Provide for each scene:
+- scene_number: Scene number (starting from 1)
+- asset_path: Exact path selected from available assets list
+- narrations: Array containing 1-3 narration sentences
+- duration: Estimated duration (seconds)
 
-现在请开始生成视频脚本："""
+Now please begin generating the video script:"""
 
 
 def build_asset_script_prompt(
@@ -68,8 +69,8 @@ def build_asset_script_prompt(
     Returns:
         Formatted prompt
     """
-    title_section = f"- 视频标题：{title}\n" if title else ""
-    title_instruction = f"6. 旁白内容应与视频标题保持一致：{title}\n" if title else ""
+    title_section = f"- Video Title: {title}\n" if title else ""
+    title_instruction = f"6. Narration content should be consistent with the video title: {title}\n" if title else ""
     
     return ASSET_SCRIPT_GENERATION_PROMPT.format(
         duration=duration,

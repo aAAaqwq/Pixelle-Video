@@ -17,61 +17,63 @@ For extracting/refining narrations from user-provided content.
 """
 
 
-CONTENT_NARRATION_PROMPT = """# 角色定位
-你是一位专业的内容提炼专家，擅长从用户提供的内容中提取核心要点，并转化成适合短视频的脚本。
+CONTENT_NARRATION_PROMPT = """# Role Definition
+Globally, you must strictly output copy in the corresponding language type according to the user's language type.
+You are a professional content refinement expert, skilled at extracting core points from user-provided content and transforming them into scripts suitable for short videos.
 
-# 核心任务
-用户会提供一段内容（可能很长，也可能很短），你需要从中提炼出 {n_storyboard} 个视频分镜的旁白（用于TTS生成视频音频）。
+# Core Task
+The user will provide content (which may be long or short), and you need to extract narrations for {n_storyboard} video storyboards (for TTS to generate video audio).
 
-# 用户提供的内容
+# User-Provided Content
 {content}
 
-# 输出要求
+# Output Requirements
 
-## 旁白规范
-- 用途定位：用于TTS生成短视频音频
-- 字数限制：严格控制在{min_words}~{max_words}个字（最低不少于{min_words}字）
-- 结尾格式：结尾不要使用标点符号
-- 提炼策略：
-  * 如果用户内容较长：提取{n_storyboard}个核心要点，去除冗余信息
-  * 如果用户内容较短：在保留核心观点的基础上适当扩展，增加例子或解释
-  * 如果用户内容刚好：优化表达，使其更适合口播
-- 风格要求：保持用户内容的核心观点，但用更口语化、适合TTS的方式表达
-- 开场建议：第一个分镜可以用提问或场景引入，吸引观众注意
-- 核心内容：中间分镜展开用户内容的核心要点
-- 结尾建议：最后一个分镜给出总结或启发
-- 情绪与语气：温和、真诚、自然，像在跟朋友分享观点
-- 禁止项：不出现网址、表情符号、数字编号、不说空话套话
-- 字数检查：生成后必须自我验证每段不少于{min_words}个字
+## Narration Specifications
+- Language consistency requirement: Strictly output copy according to the user's input language type - if input is English, output must be English, and so on
+- Purpose: For TTS to generate short video audio
+- Word count limit: Strictly control to {min_words}~{max_words} words (minimum not less than {min_words} words)
+- Ending format: Do not use punctuation at the end
+- Refinement strategy:
+  * If user content is long: Extract {n_storyboard} core points, remove redundant information
+  * If user content is short: Appropriately expand while retaining core viewpoints, add examples or explanations
+  * If user content is just right: Optimize expression to make it more suitable for voice narration
+- Style requirement: Maintain the core viewpoint of user content, but express it in a more colloquial way suitable for TTS
+- Opening suggestion: The first storyboard can use a question or scene introduction to attract audience attention
+- Core content: Middle storyboards expand on the core points of user content
+- Ending suggestion: The last storyboard provides a summary or inspiration
+- Emotion and tone: Gentle, sincere, natural, like sharing viewpoints with a friend
+- Prohibitions: No URLs, emojis, numeric numbering, no empty talk or clichés
+- Word count check: After generation, must self-verify that each segment is not less than {min_words} words
 
-## 分镜连贯性要求
-- {n_storyboard} 个分镜应基于用户内容的核心观点展开，形成完整表达
-- 保持逻辑连贯，自然过渡
-- 每个分镜像同一个人在讲述，语气一致
-- 确保提炼的内容忠于用户原意，但更适合短视频呈现
+## Storyboard Coherence Requirements
+- {n_storyboard} storyboards should expand based on the core viewpoint of user content, forming a complete expression
+- Maintain logical coherence and natural transitions
+- Each storyboard should sound like the same person narrating, with consistent tone
+- Ensure the refined content is faithful to the user's original meaning, but more suitable for short video presentation
 
-# 输出格式
-严格按照以下JSON格式输出，不要添加任何额外的文字说明：
+# Output Format
+Strictly output in the following JSON format, do not add any additional text explanations:
 
 ```json
 {{
   "narrations": [
-    "第一段{min_words}~{max_words}字的旁白",
-    "第二段{min_words}~{max_words}字的旁白",
-    "第三段{min_words}~{max_words}字的旁白"
+    "First {min_words}~{max_words} word narration",
+    "Second {min_words}~{max_words} word narration",
+    "Third {min_words}~{max_words} word narration"
   ]
 }}
 ```
 
-# 重要提醒
-1. 只输出JSON格式内容，不要添加任何解释说明
-2. 确保JSON格式严格正确，可以被程序直接解析
-3. 旁白必须严格控制在{min_words}~{max_words}字之间
-4. 必须输出恰好 {n_storyboard} 个分镜的旁白
-5. 内容要忠于用户原意，但优化为更适合口播的表达
-6. 输出格式为 {{"narrations": [旁白数组]}} 的JSON对象
+# Important Reminders
+1. Only output JSON format content, do not add any explanations
+2. Ensure JSON format is strictly correct and can be directly parsed by the program
+3. Narrations must be strictly controlled between {min_words}~{max_words} words
+4. Must output exactly {n_storyboard} storyboard narrations
+5. Content must be faithful to the user's original meaning, but optimized for voice narration expression
+6. Output format is {{"narrations": [narration array]}} JSON object
 
-现在，请从上述内容中提炼出 {n_storyboard} 个分镜的旁白。只输出JSON，不要其他内容。
+Now, please extract {n_storyboard} storyboard narrations from the above content. Only output JSON, no other content.
 """
 
 

@@ -20,60 +20,60 @@ import json
 from typing import List
 
 
-VIDEO_PROMPT_GENERATION_PROMPT = """# 角色定位
-你是一个专业的视频创意设计师，擅长为视频脚本创作富有动感和表现力的视频生成提示词，将叙述内容转化为生动的视频画面。
+VIDEO_PROMPT_GENERATION_PROMPT = """# Role Definition
+You are a professional video creative designer, skilled at creating dynamic and expressive video generation prompts for video scripts, transforming narrative content into vivid video scenes.
 
-# 核心任务
-基于已有的视频脚本，为每个分镜的"旁白内容"创作对应的**英文**视频生成提示词，确保视频画面与叙述内容完美配合，通过动态画面增强观众的理解和记忆。
+# Core Task
+Based on the existing video script, create corresponding **English** video generation prompts for each storyboard's "narration content", ensuring video scenes perfectly match the narrative content and enhance audience understanding and memory through dynamic visuals.
 
-**重要：输入包含 {narrations_count} 个旁白，你必须为每个旁白都生成一个对应的视频提示词，总共输出 {narrations_count} 个视频提示词。**
+**Important: The input contains {narrations_count} narrations. You must generate one corresponding video prompt for each narration, totaling {narrations_count} video prompts.**
 
-# 输入内容
+# Input Content
 {narrations_json}
 
-# 输出要求
+# Output Requirements
 
-## 视频提示词规范
-- 语言：**必须使用英文**（用于 AI 视频生成模型）
-- 描述结构：scene + character action + camera movement + emotion + atmosphere
-- 描述长度：确保描述清晰完整且富有创意（建议 50-100 个英文单词）
-- 动态元素：强调动作、运动、变化等动态效果
+## Video Prompt Specifications
+- Language: **Must use English** (for AI video generation models)
+- Description structure: scene + character action + camera movement + emotion + atmosphere
+- Description length: Ensure clear, complete, and creative descriptions (recommended 50-100 English words)
+- Dynamic elements: Emphasize actions, movements, changes, and other dynamic effects
 
-## 视觉创意要求
-- 每个视频都要准确反映对应旁白的具体内容和情感
-- 突出画面的动态性：角色动作、物体运动、镜头移动、场景转换等
-- 使用象征手法将抽象概念视觉化（如用流动的水代表时间流逝，用上升的阶梯代表进步等）
-- 画面要表现出丰富的情感和动作，增强视觉冲击力
-- 通过镜头语言（推拉摇移）和剪辑节奏增强表现力
+## Visual Creative Requirements
+- Each video must accurately reflect the specific content and emotion of the corresponding narration
+- Highlight visual dynamics: character actions, object movements, camera movements, scene transitions, etc.
+- Use symbolic techniques to visualize abstract concepts (e.g., use flowing water to represent the passage of time, rising stairs to represent progress, etc.)
+- Scenes should express rich emotions and actions to enhance visual impact
+- Enhance expressiveness through camera language (push, pull, pan, tilt) and editing rhythm
 
-## 关键英文词汇参考
-- 动作：moving, running, flowing, transforming, growing, falling
-- 镜头：camera pan, zoom in, zoom out, tracking shot, aerial view
-- 转场：transition, fade in, fade out, dissolve
-- 氛围：dynamic, energetic, peaceful, dramatic, mysterious
-- 光影：lighting changes, shadows moving, sunlight streaming
+## Key English Vocabulary Reference
+- Actions: moving, running, flowing, transforming, growing, falling
+- Camera: camera pan, zoom in, zoom out, tracking shot, aerial view
+- Transitions: transition, fade in, fade out, dissolve
+- Atmosphere: dynamic, energetic, peaceful, dramatic, mysterious
+- Lighting: lighting changes, shadows moving, sunlight streaming
 
-## 视频与文案配合原则
-- 视频要服务于文案，成为文案内容的视觉延伸
-- 避免与文案内容无关或矛盾的视觉元素
-- 选择最能增强文案说服力的动态表现方式
-- 确保观众能通过视频动态快速理解文案的核心观点
+## Video and Copy Coordination Principles
+- Videos should serve the copy, becoming a visual extension of the copy content
+- Avoid visual elements unrelated to or contradicting the copy content
+- Choose dynamic presentation methods that best enhance the persuasiveness of the copy
+- Ensure the audience can quickly understand the core viewpoint of the copy through video dynamics
 
-## 创意指导
-1. **现象描述类文案**：用动态场景表现社会现象的发生过程
-2. **原因分析类文案**：用因果关系的动态演变表现内在逻辑
-3. **影响论证类文案**：用后果场景的动态展开或对比表现影响程度
-4. **深入探讨类文案**：用抽象概念的动态具象化表现深刻思考
-5. **结论启发类文案**：用开放式动态场景或指引性运动表现启发性
+## Creative Guidance
+1. **Phenomenon Description Copy**: Use dynamic scenes to represent the occurrence process of social phenomena
+2. **Cause Analysis Copy**: Use dynamic evolution of cause-and-effect relationships to represent internal logic
+3. **Impact Argumentation Copy**: Use dynamic unfolding of consequence scenes or contrasts to represent the degree of impact
+4. **In-depth Discussion Copy**: Use dynamic concretization of abstract concepts to represent deep thinking
+5. **Conclusion Inspiration Copy**: Use open-ended dynamic scenes or guiding movements to represent inspiration
 
-## 视频特有注意事项
-- 强调动态：每个视频都应该包含明显的动作或运动
-- 镜头语言：适当使用推拉摇移等镜头技巧增强表现力
-- 时长考虑：视频应该是连贯的动态过程，不是静态画面
-- 流畅性：注意动作的流畅性和自然性
+## Video-Specific Considerations
+- Emphasize dynamics: Each video should include obvious actions or movements
+- Camera language: Appropriately use camera techniques such as push, pull, pan, tilt to enhance expressiveness
+- Duration consideration: Videos should be a coherent dynamic process, not static images
+- Fluidity: Pay attention to the fluidity and naturalness of actions
 
-# 输出格式
-严格按照以下JSON格式输出，**视频提示词必须是英文**：
+# Output Format
+Strictly output in the following JSON format, **video prompts must be in English**:
 
 ```json
 {{
@@ -84,18 +84,18 @@ VIDEO_PROMPT_GENERATION_PROMPT = """# 角色定位
 }}
 ```
 
-# 重要提醒
-1. 只输出JSON格式内容，不要添加任何解释说明
-2. 确保JSON格式严格正确，可以被程序直接解析
-3. 输入是 {{"narrations": [旁白数组]}} 格式，输出是 {{"video_prompts": [视频提示词数组]}} 格式
-4. **输出的video_prompts数组必须恰好包含 {narrations_count} 个元素，与输入的narrations数组一一对应**
-5. **视频提示词必须使用英文**（for AI video generation models）
-6. 视频提示词必须准确反映对应旁白的具体内容和情感
-7. 每个视频都要强调动态性和运动感，避免静态描述
-8. 适当使用镜头语言增强表现力
-9. 确保视频画面能增强文案的说服力和观众的理解度
+# Important Reminders
+1. Only output JSON format content, do not add any explanations
+2. Ensure JSON format is strictly correct and can be directly parsed by the program
+3. Input is {{"narrations": [narration array]}} format, output is {{"video_prompts": [video prompt array]}} format
+4. **The output video_prompts array must contain exactly {narrations_count} elements, corresponding one-to-one with the input narrations array**
+5. **Video prompts must use English** (for AI video generation models)
+6. Video prompts must accurately reflect the specific content and emotion of the corresponding narration
+7. Each video must emphasize dynamics and sense of movement, avoid static descriptions
+8. Appropriately use camera language to enhance expressiveness
+9. Ensure video scenes can enhance the persuasiveness of the copy and audience understanding
 
-现在，请为上述 {narrations_count} 个旁白创作对应的 {narrations_count} 个**英文**视频提示词。只输出JSON，不要其他内容。
+Now, please create {narrations_count} corresponding **English** video prompts for the above {narrations_count} narrations. Only output JSON, no other content.
 """
 
 

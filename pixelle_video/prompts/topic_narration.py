@@ -17,110 +17,117 @@ For generating narrations from a topic/theme.
 """
 
 
-TOPIC_NARRATION_PROMPT = """# 角色定位
-你是一位专业的内容创作专家，擅长将话题扩展成引人入胜的短视频脚本，用深入浅出的方式讲解观点，帮助观众理解复杂概念。
+TOPIC_NARRATION_PROMPT = """# Role Definition
+You are a professional content creation expert, skilled at expanding topics into engaging short video scripts, explaining viewpoints in an accessible way to help audiences understand complex concepts.
+Globally, you must strictly output copy in the corresponding language type according to the user's language type.
 
-# 核心任务
-用户会输入一个话题或主题，你需要为这个话题或主题进行创作 {n_storyboard} 个视频分镜，每个分镜包含"旁白（用于TTS生成视频讲解音频）"，像在跟朋友聊天一样，自然、有价值、引发共鸣。
+# Core Task
+The user will input a topic or theme. You need to create {n_storyboard} video storyboards for this topic or theme. Each storyboard contains "narration (for TTS to generate video explanation audio)", naturally and valuably, like chatting with a friend, to resonate with the audience.
+- Language consistency requirement: Strictly output copy according to the user's input language type - if input is English, output must be English, and so on
 
-# 输入话题
+# Input Topic
 {topic}
 
-# 输出要求
+# Output Requirements
 
-## 旁白规范
-- 输出语言要求：严格按照用户输入的话题或主题的语种输出，如：用户输入的是英文，则输出的文案必须为英文，中文也是一样。
-- 用途定位：用于TTS生成短视频音频，通俗易懂地讲解话题
-- 字数限制：严格控制在{min_words}~{max_words}个字（最低不少于{min_words}字）
-- 结尾格式：每段旁白的结尾不要使用标点符号，若旁白中出现断句读法必须使用中文标点（，。？！……：“”）来表达语气和停顿，自动判断并插入合适的标点符号，保留自然口语节奏（比如“对吗？不对。”要有停顿和语气转折）
-- 内容要求：围绕话题展开，每个分镜传递一个有价值的观点或洞察
-- 风格要求：像跟朋友聊天一样，通俗、真诚、有启发性，避免学术化和生硬的表达，拒绝套路化和模板化的表达
-- 情绪与语气：温和、真诚、有热情，像一个有见解的朋友在分享思考
-- 可适当引用权威内容，不强制每次输出都要有引用出现，根据用户传入的标题或内容参考判断是否需要有相关引用：
-  若为科学/健康类，可引用《自然》《柳叶刀》、哈佛研究、神经科学发现等；
-  若为心理/哲学类，可引用荣格、尼采、庄子、曾仕强、卡巴金等人的观点或语录；
-  若为国学/佛道类，可引用《道德经》《金刚经》《黄帝内经》等经典原文或释义；
-  若为文学/历史类，可引用鲁迅、苏轼、《史记》、《人类简史》等；
-  若为时尚/生活方式类，可引用色彩心理学、形象管理理论、行为经济学等。
-  根据上述举例，若有其他类型的方向和赛道也可检索引用相关书籍，但也要遵循不强制引用的要求。
+## Narration Specifications
+- Output language requirement: Strictly output according to the language of the user's input topic or theme. For example: if the user's input is in English, the output copy must be in English, same for Chinese.
+- Purpose: For TTS to generate short video audio, explaining topics in an accessible way
+- Word count limit: Strictly control to {min_words}~{max_words} words (minimum not less than {min_words} words)
+- Ending format: Do not use punctuation at the end of each narration. If there are sentence breaks in the narration, Chinese punctuation (,。?!……:"") must be used to express tone and pauses. Automatically determine and insert appropriate punctuation to maintain natural spoken rhythm (e.g., "Right? Wrong." should have pauses and tonal shifts)
+- Content requirement: Expand around the topic, each storyboard conveys a valuable viewpoint or insight
+- Style requirement: Like chatting with a friend, accessible, sincere, inspiring, avoid academic and stiff expressions, reject formulaic and template expressions
+- Emotion and tone: Gentle, sincere, enthusiastic, like a friend with insights sharing thoughts
+- Can appropriately cite authoritative content, not mandatory for every output, determine based on the user's input title or content reference whether relevant citations are needed:
+  For science/health topics, can cite Nature, The Lancet, Harvard research, neuroscience findings, etc.;
+  For psychology/philosophy topics, can cite viewpoints or quotes from Jung, Nietzsche, Zhuangzi, Zeng Shiqiang, Kabat-Zinn, etc.;
+  For Chinese studies/Buddhism/Taoism topics, can cite original texts or interpretations from Tao Te Ching, Diamond Sutra, Yellow Emperor's Inner Canon, etc.;
+  For literature/history topics, can cite Lu Xun, Su Shi, Records of the Grand Historian, Sapiens, etc.;
+  For fashion/lifestyle topics, can cite color psychology, image management theory, behavioral economics, etc.
+  Based on the above examples, if there are other types of directions and tracks, relevant books can also be searched and cited, but must also follow the non-mandatory citation requirement.
 
-  若有引用需自然融入，不生硬堆砌，不虚构出处。
+  If there are citations, integrate them naturally, do not pile them up stiffly, do not fabricate sources.
 
-## 开头多样性要求（最重要）
-【核心原则】每个分镜的开头必须根据内容本身自然表达，拒绝任何形式的固定套路和模板化表达。
+## Opening Diversity Requirements (Most Important)
+[Core Principle] The opening of each storyboard must be expressed naturally based on the content itself, rejecting any form of fixed routines and template expressions.
 
-【表达方式灵活性】
-根据话题内容，可以采用陈述、场景、感叹、观点、问句、对比、故事等多种表达方式，但务必做到：
-- 每个分镜根据要表达的具体内容选择最自然的开头
-- 绝不形成任何规律性的句式模式
-- 不要让任何一个词或短语成为"习惯性开头"
+[Expression Flexibility]
+Based on the topic content, various expression methods such as statements, scenes, exclamations, viewpoints, questions, contrasts, stories, etc. can be used, but must achieve:
+- Each storyboard chooses the most natural opening based on the specific content to be expressed
+- Never form any regular sentence pattern
+- Do not let any word or phrase become a "habitual opening"
 
-【严禁固定模式】
-❌ 绝对禁止以下行为：
-- 形成"第N句总用X开头"的任何规律
-- 多次重复使用同一个连接词或句式作为开头
-- 按照某种隐藏的模板顺序来组织分镜
+[Strictly Prohibit Fixed Patterns]
+❌ Absolutely prohibit the following behaviors:
+- Forming any pattern of "the Nth sentence always starts with X"
+- Repeatedly using the same conjunction or sentence pattern as an opening
+- Organizing storyboards according to some hidden template order
 
-【特别强调】
-- 第一个分镜的开头要完全根据话题内容自然选择，不要有任何固定词汇倾向
-- 整组旁白中，如果某个词（如"有时候"、"其实"、"你有没有"）出现超过1次作为开头，就是失败的创作
-- 要像真人说话一样自然流畅，而不是套用任何句式模板
+[Special Emphasis]
+## Language Consistency Requirements (Strictly Enforce)
+- Narration language must match the user's input video intent
+- If video intent is in Chinese, narration must be in Chinese
+- If video intent is in English, narration must be in English
+- Unless the video intent explicitly specifies an output language, strictly follow the original language of the intent
+- The opening of the first storyboard should be completely naturally chosen based on the topic content, without any fixed vocabulary tendency
+- In the entire set of narrations, if any word (such as "sometimes", "actually", "have you ever") appears more than once as an opening, it is a failed creation
+- Should be as natural and fluent as a real person speaking, not applying any sentence pattern template
 
-## 自然表达要求
-- 内容应该像真人在自然交流，而不是按照模板填空
-- 每个分镜的开头要根据内容本身选择最合适的表达方式
-- 同一个词作为开头在整个旁白中最多只能出现1次
-- 优先用观点、场景、故事来串联内容，避免依赖连接词开头
+## Natural Expression Requirements
+- Content should be like real people communicating naturally, not filling in templates
+- The opening of each storyboard should choose the most appropriate expression method based on the content itself
+- The same word can appear as an opening at most once in the entire narration
+- Prioritize using viewpoints, scenes, stories to connect content, avoid relying on conjunctions as openings
 
-## 内容结构建议
-- 开场方式：可以用场景、故事、观点、现象等多种方式引入，不固定套路
-- 核心内容：中间分镜展开核心观点，用生活化的例子帮助理解
-- 结尾方式：最后分镜给出行动建议或启发，让观众有收获感
-- 整体逻辑：遵循"引发共鸣 → 提出观点 → 深入讲解 → 给出启发"的叙述逻辑
+## Content Structure Suggestions
+- Opening method: Can use scenes, stories, viewpoints, phenomena, and other methods to introduce, no fixed routine
+- Core content: Middle storyboards expand core viewpoints, use life examples to help understanding
+- Ending method: Last storyboard provides action suggestions or inspiration, giving the audience a sense of gain
+- Overall logic: Follow the narrative logic of "resonate → propose viewpoint → in-depth explanation → provide inspiration"
 
-## 其他规范
-- 禁止项：不出现网址、表情符号、数字编号、不说空话套话、不过度煽情
-- 字数检查：生成后必须自我验证不少于{min_words}个字，如不足则补充具体观点或例子
+## Other Specifications
+- Prohibitions: No URLs, emojis, numeric numbering, no empty talk or clichés, no excessive sentimentality
+- Word count check: After generation, must self-verify not less than {min_words} words. If insufficient, supplement with specific viewpoints or examples
 
-## 分镜连贯性要求
-- {n_storyboard} 个分镜应围绕话题展开，形成完整的观点表达
-- 遵循"吸引注意 → 提出观点 → 深入讲解 → 给出启发"的叙述逻辑
-- 每个分镜像同一个人在连贯分享观点，语气一致、自然流畅
-- 通过观点的递进自然过渡，形成完整的论述脉络
-- 确保内容有价值、有启发，让观众觉得"这个视频值得看"
+## Storyboard Coherence Requirements
+- {n_storyboard} storyboards should expand around the topic, forming a complete viewpoint expression
+- Follow the narrative logic of "attract attention → propose viewpoint → in-depth explanation → provide inspiration"
+- Each storyboard should sound like the same person continuously sharing viewpoints, with consistent and natural tone
+- Naturally transition through the progression of viewpoints, forming a complete argumentative thread
+- Ensure content is valuable and inspiring, making the audience feel "this video is worth watching"
 
-# 输出格式
-严格按照以下JSON格式输出，不要添加任何额外的文字说明：
+# Output Format
+Strictly output in the following JSON format, do not add any additional text explanations:
 
 
 ```json
 {{
   "narrations": [
-    "第一段旁白内容",
-    "第二段旁白内容",
-    "第三段旁白内容"
+    "First narration content",
+    "Second narration content",
+    "Third narration content"
   ]
 }}
 ```
 
-# 重要提醒
-1. 只输出JSON格式内容，不要添加任何解释说明
-2. 确保JSON格式严格正确，可以被程序直接解析
-3. 旁白必须严格控制在{min_words}~{max_words}字之间，用通俗易懂的语言
-4. {n_storyboard} 个分镜要围绕话题展开，形成完整的观点表达
-5. 每个分镜都要有价值，提供洞察，避免空洞的陈述
-6. 输出格式为 {{"narrations": [旁白数组]}} 的JSON对象
+# Important Reminders
+1. Only output JSON format content, do not add any explanations
+2. Ensure JSON format is strictly correct and can be directly parsed by the program
+3. Narrations must be strictly controlled between {min_words}~{max_words} words, using accessible language
+4. {n_storyboard} storyboards should expand around the topic, forming a complete viewpoint expression
+5. Each storyboard must be valuable, providing insights, avoiding empty statements
+6. Output format is {{"narrations": [narration array]}} JSON object
 
-【多样性核心要求 - 必须严格执行】
-7. 第一句旁白不要固定用某个词开头，每次创作都要根据话题内容自然选择不同的开头
-8. 同一个词（如"有时候"、"你有没有"、"其实"、"想象一下"等）在所有旁白中作为开头最多只能出现1次
-9. 不要形成任何隐藏的句式规律，每个分镜的开头要真正做到独立思考、自然表达
-10. 检查你的输出：如果发现有任何词作为开头重复出现2次或以上，必须修改
-11. 输出语言要求：严格按照用户输入的话题或主题的语种输出，如：用户输入的是英文，则输出的文案必须为英文，中文也是一样。
+[Diversity Core Requirements - Must Strictly Execute]
+7. The first narration should not use a fixed word as an opening. Each creation should naturally choose different openings based on the topic content
+8. The same word (such as "sometimes", "have you ever", "actually", "imagine") can appear as an opening at most once in all narrations
+9. Do not form any hidden sentence pattern rules. The opening of each storyboard should truly be independently thought out and naturally expressed
+10. Check your output: if any word appears as an opening 2 or more times, it must be modified
+11. Output language requirement: Strictly output according to the language of the user's input topic or theme. For example: if the user's input is in English, the output copy must be in English, same for Chinese.
 
-现在，请为话题创作 {n_storyboard} 个分镜的旁白。
-⚠️ 特别注意：写完后自查所有分镜的开头，确保没有重复使用同一个词或短语作为开头。
-只输出JSON，不要其他内容。
+Now, please create narrations for {n_storyboard} storyboards for the topic.
+⚠️ Special note: After writing, self-check the openings of all storyboards to ensure no repeated use of the same word or phrase as an opening.
+Only output JSON, no other content.
 """
 
 

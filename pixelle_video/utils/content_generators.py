@@ -57,7 +57,8 @@ async def generate_title(
     # Use LLM to generate title
     from pixelle_video.prompts import build_title_generation_prompt
     
-    prompt = build_title_generation_prompt(content, max_length=500)
+    # Pass max_length to prompt so LLM knows the character limit
+    prompt = build_title_generation_prompt(content, max_length=max_length)
     response = await llm_service(prompt, temperature=0.7, max_tokens=50)
     
     # Clean up response
@@ -69,9 +70,23 @@ async def generate_title(
     if title.startswith("'") and title.endswith("'"):
         title = title[1:-1]
     
-    # Limit to max_length (safety)
+    # Remove trailing punctuation
+    title = title.rstrip('.,!?;:\'"')
+    
+    # Safety: if still over limit, truncate smartly
     if len(title) > max_length:
-        title = title[:max_length]
+        # Try to truncate at word boundary
+        truncated = title[:max_length]
+        last_space = truncated.rfind(' ')
+        
+        # Only use word boundary if it's not too far back (at least 60% of max_length)
+        if last_space > max_length * 0.6:
+            title = truncated[:last_space]
+        else:
+            title = truncated
+        
+        # Remove any trailing punctuation after truncation
+        title = title.rstrip('.,!?;:\'"')
     
     logger.debug(f"Generated title: '{title}' (length: {len(title)})")
     return title
