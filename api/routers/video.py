@@ -32,11 +32,55 @@ router = APIRouter(prefix="/video", tags=["Video Generation"])
 
 
 def path_to_url(request: Request, file_path: str) -> str:
-    """Convert file path to accessible URL"""
-    # file_path is like "output/abc123.mp4"
-    # Remove "output/" prefix for cleaner URL
-    if file_path.startswith("output/"):
-        file_path = file_path[7:]  # Remove "output/"
+    """
+    Convert file path to accessible URL
+    
+    Handles both absolute and relative paths, extracting the path relative
+    to the output directory for URL construction.
+    
+    Args:
+        request: FastAPI Request object (provides base_url from actual request)
+        file_path: Absolute or relative file path
+    
+    Returns:
+        Full URL to access the file
+    
+    Examples:
+        Windows: G:\\...\\output\\20251205_233630_c939\\final.mp4
+              -> http://localhost:8000/api/files/20251205_233630_c939/final.mp4
+        
+        Linux:   /home/user/.../output/20251205_233630_c939/final.mp4
+              -> http://localhost:8000/api/files/20251205_233630_c939/final.mp4
+        
+        Domain:  With domain request -> https://your-domain.com/api/files/...
+    """
+    from pathlib import Path
+    import os
+    
+    # Normalize path separators to forward slashes first (for cross-platform compatibility)
+    file_path = file_path.replace("\\", "/")
+    
+    # Check if it's an absolute path (works for both Windows and Linux)
+    is_absolute = os.path.isabs(file_path) or Path(file_path).is_absolute()
+    
+    if is_absolute:
+        # Find "output" in the path and get everything after it
+        # Split by / to work with normalized paths
+        parts = file_path.split("/")
+        try:
+            output_idx = parts.index("output")
+            # Get all parts after "output" and join them
+            relative_parts = parts[output_idx + 1:]
+            file_path = "/".join(relative_parts)
+        except ValueError:
+            # If "output" not in path, use the filename only
+            file_path = Path(file_path).name
+    else:
+        # If relative path starting with "output/", remove it
+        if file_path.startswith("output/"):
+            file_path = file_path[7:]  # Remove "output/"
+    
+    # Build URL using request's base_url (automatically matches the request host)
     base_url = str(request.base_url).rstrip('/')
     return f"{base_url}/api/files/{file_path}"
 
