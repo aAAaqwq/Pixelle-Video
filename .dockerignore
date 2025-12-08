@@ -28,7 +28,8 @@ env/
 .gitattributes
 
 # Documentation
-docs/
+docs/*
+!docs/images/
 *.md
 !README.md
 
