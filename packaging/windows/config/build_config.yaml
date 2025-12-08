@@ -49,6 +49,10 @@ build:
     - "venv"
     - "node_modules"
     - "uv.lock"
+    - "config.yaml"  # User configuration file (sensitive)
+    - "config.yaml.bak"  # Configuration backup
+    - "*.yaml.bak"  # All YAML backups
+    - ".env"  # Environment variables
   
   # Dependencies installation
   use_uv: true  # Use uv for faster dependency installation
