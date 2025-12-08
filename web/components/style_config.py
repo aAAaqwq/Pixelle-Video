@@ -279,12 +279,6 @@ def render_style_config(pixelle_video):
         
         # Template preview link (based on language)
         current_lang = get_language()
-        if current_lang == "zh_CN":
-            template_docs_url = "https://aidc-ai.github.io/Pixelle-Video/zh/user-guide/templates/#_3"
-        else:
-            template_docs_url = "https://aidc-ai.github.io/Pixelle-Video/user-guide/templates/#built-in-template-preview"
-        
-        st.markdown(f"🔗 [{tr('template.preview_link')}]({template_docs_url})")
         
         # Import template utilities
         from pixelle_video.utils.template_util import get_templates_grouped_by_size_and_type, get_template_type
