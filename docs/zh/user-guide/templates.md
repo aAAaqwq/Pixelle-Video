@@ -22,7 +22,7 @@
 
     ---
 
-    ![blur_card](../../images/1080x1920/blur_card.png)
+    ![blur_card](../../images/1080x1920/image_blur_card.png)
     
     模糊背景卡片风格，适合图文内容展示
 
@@ -30,7 +30,7 @@
 
     ---
 
-    ![cartoon](../../images/1080x1920/cartoon.png)
+    ![cartoon](../../images/1080x1920/image_cartoon.png)
     
     卡通风格，适合轻松活泼的内容
 
@@ -38,7 +38,7 @@
 
     ---
 
-    ![default](../../images/1080x1920/default.jpg)
+    ![default](../../images/1080x1920/image_default.jpg)
     
     默认模板，简洁通用
 
@@ -46,7 +46,7 @@
 
     ---
 
-    ![elegant](../../images/1080x1920/elegant.jpg)
+    ![elegant](../../images/1080x1920/image_elegant.jpg)
     
     优雅风格，适合文艺、知性内容
 
@@ -54,7 +54,7 @@
 
     ---
 
-    ![fashion_vintage](../../images/1080x1920/fashion_vintage.jpg)
+    ![fashion_vintage](../../images/1080x1920/image_fashion_vintage.jpg)
     
     复古时尚风格，适合怀旧主题
 
@@ -62,7 +62,7 @@
 
     ---
 
-    ![life_insights](../../images/1080x1920/life_insights.jpg)
+    ![life_insights](../../images/1080x1920/image_life_insights.jpg)
     
     生活感悟风格，适合心灵鸡汤类内容
 
@@ -70,7 +70,7 @@
 
     ---
 
-    ![modern](../../images/1080x1920/modern.jpg)
+    ![modern](../../images/1080x1920/image_modern.jpg)
     
     现代简约风格，适合商务、科技内容
 
@@ -78,7 +78,7 @@
 
     ---
 
-    ![neon](../../images/1080x1920/neon.jpg)
+    ![neon](../../images/1080x1920/image_neon.jpg)
     
     霓虹灯风格，适合时尚、潮流内容
 
@@ -86,7 +86,7 @@
 
     ---
 
-    ![psychology_card](../../images/1080x1920/psychology_card.jpg)
+    ![psychology_card](../../images/1080x1920/image_psychology_card.jpg)
     
     心理学卡片风格，适合知识科普
 
@@ -94,7 +94,7 @@
 
     ---
 
-    ![purple](../../images/1080x1920/purple.jpg)
+    ![purple](../../images/1080x1920/image_purple.jpg)
     
     紫色主题，适合梦幻、神秘风格
 
@@ -102,7 +102,7 @@
 
     ---
 
-    ![simple](../../images/1080x1920/simple.jpg)
+    ![simple](../../images/1080x1920/image_simple.jpg)
     
     极简风格，突出内容本身
 
@@ -110,7 +110,7 @@
 
     ---
 
-    ![satirical_cartoon](../../images/1080x1920/satirical_cartoon.jpg)
+    ![satirical_cartoon](../../images/1080x1920/image_satirical_cartoon.jpg)
     
     80年代讽刺漫画风格，适合精神类小故事
 
@@ -118,7 +118,7 @@
 
     ---
 
-    ![simple_black](../../images/1080x1920/simple_black.jpg)
+    ![simple_black](../../images/1080x1920/image_simple_black.jpg)
     
     极简黑色背景，适合心灵鸡汤类内容
 
@@ -126,7 +126,7 @@
 
     ---
 
-    ![simple_line_drawing](../../images/1080x1920/simple_line_drawing.jpg)
+    ![simple_line_drawing](../../images/1080x1920/image_simple_line_drawing.jpg)
     
     简笔画，适合认知成长类内容
 
@@ -134,7 +134,7 @@
 
     ---
 
-    ![book](../../images/1080x1920/book.jpg)
+    ![book](../../images/1080x1920/image_book.jpg)
     
     图书解读，适合科普类内容
 
@@ -142,7 +142,7 @@
 
     ---
 
-    ![long_text](../../images/1080x1920/long_text.jpg)
+    ![long_text](../../images/1080x1920/image_long_text.jpg)
     
     长文本，适合励志鸡汤类内容
 
@@ -150,7 +150,7 @@
 
     ---
 
-    ![excerpt](../../images/1080x1920/excerpt.jpg)
+    ![excerpt](../../images/1080x1920/image_excerpt.jpg)
     
     图文摘抄，适合图文摘抄，名人名言
 
@@ -158,7 +158,7 @@
 
     ---
 
-    ![health_preservation](../../images/1080x1920/health_preservation.jpg)
+    ![health_preservation](../../images/1080x1920/image_health_preservation.jpg)
     
     养生窍门，适合养生科普内容
 
@@ -166,7 +166,7 @@
 
     ---
 
-    ![life_insights_light](../../images/1080x1920/life_insights_light.jpg)
+    ![life_insights_light](../../images/1080x1920/image_life_insights_light.jpg)
     
     人生感悟，传递温暖与力量
 
@@ -174,7 +174,7 @@
 
     ---
 
-    ![full](../../images/1080x1920/full.jpg)
+    ![full](../../images/1080x1920/image_full.jpg)
     
     全屏模版，适合书单号
 
@@ -182,7 +182,7 @@
 
     ---
 
-    ![healing](../../images/1080x1920/healing.jpg)
+    ![healing](../../images/1080x1920/image_healing.jpg)
     
     治愈模版，适合疗愈类内容
 </div>
@@ -199,7 +199,7 @@
 
     ---
 
-    ![ultrawide_minimal](../../images/1920x1080/ultrawide_minimal.jpg)
+    ![ultrawide_minimal](../../images/1920x1080/image_ultrawide_minimal.jpg)
     
     超宽屏极简风格，适合桌面端观看
 
@@ -207,7 +207,7 @@
 
     ---
 
-    ![wide_darktech](../../images/1920x1080/wide_darktech.jpg)
+    ![wide_darktech](../../images/1920x1080/image_wide_darktech.jpg)
     
     暗黑科技风格，适合技术、游戏内容
 
@@ -215,7 +215,7 @@
 
     ---
 
-    ![film](../../images/1920x1080/film.jpg)
+    ![film](../../images/1920x1080/image_film.jpg)
     
     电影风格，沉浸式体验
 
@@ -223,7 +223,7 @@
 
     ---
 
-    ![full](../../images/1920x1080/full.jpg)
+    ![full](../../images/1920x1080/image_full.jpg)
     
     全屏显示，适合书单号
 
@@ -231,7 +231,7 @@
 
     ---
 
-    ![book](../../images/1920x1080/book.jpg)
+    ![book](../../images/1920x1080/image_book.jpg)
     
     图书解读，适合科普类内容
 </div>
@@ -248,7 +248,7 @@
 
     ---
 
-    ![minimal_framed](../../images/1080x1080/minimal_framed.jpg)
+    ![minimal_framed](../../images/1080x1080/image_minimal_framed.jpg)
     
     极简边框风格，适合社交媒体分享
 

@@ -22,7 +22,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![blur_card](../../images/1080x1920/blur_card_en.jpg)
+    ![blur_card](../../images/1080x1920/image_blur_card_en.jpg)
     
     Blurred background card style, suitable for graphic content display
 
@@ -30,7 +30,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![cartoon](../../images/1080x1920/cartoon_en.jpg)
+    ![cartoon](../../images/1080x1920/image_cartoon_en.jpg)
     
     Cartoon style, suitable for light and lively content
 
@@ -38,7 +38,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![default](../../images/1080x1920/default_en.jpg)
+    ![default](../../images/1080x1920/image_default_en.jpg)
     
     Default template, simple and versatile
 
@@ -46,7 +46,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![elegant](../../images/1080x1920/elegant_en.jpg)
+    ![elegant](../../images/1080x1920/image_elegant_en.jpg)
     
     Elegant style, suitable for artistic and intellectual content
 
@@ -54,7 +54,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![fashion_vintage](../../images/1080x1920/fashion_vintage_en.jpg)
+    ![fashion_vintage](../../images/1080x1920/image_fashion_vintage_en.jpg)
     
     Retro fashion style, suitable for nostalgic themes
 
@@ -62,7 +62,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![life_insights](../../images/1080x1920/life_insights_en.jpg)
+    ![life_insights](../../images/1080x1920/image_life_insights_en.jpg)
     
     Life insight style, suitable for inspirational content
 
@@ -70,7 +70,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![modern](../../images/1080x1920/modern_en.jpg)
+    ![modern](../../images/1080x1920/image_modern_en.jpg)
     
     Modern minimalist style, suitable for business and tech content
 
@@ -78,7 +78,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![neon](../../images/1080x1920/neon_en.jpg)
+    ![neon](../../images/1080x1920/image_neon_en.jpg)
     
     Neon style, suitable for fashion and trendy content
 
@@ -86,7 +86,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![psychology_card](../../images/1080x1920/psychology_card_en.jpg)
+    ![psychology_card](../../images/1080x1920/image_psychology_card_en.jpg)
     
     Psychology card style, suitable for knowledge popularization
 
@@ -94,7 +94,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![purple](../../images/1080x1920/purple_en.jpg)
+    ![purple](../../images/1080x1920/image_purple_en.jpg)
     
     Purple theme, suitable for dreamy and mysterious styles
 
@@ -102,7 +102,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![simple](../../images/1080x1920/simple_en.jpg)
+    ![simple](../../images/1080x1920/image_simple_en.jpg)
     
     Minimalist style, highlighting the content itself
 
@@ -110,7 +110,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![satirical_cartoon](../../images/1080x1920/satirical_cartoon_en.jpg)
+    ![satirical_cartoon](../../images/1080x1920/image_satirical_cartoon_en.jpg)
     
     80s satirical cartoon style for spiritual tales
 
@@ -118,7 +118,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![simple_black](../../images/1080x1920/simple_black_en.jpg)
+    ![simple_black](../../images/1080x1920/image_simple_black_en.jpg)
     
     Simple black background, suitable for inspirational content
 
@@ -126,7 +126,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![simple_line_drawing](../../images/1080x1920/simple_line_drawing_en.jpg)
+    ![simple_line_drawing](../../images/1080x1920/image_simple_line_drawing_en.jpg)
     
     Simple line drawing style for cognitive growth content
 
@@ -134,7 +134,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![book](../../images/1080x1920/book_en.jpg)
+    ![book](../../images/1080x1920/image_book_en.jpg)
     
     Book style, suitable for book lists
 
@@ -142,7 +142,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![long_text](../../images/1080x1920/long_text_en.jpg)
+    ![long_text](../../images/1080x1920/image_long_text_en.jpg)
     
     Long text style, suitable for inspirational content
 
@@ -150,7 +150,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![excerpt](../../images/1080x1920/excerpt_en.jpg)
+    ![excerpt](../../images/1080x1920/image_excerpt_en.jpg)
     
     Excerpt style, suitable for quotes and book excerpts
 
@@ -158,7 +158,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![health_preservation](../../images/1080x1920/health_preservation_en.jpg)
+    ![health_preservation](../../images/1080x1920/image_health_preservation_en.jpg)
     
     Health preserving tips, suitable for wellness explainers.
 
@@ -166,7 +166,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![life_insights_light](../../images/1080x1920/life_insights_light_en.jpg)
+    ![life_insights_light](../../images/1080x1920/image_life_insights_light_en.jpg)
     
     Life insights, conveying warmth and strength
 
@@ -174,7 +174,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![full](../../images/1080x1920/full_en.jpg)
+    ![full](../../images/1080x1920/image_full_en.jpg)
     
     Full screen display, suitable for book lists
 
@@ -182,7 +182,7 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
     ---
 
-    ![healing](../../images/1080x1920/healing_en.jpg)
+    ![healing](../../images/1080x1920/image_healing_en.jpg)
     
     Healing style, suitable for therapeutic content
 </div>
@@ -199,7 +199,7 @@ Suitable for YouTube, Bilibili, and other video platforms.
 
     ---
 
-    ![ultrawide_minimal](../../images/1920x1080/ultrawide_minimal_en.jpg)
+    ![ultrawide_minimal](../../images/1920x1080/image_ultrawide_minimal_en.jpg)
     
     Ultrawide minimalist style, suitable for desktop viewing
 
@@ -207,7 +207,7 @@ Suitable for YouTube, Bilibili, and other video platforms.
 
     ---
 
-    ![wide_darktech](../../images/1920x1080/wide_darktech_en.jpg)
+    ![wide_darktech](../../images/1920x1080/image_wide_darktech_en.jpg)
     
     Dark tech style, suitable for technology and gaming content
 
@@ -215,7 +215,7 @@ Suitable for YouTube, Bilibili, and other video platforms.
 
     ---
 
-    ![film](../../images/1920x1080/film_en.jpg)
+    ![film](../../images/1920x1080/image_film_en.jpg)
     
     Film style, immersive experience
 
@@ -223,7 +223,7 @@ Suitable for YouTube, Bilibili, and other video platforms.
 
     ---
 
-    ![full](../../images/1920x1080/full_en.jpg)
+    ![full](../../images/1920x1080/image_full_en.jpg)
     
     Full screen display, suitable for book lists
 
@@ -231,7 +231,7 @@ Suitable for YouTube, Bilibili, and other video platforms.
 
     ---
 
-    ![book](../../images/1920x1080/book_en.jpg)
+    ![book](../../images/1920x1080/image_book_en.jpg)
     
     Book style, suitable for book lists
 
@@ -249,7 +249,7 @@ Suitable for Instagram, WeChat Moments, and other platforms.
 
     ---
 
-    ![minimal_framed](../../images/1080x1080/minimal_framed_en.jpg)
+    ![minimal_framed](../../images/1080x1080/image_minimal_framed_en.jpg)
     
     Minimalist framed style, suitable for social media sharing
 

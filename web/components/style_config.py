@@ -228,6 +228,46 @@ def render_style_config(pixelle_video):
     # ====================================================================
     # Storyboard Template Section
     # ====================================================================
+    
+    def get_template_preview_path(template_path: str, language: str = "zh_CN") -> str:
+        """
+        Get the preview image path for a template based on language.
+        
+        Args:
+            template_path: Template path like "1080x1920/image_default.html"
+            language: Language code, either "zh_CN" or "en"
+            
+        Returns:
+            Path to preview image in docs/images/
+        """
+        # Extract size and template name from path
+        # e.g., "1080x1920/image_default.html" -> size="1080x1920", name="image_default"
+        path_parts = template_path.split('/')
+        if len(path_parts) >= 2:
+            size = path_parts[0]  # e.g., "1080x1920"
+            template_file = path_parts[1]  # e.g., "image_default.html"
+            template_name = template_file.replace('.html', '')  # e.g., "image_default"
+            
+            # Build preview image path
+            # Format: docs/images/{size}/{template_name}.jpg or {template_name}_en.jpg
+            # Chinese uses Chinese preview, all other languages use English preview for better i18n
+            suffix = "" if language == "zh_CN" else "_en"
+            
+            # Try different image extensions
+            for ext in ['.jpg', '.png']:
+                preview_path = f"docs/images/{size}/{template_name}{suffix}{ext}"
+                if os.path.exists(preview_path):
+                    return preview_path
+            
+            # Fallback: try without language suffix (for templates with only one version)
+            for ext in ['.jpg', '.png']:
+                preview_path = f"docs/images/{size}/{template_name}{ext}"
+                if os.path.exists(preview_path):
+                    return preview_path
+        
+        # If no preview found, return empty string
+        return ""
+    
     with st.container(border=True):
         st.markdown(f"**{tr('section.template')}**")
         
@@ -284,17 +324,12 @@ def render_style_config(pixelle_video):
             st.warning(f"No {template_type_options[selected_template_type]} templates found. Please select a different type or add templates.")
             st.stop()
         
-        # Build display options with group separators
+        # Build orientation i18n mapping
         ORIENTATION_I18N = {
             'portrait': tr('orientation.portrait'),
             'landscape': tr('orientation.landscape'),
             'square': tr('orientation.square')
         }
-        
-        display_options = []
-        template_paths_ordered = []  # Use ordered list instead of dict to avoid key conflicts
-        default_index = 0
-        current_index = 0
         
         # Get default template from config
         template_config = pixelle_video.config.get("template", {})
@@ -312,68 +347,145 @@ def render_style_config(pixelle_video):
         }
         type_specific_default = type_default_templates.get(selected_template_type, config_default_template)
         
+        # Initialize selected template in session state if not exists
+        if 'selected_template' not in st.session_state:
+            st.session_state['selected_template'] = type_specific_default
+        
+        # Collect size groups and prepare tabs
+        size_groups = []
+        size_labels = []
+        
         for size, templates in grouped_templates.items():
             if not templates:
                 continue
             
+            # Filter templates to only include those with proper naming convention
+            # Only show templates starting with static_, image_, or video_
+            valid_templates = []
+            for template in templates:
+                template_name = template.display_info.name
+                if template_name.startswith(('static_', 'image_', 'video_')):
+                    valid_templates.append(template)
+            
+            # Skip if no valid templates after filtering
+            if not valid_templates:
+                continue
+            
+            # Separate templates into two groups: with preview and without preview
+            templates_with_preview = []
+            templates_without_preview = []
+            
+            for template in valid_templates:
+                preview_path = get_template_preview_path(template.template_path, current_lang)
+                if preview_path and os.path.exists(preview_path):
+                    templates_with_preview.append(template)
+                else:
+                    templates_without_preview.append(template)
+            
+            # Skip this group if no templates at all
+            if not templates_with_preview and not templates_without_preview:
+                continue
+            
+            # Combine: templates with preview first, then without preview
+            all_templates = templates_with_preview + templates_without_preview
+            
             # Get orientation from first template in group
             orientation = ORIENTATION_I18N.get(
-                templates[0].display_info.orientation, 
-                templates[0].display_info.orientation
+                all_templates[0].display_info.orientation, 
+                all_templates[0].display_info.orientation
             )
-            width = templates[0].display_info.width
-            height = templates[0].display_info.height
+            width = all_templates[0].display_info.width
+            height = all_templates[0].display_info.height
             
-            # Add group separator
-            separator = f"─── {orientation} {width}×{height} ───"
-            display_options.append(separator)
-            template_paths_ordered.append(None)  # Separator has no template path
-            current_index += 1
+            # Create tab label
+            tab_label = f"{orientation} {width}×{height}"
+            size_labels.append(tab_label)
+            size_groups.append(all_templates)
+        
+        # Create tabs for each size group (wrapped in expander)
+        with st.expander(tr("template.gallery_view"), expanded=True):
+            if size_groups:
+                tabs = st.tabs(size_labels)
+                
+                for tab, all_templates in zip(tabs, size_groups):
+                    with tab:
+                        # Create grid layout (5 columns)
+                        num_cols = 5
+                        cols = st.columns(num_cols)
+                        
+                        for idx, template in enumerate(all_templates):
+                            col_idx = idx % num_cols
+                            with cols[col_idx]:
+                                # Get preview image path
+                                preview_path = get_template_preview_path(template.template_path, current_lang)
+                                
+                                # Display preview image or placeholder
+                                if preview_path and os.path.exists(preview_path):
+                                    st.image(preview_path, use_container_width=True)
+                                else:
+                                    # Placeholder for templates without preview (fixed height, compact layout)
+                                    st.markdown(
+                                        f"""
+                                        <div style="
+                                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                                            height: 150px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            text-align: center;
+                                            border-radius: 8px;
+                                            color: white;
+                                            margin-bottom: 15px;
+                                            padding: 10px;
+                                        ">
+                                            <div style="
+                                                font-size: 14px; 
+                                                opacity: 0.95;
+                                                overflow: hidden;
+                                                text-overflow: ellipsis;
+                                                display: -webkit-box;
+                                                -webkit-line-clamp: 5;
+                                                -webkit-box-orient: vertical;
+                                                word-break: break-all;
+                                            ">{template.display_info.name}</div>
+                                        </div>
+                                        """,
+                                        unsafe_allow_html=True
+                                    )
+                                
+                                # Select button (unified label)
+                                is_selected = (st.session_state['selected_template'] == template.template_path)
+                                button_label = f"{tr('template.selected')}" if is_selected else tr('template.select_button')
+                                button_type = "primary" if is_selected else "secondary"
+                                
+                                if st.button(
+                                    button_label,
+                                    key=f"template_{template.template_path}",
+                                    use_container_width=True,
+                                    type=button_type,
+                                ):
+                                    st.session_state['selected_template'] = template.template_path
+                                    st.rerun()
+            else:
+                st.warning(tr("template.no_templates_with_preview"))
             
-            # Add templates in this group
-            for t in templates:
-                display_name = f"  {t.display_info.name}"
-                display_options.append(display_name)
-                template_paths_ordered.append(t.template_path)  # Add to ordered list
-                
-                # Set default: priority is config > type-specific default > first in portrait
-                if t.template_path == config_default_template:
-                    default_index = current_index
-                elif default_index == 0 and t.template_path == type_specific_default:
-                    default_index = current_index
-                elif default_index == 0 and t.display_info.orientation == 'portrait':
-                    default_index = current_index
-                
-                current_index += 1
+            # Display selected template name (inside expander, below tabs)
+            frame_template = st.session_state['selected_template']
+            
+            # Find the selected template's display name
+            selected_template_name = None
+            for size, templates in grouped_templates.items():
+                for template in templates:
+                    if template.template_path == frame_template:
+                        selected_template_name = template.display_info.name
+                        break
+                if selected_template_name:
+                    break
+            
+        if selected_template_name:
+            st.info(f"📋 {tr('template.selected_template')}: **{selected_template_name}**")
         
-        # Dropdown with grouped display
-        # Create unique display strings by appending hidden unique identifier
-        # This ensures Streamlit doesn't confuse templates with same name in different groups
-        unique_display_options = []
-        for i, option in enumerate(display_options):
-            # Add zero-width space characters as unique identifier (invisible to users)
-            unique_option = option + ("\u200B" * i)  # \u200B is zero-width space
-            unique_display_options.append(unique_option)
-        
-        selected_unique_option = st.selectbox(
-            tr("template.select"),
-            unique_display_options,
-            index=default_index,
-            label_visibility="collapsed",
-            help=tr("template.select_help")
-        )
-        
-        # Get index from selected unique option
-        selected_index = unique_display_options.index(selected_unique_option)
-        
-        # Check if separator is selected (shouldn't happen, but handle it)
-        if display_options[selected_index].startswith("───"):
-            st.warning(tr("template.separator_selected"))
-            st.stop()
-        
-        # Get full template path directly by index
-        frame_template = template_paths_ordered[selected_index]
-        
+
         # Display video size from template
         from pixelle_video.utils.template_util import parse_template_size
         video_width, video_height = parse_template_size(frame_template)
