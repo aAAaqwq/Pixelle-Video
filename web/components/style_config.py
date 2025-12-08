@@ -345,6 +345,13 @@ def render_style_config(pixelle_video):
         if 'selected_template' not in st.session_state:
             st.session_state['selected_template'] = type_specific_default
         
+        # Track last selected template type to detect type changes
+        last_template_type = st.session_state.get('last_template_type', None)
+        if last_template_type != selected_template_type:
+            # Template type changed, reset to type-specific default
+            st.session_state['selected_template'] = type_specific_default
+            st.session_state['last_template_type'] = selected_template_type
+        
         # Collect size groups and prepare tabs
         size_groups = []
         size_labels = []

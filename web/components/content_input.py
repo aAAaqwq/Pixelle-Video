@@ -59,6 +59,23 @@ def render_content_input():
                 help=text_help
             )
             
+            # Split mode selector (only show in fixed mode)
+            if mode == "fixed":
+                split_mode_options = {
+                    "paragraph": tr("split.mode_paragraph"),
+                    "line": tr("split.mode_line"),
+                    "sentence": tr("split.mode_sentence"),
+                }
+                split_mode = st.selectbox(
+                    tr("split.mode_label"),
+                    options=list(split_mode_options.keys()),
+                    format_func=lambda x: split_mode_options[x],
+                    index=0,  # Default to paragraph mode
+                    help=tr("split.mode_help")
+                )
+            else:
+                split_mode = "paragraph"  # Default for generate mode (not used)
+            
             # Title input (optional for both modes)
             title = st.text_input(
                 tr("input.title"),
@@ -87,7 +104,8 @@ def render_content_input():
                 "mode": mode,
                 "text": text,
                 "title": title,
-                "n_scenes": n_scenes
+                "n_scenes": n_scenes,
+                "split_mode": split_mode
             }
         
         else:

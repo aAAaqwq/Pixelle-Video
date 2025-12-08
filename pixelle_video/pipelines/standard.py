@@ -125,8 +125,9 @@ class StandardPipeline(LinearVideoPipeline):
             logger.info(f"✅ Generated {len(ctx.narrations)} narrations")
         else:  # fixed
             self._report_progress(ctx.progress_callback, "splitting_script", 0.05)
-            ctx.narrations = await split_narration_script(text)
-            logger.info(f"✅ Split script into {len(ctx.narrations)} segments (by lines)")
+            split_mode = ctx.params.get("split_mode", "paragraph")
+            ctx.narrations = await split_narration_script(text, split_mode=split_mode)
+            logger.info(f"✅ Split script into {len(ctx.narrations)} segments (mode={split_mode})")
             logger.info(f"   Note: n_scenes={n_scenes} is ignored in fixed mode")
 
     async def determine_title(self, ctx: PipelineContext):

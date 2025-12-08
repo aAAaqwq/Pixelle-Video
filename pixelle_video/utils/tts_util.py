@@ -22,6 +22,7 @@ import ssl
 import random
 import certifi
 import edge_tts as edge_tts_sdk
+from edge_tts.exceptions import NoAudioReceived
 from loguru import logger
 from aiohttp import WSServerHandshakeError, ClientResponseError
 
@@ -29,8 +30,8 @@ from aiohttp import WSServerHandshakeError, ClientResponseError
 # Use certifi bundle for SSL verification instead of disabling it
 _USE_CERTIFI_SSL = True
 
-# Retry configuration for Edge TTS (to handle 401 errors)
-_RETRY_COUNT = 10       # Default retry count (increased from 3 to 5)
+# Retry configuration for Edge TTS (to handle 401 errors and NoAudioReceived)
+_RETRY_COUNT = 5           # Default retry count
 _RETRY_BASE_DELAY = 1.0     # Base retry delay in seconds (for exponential backoff)
 _MAX_RETRY_DELAY = 10.0     # Maximum retry delay in seconds
 
@@ -198,6 +199,18 @@ async def edge_tts(
                     logger.error(f"❌ All {retry_count + 1} attempts failed. Last error: {error_code}")
                     raise
                 # Otherwise, continue to next retry
+            
+            except NoAudioReceived as e:
+                # NoAudioReceived is often a temporary issue - retry with longer delay
+                last_error = e
+                logger.warning(f"⚠️  Edge TTS NoAudioReceived (attempt {attempt + 1}/{retry_count + 1})")
+                logger.debug(f"This is usually a temporary Microsoft service issue. Will retry with longer delay...")
+                
+                if attempt >= retry_count:
+                    logger.error(f"❌ All {retry_count + 1} attempts failed due to NoAudioReceived")
+                    raise
+                # Add extra delay for NoAudioReceived errors
+                await asyncio.sleep(2.0)
             
             except Exception as e:
                 # Other errors - don't retry, raise immediately

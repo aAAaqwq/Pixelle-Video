@@ -47,6 +47,7 @@ def render_single_output(pixelle_video, video_params):
     mode = video_params.get("mode", "generate")
     title = video_params.get("title")
     n_scenes = video_params.get("n_scenes", 5)
+    split_mode = video_params.get("split_mode", "paragraph")
     bgm_path = video_params.get("bgm_path")
     bgm_volume = video_params.get("bgm_volume", 0.2)
     
@@ -129,6 +130,7 @@ def render_single_output(pixelle_video, video_params):
                     "mode": mode,
                     "title": title if title else None,
                     "n_scenes": n_scenes,
+                    "split_mode": split_mode,
                     "media_workflow": workflow_key,
                     "frame_template": frame_template,
                     "prompt_prefix": prompt_prefix,

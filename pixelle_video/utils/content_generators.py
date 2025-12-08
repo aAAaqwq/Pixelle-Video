@@ -208,22 +208,55 @@ async def generate_narrations_from_content(
 
 async def split_narration_script(
     script: str,
+    split_mode: Literal["paragraph", "line", "sentence"] = "paragraph",
 ) -> List[str]:
     """
-    Split user-provided narration script into segments by lines
+    Split user-provided narration script into segments
     
     Args:
-        script: Fixed narration script (each line is a narration)
+        script: Fixed narration script
+        split_mode: Splitting strategy
+            - "paragraph": Split by double newline (\\n\\n), preserve single newlines within paragraphs
+            - "line": Split by single newline (\\n), each line is a segment
+            - "sentence": Split by sentence-ending punctuation (。.!?！？)
     
     Returns:
         List of narration segments
     """
-    logger.info(f"Splitting script by lines (length: {len(script)} chars)")
+    logger.info(f"Splitting script (mode={split_mode}, length={len(script)} chars)")
     
-    # Split by newline, filter empty lines
-    narrations = [line.strip() for line in script.split('\n') if line.strip()]
+    narrations = []
     
-    logger.info(f"✅ Split script into {len(narrations)} segments (by lines)")
+    if split_mode == "paragraph":
+        # Split by double newline (paragraph mode)
+        # Preserve single newlines within paragraphs
+        paragraphs = re.split(r'\n\s*\n', script)
+        for para in paragraphs:
+            # Only strip leading/trailing whitespace, preserve internal newlines
+            cleaned = para.strip()
+            if cleaned:
+                narrations.append(para)
+        logger.info(f"✅ Split script into {len(narrations)} segments (by paragraph)")
+    
+    elif split_mode == "line":
+        # Split by single newline (original behavior)
+        narrations = [line.strip() for line in script.split('\n') if line.strip()]
+        logger.info(f"✅ Split script into {len(narrations)} segments (by line)")
+    
+    elif split_mode == "sentence":
+        # Split by sentence-ending punctuation
+        # Supports Chinese (。！？) and English (.!?)
+        # Use regex to split while keeping sentences intact
+        cleaned = re.sub(r'\s+', ' ', script.strip())
+        # Split on sentence-ending punctuation, keeping the punctuation with the sentence
+        sentences = re.split(r'(?<=[。.!?！？])\s*', cleaned)
+        narrations = [s.strip() for s in sentences if s.strip()]
+        logger.info(f"✅ Split script into {len(narrations)} segments (by sentence)")
+    
+    else:
+        # Fallback to line mode
+        logger.warning(f"Unknown split_mode '{split_mode}', falling back to 'line'")
+        narrations = [line.strip() for line in script.split('\n') if line.strip()]
     
     # Log statistics
     if narrations:
