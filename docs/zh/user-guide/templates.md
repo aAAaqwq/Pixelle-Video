@@ -18,6 +18,22 @@
 
 <div class="grid cards" markdown>
 
+-   **static_default**
+
+    ---
+
+    ![static_default](../../images/1080x1920/static_default.jpg)
+    
+    默认静态模板
+
+-   **static_excerpt**
+
+    ---
+
+    ![static_excerpt](../../images/1080x1920/static_excerpt.jpg)
+    
+    图文摘抄静态模板
+
 -   **Blur Card**
 
     ---
@@ -98,14 +114,6 @@
     
     紫色主题，适合梦幻、神秘风格
 
--   **Simple**
-
-    ---
-
-    ![simple](../../images/1080x1920/image_simple.jpg)
-    
-    极简风格，突出内容本身
-
 -   **Satirical Cartoon**
 
     ---
@@ -185,6 +193,22 @@
     ![healing](../../images/1080x1920/image_healing.jpg)
     
     治愈模版，适合疗愈类内容
+
+-   **Video_Default**
+
+    ---
+
+    ![video_default](../../images/1080x1920/video_default.jpg)
+    
+    默认动态模版
+
+-   **Video_Healing**
+
+    ---
+
+    ![video_healing](../../images/1080x1920/video_healing.jpg)
+    
+    治愈动态模版
 </div>
 
 ---

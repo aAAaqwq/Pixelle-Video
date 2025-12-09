@@ -18,6 +18,22 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
 
 <div class="grid cards" markdown>
 
+-   **static_default**
+
+    ---
+
+    ![static_default](../../images/1080x1920/static_default_en.jpg)
+    
+    Default static template
+
+-   **static_excerpt**
+
+    ---
+
+    ![static_excerpt](../../images/1080x1920/static_excerpt_en.jpg)
+    
+    Text excerpt static template
+
 -   **Blur Card**
 
     ---
@@ -98,14 +114,6 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
     
     Purple theme, suitable for dreamy and mysterious styles
 
--   **Simple**
-
-    ---
-
-    ![simple](../../images/1080x1920/image_simple_en.jpg)
-    
-    Minimalist style, highlighting the content itself
-
 -   **Satirical Cartoon**
 
     ---
@@ -185,6 +193,23 @@ Suitable for TikTok, Kuaishou, Xiaohongshu, and other short video platforms.
     ![healing](../../images/1080x1920/image_healing_en.jpg)
     
     Healing style, suitable for therapeutic content
+
+-   **Video_Default**
+
+    ---
+
+    ![video_default](../../images/1080x1920/video_default.jpg)
+    
+    Default dynamic template
+
+-   **Video_Healing**
+
+    ---
+
+    ![video_healing](../../images/1080x1920/video_healing.jpg)
+    
+    Healing dynamic template
+
 </div>
 
 ---
