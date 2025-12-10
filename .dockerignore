@@ -30,6 +30,7 @@ env/
 # Documentation
 docs/*
 !docs/images/
+!docs/FAQ*.md
 *.md
 !README.md
 
