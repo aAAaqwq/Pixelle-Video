@@ -380,6 +380,9 @@
     "asset_based.progress.analyzing_complete": "✅ Asset analysis complete ({count} total)",
     "asset_based.progress.generating_script": "📝 Generating video script...",
     "asset_based.progress.script_complete": "✅ Script generation complete",
-    "asset_based.progress.concat_complete": "✅ Video concatenation complete"
+    "asset_based.progress.concat_complete": "✅ Video concatenation complete",
+    "faq.expand_to_view": "FAQ",
+    "faq.load_error": "Failed to load FAQ content",
+    "faq.more_help": "Need more help?"
   }
 }

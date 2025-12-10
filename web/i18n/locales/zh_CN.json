@@ -380,6 +380,9 @@
     "asset_based.progress.analyzing_complete": "✅ 素材分析完成（共 {count} 个）",
     "asset_based.progress.generating_script": "📝 正在生成视频脚本...",
     "asset_based.progress.script_complete": "✅ 脚本生成完成",
-    "asset_based.progress.concat_complete": "✅ 视频合成完成"
+    "asset_based.progress.concat_complete": "✅ 视频合成完成",
+    "faq.expand_to_view": "常见问题",
+    "faq.load_error": "无法加载常见问题内容",
+    "faq.more_help": "需要更多帮助？"
   }
 }
