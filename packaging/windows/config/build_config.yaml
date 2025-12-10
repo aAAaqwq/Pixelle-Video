@@ -47,7 +47,7 @@ build:
     - "docs/zh/*"  # Don't include Chinese docs
     - "docs/gallery/*"  # Don't include gallery docs
     - "docs/stylesheets/*"  # Don't include doc stylesheets
-    - "docs/*.md"  # Don't include doc markdown files
+    # Note: FAQ.md and FAQ_CN.md are included for in-app FAQ feature
     - "test_*.py"  # Don't include test files
     - ".venv"
     - "venv"

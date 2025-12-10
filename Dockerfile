@@ -64,6 +64,7 @@ COPY templates ./templates
 COPY workflows ./workflows
 COPY resources ./resources
 COPY docs/images ./docs/images
+COPY docs/FAQ.md docs/FAQ_CN.md ./docs/
 
 # Create output, data and temp directories
 RUN mkdir -p /app/output /app/data /app/temp
