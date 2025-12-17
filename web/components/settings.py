@@ -134,12 +134,22 @@ def render_advanced_settings():
                 
                 # Local/Self-hosted ComfyUI configuration
                 st.markdown(f"**{tr('settings.comfyui.local_title')}**")
-                comfyui_url = st.text_input(
-                    tr("settings.comfyui.comfyui_url"),
-                    value=comfyui_config.get("comfyui_url", "http://127.0.0.1:8188"),
-                    help=tr("settings.comfyui.comfyui_url_help"),
-                    key="comfyui_url_input"
-                )
+                url_col, key_col = st.columns(2)
+                with url_col:
+                    comfyui_url = st.text_input(
+                        tr("settings.comfyui.comfyui_url"),
+                        value=comfyui_config.get("comfyui_url", "http://127.0.0.1:8188"),
+                        help=tr("settings.comfyui.comfyui_url_help"),
+                        key="comfyui_url_input"
+                    )
+                with key_col:
+                    comfyui_api_key = st.text_input(
+                        tr("settings.comfyui.comfyui_api_key"),
+                        value=comfyui_config.get("comfyui_api_key", ""),
+                        type="password",
+                        help=tr("settings.comfyui.comfyui_api_key_help"),
+                        key="comfyui_api_key_input"
+                    )
                 
                 # Test connection button
                 if st.button(tr("btn.test_connection"), key="test_comfyui", use_container_width=True):
@@ -186,6 +196,7 @@ def render_advanced_settings():
                     # Save ComfyUI configuration
                     config_manager.set_comfyui_config(
                         comfyui_url=comfyui_url if comfyui_url else None,
+                        comfyui_api_key=comfyui_api_key if comfyui_api_key else None,
                         runninghub_api_key=runninghub_api_key if runninghub_api_key else None
                     )
                     

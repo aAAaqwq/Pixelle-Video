@@ -144,13 +144,15 @@ class ConfigManager:
     
     def set_comfyui_config(
         self, 
-        comfyui_url: Optional[str] = None, 
+        comfyui_url: Optional[str] = None,
+        comfyui_api_key: Optional[str] = None,
         runninghub_api_key: Optional[str] = None
     ):
         """Set ComfyUI global configuration"""
         updates = {}
         if comfyui_url is not None:
             updates["comfyui_url"] = comfyui_url
+        updates["comfyui_api_key"] = comfyui_api_key
         updates["runninghub_api_key"] = runninghub_api_key
         
         if updates:

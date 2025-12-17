@@ -187,6 +187,8 @@
     "settings.comfyui.cloud_title": "RunningHub Cloud",
     "settings.comfyui.comfyui_url": "ComfyUI Server URL",
     "settings.comfyui.comfyui_url_help": "Local or remote ComfyUI server address",
+    "settings.comfyui.comfyui_api_key": "ComfyUI API Key",
+    "settings.comfyui.comfyui_api_key_help": "Optional, get from https://platform.comfy.org/profile/api-keys",
     "settings.comfyui.runninghub_api_key": "RunningHub API Key",
     "settings.comfyui.runninghub_api_key_help": "Visit https://runninghub.ai to register and get API Key",
     "settings.comfyui.runninghub_hint": "No local ComfyUI? Use RunningHub Cloud:",

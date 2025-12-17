@@ -187,6 +187,8 @@
     "settings.comfyui.cloud_title": "RunningHub 云端",
     "settings.comfyui.comfyui_url": "ComfyUI 服务器地址",
     "settings.comfyui.comfyui_url_help": "本地或远程 ComfyUI 服务器地址",
+    "settings.comfyui.comfyui_api_key": "ComfyUI API 密钥",
+    "settings.comfyui.comfyui_api_key_help": "可选，访问 https://platform.comfy.org/profile/api-keys 获取",
     "settings.comfyui.runninghub_api_key": "RunningHub API 密钥",
     "settings.comfyui.runninghub_api_key_help": "访问 https://runninghub.ai 注册并获取 API Key",
     "settings.comfyui.runninghub_hint": "没有本地 ComfyUI？可用 RunningHub 云端：",
