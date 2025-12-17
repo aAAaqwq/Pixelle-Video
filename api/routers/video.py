@@ -151,6 +151,10 @@ async def generate_video_sync(
             logger.warning("voice_id parameter is deprecated, please use tts_workflow instead")
             video_params["voice_id"] = request_body.voice_id
         
+        # Add custom template parameters if specified
+        if request_body.template_params:
+            video_params["template_params"] = request_body.template_params
+        
         # Call video generator service
         result = await pixelle_video.generate_video(**video_params)
         
@@ -251,6 +255,10 @@ async def generate_video_async(
             if request_body.voice_id:
                 logger.warning("voice_id parameter is deprecated, please use tts_workflow instead")
                 video_params["voice_id"] = request_body.voice_id
+            
+            # Add custom template parameters if specified
+            if request_body.template_params:
+                video_params["template_params"] = request_body.template_params
             
             result = await pixelle_video.generate_video(**video_params)
             

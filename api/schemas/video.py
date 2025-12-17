@@ -14,7 +14,7 @@
 Video generation API schemas
 """
 
-from typing import Optional, Literal
+from typing import Optional, Literal, Dict, Any
 from pydantic import BaseModel, Field
 
 
@@ -69,6 +69,13 @@ class VideoGenerateRequest(BaseModel):
         description="HTML template path with size (e.g., '1080x1920/default.html'). Video size is auto-determined from template."
     )
     
+    # === Template Custom Parameters ===
+    template_params: Optional[Dict[str, Any]] = Field(
+        None,
+        description="Custom template parameters (e.g., {'accent_color': '#ff0000', 'background': 'url'}). "
+                    "Available parameters depend on the template. Use GET /api/templates/{template_path}/params to discover them."
+    )
+    
     # === Image Style ===
     prompt_prefix: Optional[str] = Field(None, description="Image style prefix")
     
@@ -82,7 +89,11 @@ class VideoGenerateRequest(BaseModel):
                 "text": "Atomic Habits teaches us that small changes compound over time to produce remarkable results.",
                 "mode": "generate",
                 "n_scenes": 5,
-                "voice_id": "[Chinese] zh-CN Yunjian",
+                "frame_template": "1080x1920/image_default.html",
+                "template_params": {
+                    "accent_color": "#3498db",
+                    "background": "https://example.com/custom-bg.jpg"
+                },
                 "title": "The Power of Atomic Habits"
             }
         }

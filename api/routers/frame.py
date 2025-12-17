@@ -18,7 +18,7 @@ from fastapi import APIRouter, HTTPException
 from loguru import logger
 
 from api.dependencies import PixelleVideoDep
-from api.schemas.frame import FrameRenderRequest, FrameRenderResponse
+from api.schemas.frame import FrameRenderRequest, FrameRenderResponse, TemplateParamsResponse
 from pixelle_video.services.frame_html import HTMLFrameGenerator
 from pixelle_video.utils.template_util import parse_template_size, resolve_template_path
 
@@ -80,5 +80,82 @@ async def render_frame(
         
     except Exception as e:
         logger.error(f"Frame render error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/template/params", response_model=TemplateParamsResponse)
+async def get_template_params(
+    template: str
+):
+    """
+    Get custom parameters for a template
+    
+    Returns the custom parameters defined in the template HTML file.
+    These parameters can be passed via `template_params` in video generation requests.
+    
+    Template parameters are defined using syntax: `{{param_name:type=default}}`
+    
+    Supported types:
+    - `text`: String input
+    - `number`: Numeric input
+    - `color`: Color picker (hex format)
+    - `bool`: Boolean checkbox
+    
+    Example template syntax:
+    ```html
+    <div style="color: {{accent_color:color=#ff0000}}">
+        {{custom_text:text=Hello World}}
+    </div>
+    ```
+    
+    Args:
+        template: Template path (e.g., '1080x1920/image_default.html')
+    
+    Returns:
+        Template parameters with their types, defaults, and labels
+    
+    Example response:
+    ```json
+    {
+        "template": "1080x1920/image_default.html",
+        "media_width": 1080,
+        "media_height": 1440,
+        "params": {
+            "accent_color": {
+                "type": "color",
+                "default": "#ff0000",
+                "label": "accent_color"
+            },
+            "background": {
+                "type": "text", 
+                "default": "https://example.com/bg.jpg",
+                "label": "background"
+            }
+        }
+    }
+    ```
+    """
+    try:
+        logger.info(f"Get template params: {template}")
+        
+        # Resolve template path
+        template_path = resolve_template_path(template)
+        
+        # Create generator and parse parameters
+        generator = HTMLFrameGenerator(template_path)
+        params = generator.parse_template_parameters()
+        media_width, media_height = generator.get_media_size()
+        
+        return TemplateParamsResponse(
+            template=template,
+            media_width=media_width,
+            media_height=media_height,
+            params=params
+        )
+        
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail=f"Template not found: {template}")
+    except Exception as e:
+        logger.error(f"Get template params error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 

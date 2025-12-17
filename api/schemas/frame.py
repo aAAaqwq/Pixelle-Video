@@ -14,7 +14,7 @@
 Frame/Template rendering API schemas
 """
 
-from typing import Optional
+from typing import Optional, Dict, Any, List
 from pydantic import BaseModel, Field
 
 
@@ -46,4 +46,24 @@ class FrameRenderResponse(BaseModel):
     frame_path: str = Field(..., description="Path to generated frame image")
     width: int = Field(..., description="Frame width in pixels")
     height: int = Field(..., description="Frame height in pixels")
+
+
+class TemplateParamConfig(BaseModel):
+    """Single template parameter configuration"""
+    type: str = Field(..., description="Parameter type: 'text', 'number', 'color', 'bool'")
+    default: Any = Field(..., description="Default value")
+    label: str = Field(..., description="Display label for the parameter")
+
+
+class TemplateParamsResponse(BaseModel):
+    """Template parameters response"""
+    success: bool = True
+    message: str = "Success"
+    template: str = Field(..., description="Template path")
+    media_width: int = Field(..., description="Media width from template meta tags")
+    media_height: int = Field(..., description="Media height from template meta tags")
+    params: Dict[str, TemplateParamConfig] = Field(
+        default_factory=dict,
+        description="Custom parameters defined in template. Key is parameter name, value is config."
+    )
 
