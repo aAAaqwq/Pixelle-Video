@@ -80,8 +80,8 @@ def render_advanced_settings():
                         # Same preset as saved config: keep API key
                         default_api_key = current_llm["api_key"]
                     else:
-                        # Different preset: clear API key
-                        default_api_key = ""
+                        # Different preset: use default_api_key if provided (e.g., Ollama), otherwise clear
+                        default_api_key = preset_config.get("default_api_key", "")
                     
                     default_base_url = preset_config.get("base_url", "")
                     default_model = preset_config.get("model", "")
