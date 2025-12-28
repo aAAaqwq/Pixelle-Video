@@ -301,8 +301,9 @@ class StandardPipeline(LinearVideoPipeline):
             (config.media_workflow and config.media_workflow.startswith("runninghub/"))
         )
         
-        # Get concurrent limit from config (default to 1 for backward compatibility)
-        runninghub_concurrent_limit = self.core.config.get("comfyui", {}).get("runninghub_concurrent_limit", 1)
+        # Get concurrent limit from config_manager (supports hot reload without restart)
+        from pixelle_video.config import config_manager
+        runninghub_concurrent_limit = config_manager.config.comfyui.runninghub_concurrent_limit or 1
         
         if is_runninghub and runninghub_concurrent_limit > 1:
             logger.info(f"🚀 Using parallel processing for RunningHub workflows (max {runninghub_concurrent_limit} concurrent)")
