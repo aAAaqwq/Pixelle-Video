@@ -50,8 +50,6 @@ from pixelle_video.utils.prompt_helper import build_image_prompt
 from pixelle_video.services.video import VideoService
 
 
-# Parallel limit for RunningHub workflows (Call by sequential if set to 1)
-RUNNING_HUB_PARALLEL_LIMIT = 1
 
 
 class StandardPipeline(LinearVideoPipeline):
@@ -303,10 +301,13 @@ class StandardPipeline(LinearVideoPipeline):
             (config.media_workflow and config.media_workflow.startswith("runninghub/"))
         )
         
-        if is_runninghub and RUNNING_HUB_PARALLEL_LIMIT > 1:
-            logger.info(f"🚀 Using parallel processing for RunningHub workflows (max {RUNNING_HUB_PARALLEL_LIMIT} concurrent)")
+        # Get concurrent limit from config (default to 1 for backward compatibility)
+        runninghub_concurrent_limit = self.core.config.get("comfyui", {}).get("runninghub_concurrent_limit", 1)
+        
+        if is_runninghub and runninghub_concurrent_limit > 1:
+            logger.info(f"🚀 Using parallel processing for RunningHub workflows (max {runninghub_concurrent_limit} concurrent)")
             
-            semaphore = asyncio.Semaphore(RUNNING_HUB_PARALLEL_LIMIT)
+            semaphore = asyncio.Semaphore(runninghub_concurrent_limit)
             completed_count = 0
             
             async def process_frame_with_semaphore(i: int, frame: StoryboardFrame):

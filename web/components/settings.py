@@ -179,6 +179,16 @@ def render_advanced_settings():
                     f"[{tr('settings.comfyui.runninghub_get_api_key')}]"
                     f"(https://www.runninghub{'.cn' if get_language() == 'zh_CN' else '.ai'}/?inviteCode=bozpdlbj)"
                 )
+                
+                # RunningHub concurrent limit
+                runninghub_concurrent_limit = st.number_input(
+                    tr("settings.comfyui.runninghub_concurrent_limit"),
+                    min_value=1,
+                    max_value=10,
+                    value=comfyui_config.get("runninghub_concurrent_limit", 1),
+                    help=tr("settings.comfyui.runninghub_concurrent_limit_help"),
+                    key="runninghub_concurrent_limit_input"
+                )
         
         # ====================================================================
         # Action Buttons (full width at bottom)
@@ -199,7 +209,8 @@ def render_advanced_settings():
                     config_manager.set_comfyui_config(
                         comfyui_url=comfyui_url if comfyui_url else None,
                         comfyui_api_key=comfyui_api_key if comfyui_api_key else None,
-                        runninghub_api_key=runninghub_api_key if runninghub_api_key else None
+                        runninghub_api_key=runninghub_api_key if runninghub_api_key else None,
+                        runninghub_concurrent_limit=int(runninghub_concurrent_limit)
                     )
                     
                     # Only save to file if LLM config is valid

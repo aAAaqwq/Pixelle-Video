@@ -195,6 +195,8 @@
     "settings.comfyui.runninghub_api_key_help": "访问 https://runninghub.ai 注册并获取 API Key",
     "settings.comfyui.runninghub_hint": "没有本地 ComfyUI？可用 RunningHub 云端：",
     "settings.comfyui.runninghub_get_api_key": "点此获取 RunningHub API Key",
+    "settings.comfyui.runninghub_concurrent_limit": "并发限制",
+    "settings.comfyui.runninghub_concurrent_limit_help": "RunningHub 并发执行数量（1-10），普通会员默认为1，请根据您的会员等级调整",
     "tts.inference_mode": "合成方式",
     "tts.mode.local": "本地合成",
     "tts.mode.comfyui": "ComfyUI 合成",

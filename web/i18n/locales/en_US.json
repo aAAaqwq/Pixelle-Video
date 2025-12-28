@@ -195,6 +195,8 @@
     "settings.comfyui.runninghub_api_key_help": "Visit https://runninghub.ai to register and get API Key",
     "settings.comfyui.runninghub_hint": "No local ComfyUI? Use RunningHub Cloud:",
     "settings.comfyui.runninghub_get_api_key": "Get RunningHub API Key",
+    "settings.comfyui.runninghub_concurrent_limit": "Concurrent Limit",
+    "settings.comfyui.runninghub_concurrent_limit_help": "RunningHub concurrent execution limit (1-10), default is 1 for regular members, adjust based on your membership level",
     "tts.inference_mode": "Synthesis Mode",
     "tts.mode.local": "Local Synthesis",
     "tts.mode.comfyui": "ComfyUI Synthesis",
