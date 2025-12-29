@@ -194,7 +194,6 @@ class DigitalHumanPipelineUI(PipelineUI):
             tts_voice = video_params.get("tts_voice", "zh-CN-YunjianNeural")
             tts_speed = video_params.get("tts_speed", 1.2)
             
-            # Debug: 显示获取到的TTS参数
             logger.info(f"🔧 获取到的TTS参数:")
             logger.info(f"  - tts_voice: {tts_voice}")
             logger.info(f"  - tts_speed: {tts_speed}")
@@ -274,8 +273,6 @@ class DigitalHumanPipelineUI(PipelineUI):
                             first_workflow_config = json.load(f)
                         
                         # Build workflow parameters for first workflow
-                        # 注意：参数名需要根据你的 workflow 实际参数来调整
-                        # 尝试多种可能的参数名
                         first_workflow_params = {
                             # 根据之前的日志尝试的参数名
                             "firstimage": character_assets[0],
@@ -321,8 +318,7 @@ class DigitalHumanPipelineUI(PipelineUI):
                             if first_result.outputs:
                                 for node_id, node_output in first_result.outputs.items():
                                     logger.info(f"  - 节点 {node_id}: {node_output}")
-                        
-                        # 尝试获取所有可能的属性
+
                         for attr in dir(first_result):
                             if not attr.startswith('_'):
                                 try:
@@ -336,13 +332,11 @@ class DigitalHumanPipelineUI(PipelineUI):
                         generated_image_url = None
                         generated_text = None
                         generated_video_url = None
-                        
-                        # 检查是否直接返回了视频（一步到位的工作流）
+
                         if hasattr(first_result, 'videos') and first_result.videos:
                             generated_video_url = first_result.videos[0]
                             logger.info(f"✅ 第一步工作流直接生成了视频: {generated_video_url}")
                             
-                            # 如果直接生成了视频，跳过后续步骤
                             progress_bar.progress(100)
                             status_text.text(tr("status.success"))
                             
@@ -357,7 +351,6 @@ class DigitalHumanPipelineUI(PipelineUI):
                             
                             return final_video_path
                         
-                        # 如果没有直接返回视频，尝试提取图片和文本（原来的逻辑）
                         # Extract image - try direct access first
                         if hasattr(first_result, 'images') and first_result.images:
                             generated_image_url = first_result.images[0]
@@ -388,17 +381,14 @@ class DigitalHumanPipelineUI(PipelineUI):
                                         break
                         
                         if not generated_image_url:
-                            # 如果没有找到图片，尝试查看是否有其他类型的输出
                             logger.error("❌ 第一步工作流未返回图片，尝试查找其他输出...")
                             if hasattr(first_result, 'outputs') and first_result.outputs:
                                 for node_id, node_output in first_result.outputs.items():
                                     logger.info(f"- 节点 {node_id} 输出: {node_output}")
-                            
-                            # 尝试使用第一个可用的图片输出（如果有的话）
+
                             if hasattr(first_result, 'outputs') and first_result.outputs:
                                 for node_id, node_output in first_result.outputs.items():
                                     if isinstance(node_output, dict):
-                                        # 检查所有可能的图片字段
                                         for key in ['images', 'image', 'output_image', 'result_image']:
                                             if key in node_output and node_output[key]:
                                                 if isinstance(node_output[key], list) and len(node_output[key]) > 0:
@@ -416,12 +406,10 @@ class DigitalHumanPipelineUI(PipelineUI):
                                 raise Exception("第一步工作流未返回图片，请检查工作流配置")
                         
                         if not generated_text:
-                            # 如果没有找到文本，尝试查找其他文本输出
                             logger.warning("⚠️ 第一步工作流未返回文本，尝试查找其他文本输出...")
                             if hasattr(first_result, 'outputs') and first_result.outputs:
                                 for node_id, node_output in first_result.outputs.items():
                                     if isinstance(node_output, dict):
-                                        # 检查所有可能的文本字段
                                         for key in ['text', 'texts', 'output_text', 'result_text', 'description', 'caption']:
                                             if key in node_output and node_output[key]:
                                                 if isinstance(node_output[key], list) and len(node_output[key]) > 0:
@@ -435,7 +423,6 @@ class DigitalHumanPipelineUI(PipelineUI):
                                         if generated_text:
                                             break
                             
-                            # 如果还是没有文本，使用默认文本
                             if not generated_text:
                                 generated_text = f"为您推荐这款{goods_title}，品质优良，值得拥有！"
                                 logger.warning(f"⚠️ 使用默认文本: {generated_text}")
@@ -444,7 +431,7 @@ class DigitalHumanPipelineUI(PipelineUI):
                         
                         # Download generated image to local
                         generated_image_path = os.path.join(task_dir, "generated_image.png")
-                        timeout = httpx.Timeout(10.0)  # 简化timeout设置
+                        timeout = httpx.Timeout(10.0)
                         async with httpx.AsyncClient(timeout=timeout) as client:
                             response = await client.get(generated_image_url)
                             response.raise_for_status()
@@ -461,8 +448,8 @@ class DigitalHumanPipelineUI(PipelineUI):
                         await pixelle_video.tts(
                             text=generated_text,
                             output_path=audio_path,
-                            inference_mode="local",  # 明确指定推理模式
-                            voice=tts_voice,  # 使用voice而不是voice_id
+                            inference_mode="local",  
+                            voice=tts_voice,  
                             speed=tts_speed
                         )
                         
@@ -482,12 +469,9 @@ class DigitalHumanPipelineUI(PipelineUI):
                             second_workflow_config = json.load(f)
                         
                         # Build workflow parameters for second workflow
-                        # 注意：参数名需要根据你的 workflow 实际参数来调整
-                        # 尝试多种可能的参数名
                         second_workflow_params = {
-                            # 尝试常见的参数名
-                            "videoimage": generated_image_path,  # 生成的图片路径
-                            "audio": audio_path,  # 音频路径
+                            "videoimage": generated_image_path,  
+                            "audio": audio_path,  
                         }
                         
                         logger.info(f"🔧 传递给第二步工作流的参数:")
@@ -523,7 +507,6 @@ class DigitalHumanPipelineUI(PipelineUI):
                                 for node_id, node_output in second_result.outputs.items():
                                     logger.info(f"  - 节点 {node_id}: {node_output}")
                         
-                        # 尝试获取所有可能的属性
                         for attr in dir(second_result):
                             if not attr.startswith('_'):
                                 try:
@@ -550,17 +533,14 @@ class DigitalHumanPipelineUI(PipelineUI):
                                         break
                         
                         if not generated_video_url:
-                            # 如果没有找到视频，尝试查看是否有其他类型的输出
                             logger.error("❌ 第二步工作流未返回视频，尝试查找其他输出...")
                             if hasattr(second_result, 'outputs') and second_result.outputs:
                                 for node_id, node_output in second_result.outputs.items():
                                     logger.info(f"- 节点 {node_id} 输出: {node_output}")
                             
-                            # 尝试使用第一个可用的视频输出（如果有的话）
                             if hasattr(second_result, 'outputs') and second_result.outputs:
                                 for node_id, node_output in second_result.outputs.items():
                                     if isinstance(node_output, dict):
-                                        # 检查所有可能的视频字段
                                         for key in ['videos', 'video', 'output_video', 'result_video', 'mp4']:
                                             if key in node_output and node_output[key]:
                                                 if isinstance(node_output[key], list) and len(node_output[key]) > 0:
@@ -581,7 +561,7 @@ class DigitalHumanPipelineUI(PipelineUI):
                         
                         # Download video to local
                         final_video_path = os.path.join(task_dir, "final.mp4")
-                        timeout = httpx.Timeout(300.0)  # 简化timeout设置
+                        timeout = httpx.Timeout(300.0)
                         async with httpx.AsyncClient(timeout=timeout) as client:
                             response = await client.get(generated_video_url)
                             response.raise_for_status()
