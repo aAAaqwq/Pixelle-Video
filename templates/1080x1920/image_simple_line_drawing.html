@@ -26,12 +26,13 @@
         .title-wrapper {
             position: absolute;
             width: 900px;
-            top: 20%;
+            top: 25%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 70px;
+            font-size: 60px;
             font-weight: 600;
             text-align: center;
+            z-index: 10;
         }
 
         .title {
@@ -133,7 +134,7 @@
 </head>
 <body>
     <div class="title-wrapper">
-        <span class="title">{{title}}</span>
+        <span class="title">{{text}}</span>
     </div>
     <image src="{{image}}" class="image-center" />
     <div class="footer">
