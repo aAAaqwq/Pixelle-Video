@@ -10,6 +10,28 @@ version: '3.8'
 #   docker-compose up -d
 
 services:
+  # Init Service - Ensures config.yaml exists before other services start
+  # This fixes the Docker issue where mounting a non-existent file creates a directory
+  init:
+    image: alpine:latest
+    volumes:
+      - ./:/workspace
+    command: >
+      sh -c '
+        if [ -d /workspace/config.yaml ]; then
+          echo "⚠️  config.yaml is a directory, removing it...";
+          rm -rf /workspace/config.yaml;
+        fi;
+        if [ ! -f /workspace/config.yaml ] && [ -f /workspace/config.example.yaml ]; then
+          echo "📋 Creating config.yaml from config.example.yaml...";
+          cp /workspace/config.example.yaml /workspace/config.yaml;
+          echo "✅ config.yaml created successfully!";
+        else
+          echo "✅ config.yaml already exists.";
+        fi
+      '
+    restart: "no"
+
   # API Service - FastAPI backend
   api:
     build:
@@ -19,11 +41,14 @@ services:
         USE_CN_MIRROR: ${USE_CN_MIRROR:-false}
     container_name: pixelle-video-api
     command: .venv/bin/python api/app.py --host 0.0.0.0 --port 8000
+    depends_on:
+      init:
+        condition: service_completed_successfully
     ports:
       - "8000:8000"
     volumes:
-      # Mount config file (required, read-write to allow saving from Web UI)
-      # IMPORTANT: Create config.yaml before first run: cp config.example.yaml config.yaml
+      # Mount config file (read-write to allow saving from Web UI)
+      # Note: init service auto-creates config.yaml from config.example.yaml if not exists
       - ./config.yaml:/app/config.yaml
       # Mount data directories for persistence
       # data/ contains: users/, bgm/, templates/, workflows/ (custom resources)
@@ -57,11 +82,14 @@ services:
         USE_CN_MIRROR: ${USE_CN_MIRROR:-false}
     container_name: pixelle-video-web
     command: .venv/bin/streamlit run web/app.py --server.port 8501 --server.address 0.0.0.0
+    depends_on:
+      init:
+        condition: service_completed_successfully
     ports:
       - "8501:8501"
     volumes:
-      # Mount config file (required, read-write to allow saving from Web UI)
-      # IMPORTANT: Create config.yaml before first run: cp config.example.yaml config.yaml
+      # Mount config file (read-write to allow saving from Web UI)
+      # Note: init service auto-creates config.yaml from config.example.yaml if not exists
       - ./config.yaml:/app/config.yaml
       # Mount data directories for persistence
       # data/ contains: users/, bgm/, templates/, workflows/ (custom resources)
