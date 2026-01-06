@@ -432,7 +432,7 @@ wheels = [
 
 [[package]]
 name = "comfykit"
-version = "0.1.11"
+version = "0.1.12"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aiofiles" },
@@ -442,9 +442,9 @@ dependencies = [
     { name = "pydantic" },
     { name = "websockets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/2c/c2/55612d8ee85f0f003113b36795ee40c2ce5ea4f3806baa6b056fb88e696a/comfykit-0.1.11.tar.gz", hash = "sha256:1dc96c15da81a1c69a5f42af2f0f156f9574e534ac925476d1e469b02f2736b0", size = 50179 }
+sdist = { url = "https://files.pythonhosted.org/packages/1b/d3/6213304fae8823441567b00a5e62ea2f9ae229c86e62ad5996df18851511/comfykit-0.1.12.tar.gz", hash = "sha256:129aedbb1966e78f406ab96cc713e5ade089182156a1cafd3c4c79cac4fcd3c9", size = 50671 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/c0/e5/9fdd7da9a944fa8ad32f1e7623604d5bbc0a37f8a6d9beda23e51e3e3698/comfykit-0.1.11-py3-none-any.whl", hash = "sha256:d23cf636adc360976f4724cfc5a0f3ef23dd77735c852a1f83f061256a7b9a2e", size = 53286 },
+    { url = "https://files.pythonhosted.org/packages/d9/e6/c008888d1386cb75ba2fde68b07f45821500e262536039aead9689d335c3/comfykit-0.1.12-py3-none-any.whl", hash = "sha256:30ec8c8368b5b8224a26bb21cdf2240b5aff9938146a76229c079427f7c12421", size = 53697 },
 ]
 
 [[package]]
@@ -1697,7 +1697,7 @@ dev = [
 requires-dist = [
     { name = "beautifulsoup4", specifier = ">=4.14.2" },
     { name = "certifi", specifier = ">=2025.10.5" },
-    { name = "comfykit", specifier = ">=0.1.11" },
+    { name = "comfykit", specifier = ">=0.1.12" },
     { name = "edge-tts", specifier = "==7.2.1" },
     { name = "fastapi", specifier = ">=0.115.0" },
     { name = "fastmcp", specifier = ">=2.0.0" },
