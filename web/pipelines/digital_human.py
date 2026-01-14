@@ -40,6 +40,7 @@ class DigitalHumanPipelineUI(PipelineUI):
         # ====================================================================
         with left_col:
             asset_params = self.render_digital_human_input()
+            style_params = render_style_config(pixelle_video)
             # bgm_params = render_bgm_section(key_prefix="asset_")
             render_version_info()
         
@@ -47,8 +48,8 @@ class DigitalHumanPipelineUI(PipelineUI):
         # Middle Column: Video Configuration
         # ====================================================================
         with middle_col:
-            # Style configuration (TTS, template, workflow, etc.)
-            style_params = render_style_config(pixelle_video)
+            # Style configuration ()
+            mode_params = self.render_digital_human_mode(asset_params["character_assets"])
         
         # # ====================================================================
         # # Right Column: Output Preview
@@ -56,6 +57,7 @@ class DigitalHumanPipelineUI(PipelineUI):
         with right_col:
             # Combine all parameters
             video_params = {
+                **mode_params,
                 **asset_params,
                 **style_params
             }
@@ -110,7 +112,10 @@ class DigitalHumanPipelineUI(PipelineUI):
                                 st.image(file, caption=file.name, use_container_width=True)
             else:
                 st.info(tr("digital_human.assets.character_empty_hint"))
-    
+
+            return {"character_assets": character_asset_paths}
+
+    def render_digital_human_mode(self, character_asset_paths: list) -> dict:
         with st.container(border=True):
             st.markdown(f"**{tr('digital_human.section.select_mode')}**")
             
@@ -173,13 +178,6 @@ class DigitalHumanPipelineUI(PipelineUI):
                 else:
                     st.info(tr("digital_human.assets.goods_empty_hint"))
                     # Text input
-                goods_title = st.text_input(
-                    tr("digital_human.goods_title"),
-                    placeholder=tr("digital_human.goods_title_placeholder"),
-                    help=tr("digital_human.goods_title_help"),
-                    key="goods_title"
-                )
-
                 goods_text = st.text_area(
                     tr("digital_human.input_text"),
                     placeholder=text_placeholder,
@@ -187,6 +185,13 @@ class DigitalHumanPipelineUI(PipelineUI):
                     help=text_help,
                     key="digital_box"
                     )
+
+                goods_title = st.text_input(
+                    tr("digital_human.goods_title"),
+                    placeholder=tr("digital_human.goods_title_placeholder"),
+                    help=tr("digital_human.goods_title_help"),
+                    key="goods_title"
+                )
 
                 return {
                     "character_assets": character_asset_paths,
@@ -205,13 +210,12 @@ class DigitalHumanPipelineUI(PipelineUI):
                     key="customize_box"
                 )
 
-
                 return {
                     "character_assets": character_asset_paths,
                     "goods_text": goods_text,
                     "mode": mode
                     }
-
+                    
     def _render_output_preview(self, pixelle_video: Any, video_params: dict):
         """Render output preview section"""
         with st.container(border=True):
@@ -227,17 +231,14 @@ class DigitalHumanPipelineUI(PipelineUI):
             goods_title = video_params.get("goods_title", "")
             goods_text = video_params.get("goods_text", "")
             mode = video_params.get("mode")
-            first_workflow = video_params.get("first_workflow")
-            second_workflow = video_params.get("second_workflow")
-            third_workflow = video_params.get("third_workflow")
             tts_voice = video_params.get("tts_voice", "zh-CN-YunjianNeural")
             tts_speed = video_params.get("tts_speed", 1.2)
             
-            logger.info(f"🔧 获取到的TTS参数:")
+            logger.info(f"🔧 The obtained TTS parameters:")
             logger.info(f"  - tts_voice: {tts_voice}")
             logger.info(f"  - tts_speed: {tts_speed}")
             logger.info(f"  - video_params中的tts_voice: {video_params.get('tts_voice', 'NOT_FOUND')}")
-            logger.info(f"  - 所有video_params: {video_params}")
+            logger.info(f"  - video_params: {video_params}")
             
             # Validation
             if not character_assets:
@@ -257,22 +258,10 @@ class DigitalHumanPipelineUI(PipelineUI):
                     tr("btn.generate"),
                     type="primary",
                     use_container_width=True,
-                    disabled=True,  # 禁用
+                    disabled=True,
                     key="digital_human_generate"
                 )
                 return  
-            
-            # Workflow validation
-            # if not first_workflow or not second_workflow or not third_workflow:
-            #     st.warning("请选择工作流配置")
-            #     st.button(
-            #         tr("btn.generate"),
-            #         type="primary",
-            #         use_container_width=True,
-            #         disabled=True,
-            #         key="digital_human_generate_disabled_no_workflow"
-            #     )
-            #     return
             
             # Generate button
             if st.button(tr("btn.generate"), type="primary", use_container_width=True, key="digital_human_generate"):
@@ -297,12 +286,12 @@ class DigitalHumanPipelineUI(PipelineUI):
                         from pathlib import Path
 
                         if mode == "customize":
-                            status_text.text("步骤 1/2: 文案转语音 ...")
+                            status_text.text(tr("progress.step_audio"))
                             progress_bar.progress(25)
-                            generated_image_path = character_assets[0]   # 用户上传
-                            generated_text = goods_text                  # 用户输入文本
+                            generated_image_path = character_assets[0]   
+                            generated_text = goods_text                 
 
-                            # TTS合成
+                            # TTS
                             audio_path = os.path.join(task_dir, "narration.mp3")
                             await pixelle_video.tts(
                                 text=generated_text,
@@ -312,12 +301,12 @@ class DigitalHumanPipelineUI(PipelineUI):
                                 speed=tts_speed
                             )
                             progress_bar.progress(65)
-                            status_text.text("步骤 2/2: 合成视频 ...")
+                            status_text.text(tr("progress.concatenating"))
 
-                            # 直接调用第二工作流
+                            # Directly call the second workflow
                             second_workflow_path = Path("workflows/runninghub/digital_combination.json")
                             if not second_workflow_path.exists():
-                                raise Exception(f"第二步工作流文件不存在: {second_workflow_path}")
+                                raise Exception(f"The second step workflow file does not exist:{second_workflow_path}")
                             with open(second_workflow_path, 'r', encoding='utf-8') as f:
                                 second_workflow_config = json.load(f)
                             second_workflow_params = {
@@ -329,7 +318,7 @@ class DigitalHumanPipelineUI(PipelineUI):
                             else:
                                 workflow_input = str(second_workflow_path)
                             second_result = await kit.execute(workflow_input, second_workflow_params)
-                            # 视频链接提取
+                            # Video Link Extraction
                             generated_video_url = None
                             if hasattr(second_result, 'videos') and second_result.videos:
                                 generated_video_url = second_result.videos[0]
@@ -341,7 +330,7 @@ class DigitalHumanPipelineUI(PipelineUI):
                                             generated_video_url = videos[0]
                                             break
                             if not generated_video_url:
-                                raise Exception("第二步工作流未返回视频，请检查工作流配置")
+                                raise Exception("The second step of the workflow did not return a video. Please check the workflow configuration.")
                                         
                             final_video_path = os.path.join(task_dir, "final.mp4")
                             timeout = httpx.Timeout(300.0)
@@ -355,339 +344,145 @@ class DigitalHumanPipelineUI(PipelineUI):
                             return final_video_path
                         
                         else:
-                            # Create task directory
+                            #Initialization and parameter preparation
                             task_dir, task_id = create_task_output_dir()
-                            logger.info(f"📁 Task directory created: {task_dir}")
-                            
-                            # ============================================================
-                            # Step 1: Call first workflow (character_image + goods_image + goods_title)
-                            # ============================================================
-                            status_text.text("步骤 1/3: 调用第一步工作流生成拼图和文案...")
-                            progress_bar.progress(10)
-                            
-                            # Directly load first workflow file                            
+                            logger.info(f"[Initialization] Task Directory: {task_dir}")
+
                             first_workflow_path = Path("workflows/runninghub/digital_image.json")
                             third_workflow_path = Path("workflows/runninghub/digital_customize.json")
-                            if not first_workflow_path.exists():
-                                raise Exception(f"第一步工作流文件不存在: {first_workflow_path}")
+                            second_workflow_path = Path("workflows/runninghub/digital_combination.json")
+                            assert first_workflow_path.exists(), "The first_workflow file does not exist."
+                            assert third_workflow_path.exists(), "The third_workflow file does not exist."
+                            assert second_workflow_path.exists(), "The  second_workflow file does not exist."
 
-                            if not third_workflow_path.exists():
-                                raise Exception(f"第一步工作流文件不存在: {third_workflow_path}")
-                            
                             if goods_text and goods_text.strip():
-                                logger.info("✏️ 文本输入非空")
                                 workflow_path = third_workflow_path
-                                with open(third_workflow_path, 'r', encoding='utf-8') as f:
-                                    workflow_config = json.load(f)
-                                workflow_params = {
-                                    "firstimage": character_assets[0],
-                                    "secondimage": goods_assets[0]
-                                }
-                            else:
-                                logger.info("🖼️ 文本输入为空，按原逻辑调用第一工作流")
-                                workflow_path = first_workflow_path
-                                with open(first_workflow_path, 'r', encoding='utf-8') as f:
-                                    workflow_config = json.load(f)
-                                workflow_params = {
-                                    "firstimage": character_assets[0],
-                                    "secondimage": goods_assets[0],
-                                    "goodstype": goods_title
-                                }
+                                workflow_params = {"firstimage": character_assets[0], "secondimage": goods_assets[0]}
+                                
+                                status_text.text(tr("progress.step_image"))
+                                kit = await pixelle_video._get_or_create_comfykit()
+                                workflow_config = json.load(open(workflow_path, 'r', encoding='utf8'))
+                                workflow_input = workflow_config.get("workflow_id", str(workflow_path))
+                                combine_image = await kit.execute(workflow_input, workflow_params)
+                                if combine_image.status != "completed":
+                                    raise Exception(f"workflow execution failed: {combine_image.msg}")
+                                generated_image_url = getattr(combine_image, "images", [None])[0]
+                                status_text.text(tr("progress.step_audio"))
+                                audio_path = os.path.join(task_dir, "narration.mp3")
+                                await pixelle_video.tts(
+                                    text=goods_text,
+                                    output_path=audio_path,
+                                    inference_mode="local",  
+                                    voice=tts_voice,  
+                                    speed=tts_speed
+                                )
+                                progress_bar.progress(65)
+                                status_text.text(tr("progress.progress.concatenating"))
 
-                            
-                            logger.info(f"🔧 传递给第一步工作流的参数:")
-                            for key, value in workflow_params.items():
-                                if isinstance(value, str) and len(value) > 100:
-                                    logger.info(f"  - {key}: {value[:100]}... (文件路径)")
+                                second_workflow_path = Path("workflows/runninghub/digital_combination.json")
+                                if not second_workflow_path.exists():
+                                    raise Exception(f"The second step workflow file does not exist:{second_workflow_path}")
+                                with open(second_workflow_path, 'r', encoding='utf-8') as f:
+                                    second_workflow_config = json.load(f)
+                                second_workflow_params = {
+                                    "videoimage": generated_image_url,
+                                    "audio": audio_path
+                                }
+                                if second_workflow_config.get("source") == "runninghub" and "workflow_id" in second_workflow_config:
+                                    workflow_input = second_workflow_config["workflow_id"]
                                 else:
-                                    logger.info(f"  - {key}: {value}")
-                            
-                            kit = await pixelle_video._get_or_create_comfykit()
-                            if workflow_config.get("source") == "runninghub" and "workflow_id" in workflow_config:
-                                workflow_input = workflow_config["workflow_id"]
+                                    workflow_input = str(second_workflow_path)
+                                second_result = await kit.execute(workflow_input, second_workflow_params)
+                                # Video Link Extraction
+                                generated_video_url = None
+                                if hasattr(second_result, 'videos') and second_result.videos:
+                                    generated_video_url = second_result.videos[0]
+                                elif hasattr(second_result, 'outputs') and second_result.outputs:
+                                    for node_id, node_output in second_result.outputs.items():
+                                        if isinstance(node_output, dict) and 'videos' in node_output:
+                                            videos = node_output['videos']
+                                            if videos and len(videos) > 0:
+                                                generated_video_url = videos[0]
+                                                break
+                                if not generated_video_url:
+                                    raise Exception("The second step of the workflow did not return a video. Please check the workflow configuration.")
+                                            
+                                final_video_path = os.path.join(task_dir, "final.mp4")
+                                timeout = httpx.Timeout(300.0)
+                                async with httpx.AsyncClient(timeout=timeout) as client:
+                                    response = await client.get(generated_video_url)
+                                    response.raise_for_status()
+                                    with open(final_video_path, 'wb') as f:
+                                        f.write(response.content)
+                                progress_bar.progress(100)
+                                status_text.text(tr("status.success"))
+                                return final_video_path
+                                
                             else:
-                                workflow_input = str(workflow_path)
+                                workflow_path = first_workflow_path
+                                workflow_params = {"firstimage": character_assets[0], "secondimage": goods_assets[0], "goodstype": goods_title}
+                                
+                                status_text.text(tr("progress.step_image"))
+                                kit = await pixelle_video._get_or_create_comfykit()
+                                workflow_config = json.load(open(workflow_path, 'r', encoding='utf8'))
+                                workflow_input = workflow_config.get("workflow_id", str(workflow_path))
+                                synthesis_result = await kit.execute(workflow_input, workflow_params)
+                                if synthesis_result.status != "completed":
+                                    raise Exception(f"workflow execution failed: {synthesis_result.msg}")
+                                generated_image_url = getattr(synthesis_result, "images", [None])[0]
+                                generated_text = getattr(synthesis_result, "texts", [None])[0]
+                                
+                                status_text.text(tr("progress.step_audio"))
+                                audio_path = os.path.join(task_dir, "narration.mp3")
+                                await pixelle_video.tts(
+                                    text=generated_text,
+                                    output_path=audio_path,
+                                    inference_mode="local",  
+                                    voice=tts_voice,  
+                                    speed=tts_speed
+                                )
+                                progress_bar.progress(65)
+                                status_text.text(tr("progress.concatenating"))
 
-                            logger.info(f"执行当前工作流: {workflow_input}")
-                            first_result = await kit.execute(workflow_input, workflow_params)
-                            
-                            if first_result.status != "completed":
-                                raise Exception(f"第一步工作流执行失败: {first_result.msg}")
-                            
-                            # Debug: Log the actual result structure
-                            logger.info(f"🔍 第一步工作流返回结果调试:")
-                            logger.info(f"- result type: {type(first_result)}")
-                            logger.info(f"- result.__dict__: {first_result.__dict__}")
-                            
-                            if hasattr(first_result, 'images'):
-                                logger.info(f"- images: {first_result.images}")
-                            if hasattr(first_result, 'texts'):
-                                logger.info(f"- texts: {first_result.texts}")
-                            if hasattr(first_result, 'videos'):
-                                logger.info(f"- videos: {first_result.videos}")
-                            if hasattr(first_result, 'outputs'):
-                                logger.info(f"- outputs keys: {list(first_result.outputs.keys()) if first_result.outputs else 'None'}")
-                                if first_result.outputs:
-                                    for node_id, node_output in first_result.outputs.items():
-                                        logger.info(f"  - 节点 {node_id}: {node_output}")
-
-                            for attr in dir(first_result):
-                                if not attr.startswith('_'):
-                                    try:
-                                        value = getattr(first_result, attr)
-                                        if not callable(value):
-                                            logger.info(f"- {attr}: {value}")
-                                    except:
-                                        pass
-                        
-                        # Extract results from first workflow
-                        generated_image_url = None
-                        generated_text = None
-                        generated_video_url = None
-
-                        if hasattr(first_result, 'videos') and first_result.videos:
-                            generated_video_url = first_result.videos[0]
-                            logger.info(f"✅ 第一步工作流直接生成了视频: {generated_video_url}")
-                            
-                            progress_bar.progress(100)
-                            status_text.text(tr("status.success"))
-                            
-                            # Download video to local
-                            final_video_path = os.path.join(task_dir, "final.mp4")
-                            timeout = httpx.Timeout(300.0)  # 简化timeout设置
-                            async with httpx.AsyncClient(timeout=timeout) as client:
-                                response = await client.get(generated_video_url)
-                                response.raise_for_status()
-                                with open(final_video_path, 'wb') as f:
-                                    f.write(response.content)
-                            
-                            return final_video_path
-                        
-                        # Extract image - try direct access first
-                        if hasattr(first_result, 'images') and first_result.images:
-                            generated_image_url = first_result.images[0]
-                            logger.info(f"✅ 从 result.images 获取图片: {generated_image_url}")
-                        elif hasattr(first_result, 'outputs') and first_result.outputs:
-                            # Try to find image in outputs
-                            for node_id, node_output in first_result.outputs.items():
-                                logger.info(f"- 检查节点 {node_id}: {list(node_output.keys()) if isinstance(node_output, dict) else type(node_output)}")
-                                if isinstance(node_output, dict) and 'images' in node_output:
-                                    images = node_output['images']
-                                    if images and len(images) > 0:
-                                        generated_image_url = images[0]
-                                        logger.info(f"✅ 从 outputs[{node_id}].images 获取图片: {generated_image_url}")
-                                        break
-                        
-                        # Extract text - try direct access first
-                        if hasattr(first_result, 'texts') and first_result.texts:
-                            generated_text = first_result.texts[0]
-                            logger.info(f"✅ 从 result.texts 获取文本: {generated_text[:50]}...")
-                        elif hasattr(first_result, 'outputs') and first_result.outputs:
-                            # Try to find text in outputs
-                            for node_id, node_output in first_result.outputs.items():
-                                if isinstance(node_output, dict) and 'text' in node_output:
-                                    text_list = node_output['text']
-                                    if text_list and len(text_list) > 0:
-                                        generated_text = text_list[0]
-                                        logger.info(f"✅ 从 outputs[{node_id}].text 获取文本: {generated_text[:50]}...")
-                                        break
-                        
-                        if not generated_image_url:
-                            logger.error("❌ 第一步工作流未返回图片，尝试查找其他输出...")
-                            if hasattr(first_result, 'outputs') and first_result.outputs:
-                                for node_id, node_output in first_result.outputs.items():
-                                    logger.info(f"- 节点 {node_id} 输出: {node_output}")
-
-                            if hasattr(first_result, 'outputs') and first_result.outputs:
-                                for node_id, node_output in first_result.outputs.items():
-                                    if isinstance(node_output, dict):
-                                        for key in ['images', 'image', 'output_image', 'result_image']:
-                                            if key in node_output and node_output[key]:
-                                                if isinstance(node_output[key], list) and len(node_output[key]) > 0:
-                                                    generated_image_url = node_output[key][0]
-                                                    logger.info(f"✅ 从 outputs[{node_id}].{key} 获取图片: {generated_image_url}")
-                                                    break
-                                                elif isinstance(node_output[key], str):
-                                                    generated_image_url = node_output[key]
-                                                    logger.info(f"✅ 从 outputs[{node_id}].{key} 获取图片: {generated_image_url}")
-                                                    break
-                                        if generated_image_url:
-                                            break
-                            
-                            if not generated_image_url:
-                                raise Exception("第一步工作流未返回图片，请检查工作流配置")
-                        
-                        if not generated_text:
-                            logger.warning("⚠️ 第一步工作流未返回文本，尝试查找其他文本输出...")
-                            if hasattr(first_result, 'outputs') and first_result.outputs:
-                                for node_id, node_output in first_result.outputs.items():
-                                    if isinstance(node_output, dict):
-                                        for key in ['text', 'texts', 'output_text', 'result_text', 'description', 'caption']:
-                                            if key in node_output and node_output[key]:
-                                                if isinstance(node_output[key], list) and len(node_output[key]) > 0:
-                                                    generated_text = node_output[key][0]
-                                                    logger.info(f"✅ 从 outputs[{node_id}].{key} 获取文本: {generated_text[:50]}...")
-                                                    break
-                                                elif isinstance(node_output[key], str):
-                                                    generated_text = node_output[key]
-                                                    logger.info(f"✅ 从 outputs[{node_id}].{key} 获取文本: {generated_text[:50]}...")
-                                                    break
-                                        if generated_text:
-                                            break
-                            
-                            if not generated_text:
-                                generated_text = goods_text
-                                logger.warning(f"⚠️ 使用自定义文本: {generated_text}")
-                        
-                        logger.info(f"✅ 第一步完成: 图片={generated_image_url}, 文本={generated_text[:50]}...")
-                        
-                        # Download generated image to local
-                        generated_image_path = os.path.join(task_dir, "generated_image.png")
-                        timeout = httpx.Timeout(10.0)
-                        async with httpx.AsyncClient(timeout=timeout) as client:
-                            response = await client.get(generated_image_url)
-                            response.raise_for_status()
-                            with open(generated_image_path, 'wb') as f:
-                                f.write(response.content)
-                        
-                        progress_bar.progress(40)
-                        status_text.text("步骤 2/3: 将文案转换为语音...")
-                        
-                        # ============================================================
-                        # Step 2: TTS conversion (text -> audio)
-                        # ============================================================
-                        audio_path = os.path.join(task_dir, "narration.mp3")
-                        await pixelle_video.tts(
-                            text=generated_text,
-                            output_path=audio_path,
-                            inference_mode="local",  
-                            voice=tts_voice,  
-                            speed=tts_speed
-                        )
-                        
-                        logger.info(f"✅ 第二步完成: 语音={audio_path}")
-                        progress_bar.progress(70)
-                        status_text.text("步骤 3/3: 调用第二步工作流生成最终视频...")
-                        
-                        # ============================================================
-                        # Step 3: Call second workflow (generated_image + audio)
-                        # ============================================================
-                        # Directly load second workflow file
-                        second_workflow_path = Path("workflows/runninghub/digital_combination.json")
-                        if not second_workflow_path.exists():
-                            raise Exception(f"第二步工作流文件不存在: {second_workflow_path}")
-                        
-                        with open(second_workflow_path, 'r', encoding='utf-8') as f:
-                            second_workflow_config = json.load(f)
-                        
-                        # Build workflow parameters for second workflow
-                        if mode == "digital":
-                            second_workflow_params = {
-                                "videoimage": generated_image_path,  
-                                "audio": audio_path,  
-                            }
-                        else:
-                            second_workflow_params = {
-                                "videoimage": character_assets[0],
-                                "audio": audio_path
-                            }
-                        
-                        logger.info(f"🔧 传递给第二步工作流的参数:")
-                        for key, value in second_workflow_params.items():
-                            logger.info(f"  - {key}: {value}")
-                        
-                        # Execute second workflow
-                        if second_workflow_config.get("source") == "runninghub" and "workflow_id" in second_workflow_config:
-                            workflow_input = second_workflow_config["workflow_id"]
-                        else:
-                            workflow_input = str(second_workflow_path)
-                        
-                        logger.info(f"执行第二步工作流: {workflow_input}")
-                        second_result = await kit.execute(workflow_input, second_workflow_params)
-                        
-                        if second_result.status != "completed":
-                            raise Exception(f"第二步工作流执行失败: {second_result.msg}")
-                        
-                        # Debug: Log the second workflow result structure
-                        logger.info(f"🔍 第二步工作流返回结果调试:")
-                        logger.info(f"- result type: {type(second_result)}")
-                        logger.info(f"- result.__dict__: {second_result.__dict__}")
-                        
-                        if hasattr(second_result, 'videos'):
-                            logger.info(f"- videos: {second_result.videos}")
-                        if hasattr(second_result, 'images'):
-                            logger.info(f"- images: {second_result.images}")
-                        if hasattr(second_result, 'texts'):
-                            logger.info(f"- texts: {second_result.texts}")
-                        if hasattr(second_result, 'outputs'):
-                            logger.info(f"- outputs keys: {list(second_result.outputs.keys()) if second_result.outputs else 'None'}")
-                            if second_result.outputs:
-                                for node_id, node_output in second_result.outputs.items():
-                                    logger.info(f"  - 节点 {node_id}: {node_output}")
-                        
-                        for attr in dir(second_result):
-                            if not attr.startswith('_'):
-                                try:
-                                    value = getattr(second_result, attr)
-                                    if not callable(value):
-                                        logger.info(f"- {attr}: {value}")
-                                except:
-                                    pass
-                        
-                        # Extract video from second workflow result
-                        generated_video_url = None
-                        
-                        if hasattr(second_result, 'videos') and second_result.videos:
-                            generated_video_url = second_result.videos[0]
-                            logger.info(f"✅ 从 result.videos 获取视频: {generated_video_url}")
-                        elif hasattr(second_result, 'outputs') and second_result.outputs:
-                            for node_id, node_output in second_result.outputs.items():
-                                logger.info(f"- 检查节点 {node_id}: {list(node_output.keys()) if isinstance(node_output, dict) else type(node_output)}")
-                                if isinstance(node_output, dict) and 'videos' in node_output:
-                                    videos = node_output['videos']
-                                    if videos and len(videos) > 0:
-                                        generated_video_url = videos[0]
-                                        logger.info(f"✅ 从 outputs[{node_id}].videos 获取视频: {generated_video_url}")
-                                        break
-                        
-                        if not generated_video_url:
-                            logger.error("❌ 第二步工作流未返回视频，尝试查找其他输出...")
-                            if hasattr(second_result, 'outputs') and second_result.outputs:
-                                for node_id, node_output in second_result.outputs.items():
-                                    logger.info(f"- 节点 {node_id} 输出: {node_output}")
-                            
-                            if hasattr(second_result, 'outputs') and second_result.outputs:
-                                for node_id, node_output in second_result.outputs.items():
-                                    if isinstance(node_output, dict):
-                                        for key in ['videos', 'video', 'output_video', 'result_video', 'mp4']:
-                                            if key in node_output and node_output[key]:
-                                                if isinstance(node_output[key], list) and len(node_output[key]) > 0:
-                                                    generated_video_url = node_output[key][0]
-                                                    logger.info(f"✅ 从 outputs[{node_id}].{key} 获取视频: {generated_video_url}")
-                                                    break
-                                                elif isinstance(node_output[key], str):
-                                                    generated_video_url = node_output[key]
-                                                    logger.info(f"✅ 从 outputs[{node_id}].{key} 获取视频: {generated_video_url}")
-                                                    break
-                                        if generated_video_url:
-                                            break
-                            
-                            if not generated_video_url:
-                                raise Exception("第二步工作流未返回视频，请检查工作流配置")
-                        
-                        logger.info(f"✅ 第三步完成: 视频={generated_video_url}")
-                        
-                        # Download video to local
-                        final_video_path = os.path.join(task_dir, "final.mp4")
-                        timeout = httpx.Timeout(300.0)
-                        async with httpx.AsyncClient(timeout=timeout) as client:
-                            response = await client.get(generated_video_url)
-                            response.raise_for_status()
-                            with open(final_video_path, 'wb') as f:
-                                f.write(response.content)
-                        
-                        return final_video_path
-                    
+                                second_workflow_path = Path("workflows/runninghub/digital_combination.json")
+                                if not second_workflow_path.exists():
+                                    raise Exception(f"The second step workflow file does not exist:{second_workflow_path}")
+                                with open(second_workflow_path, 'r', encoding='utf-8') as f:
+                                    second_workflow_config = json.load(f)
+                                second_workflow_params = {
+                                    "videoimage": generated_image_url,
+                                    "audio": audio_path
+                                }
+                                if second_workflow_config.get("source") == "runninghub" and "workflow_id" in second_workflow_config:
+                                    workflow_input = second_workflow_config["workflow_id"]
+                                else:
+                                    workflow_input = str(second_workflow_path)
+                                second_result = await kit.execute(workflow_input, second_workflow_params)
+                                # Video Link Extraction
+                                generated_video_url = None
+                                if hasattr(second_result, 'videos') and second_result.videos:
+                                    generated_video_url = second_result.videos[0]
+                                elif hasattr(second_result, 'outputs') and second_result.outputs:
+                                    for node_id, node_output in second_result.outputs.items():
+                                        if isinstance(node_output, dict) and 'videos' in node_output:
+                                            videos = node_output['videos']
+                                            if videos and len(videos) > 0:
+                                                generated_video_url = videos[0]
+                                                break
+                                if not generated_video_url:
+                                    raise Exception("The second step of the workflow did not return a video. Please check the workflow configuration.")
+                                            
+                                final_video_path = os.path.join(task_dir, "final.mp4")
+                                timeout = httpx.Timeout(300.0)
+                                async with httpx.AsyncClient(timeout=timeout) as client:
+                                    response = await client.get(generated_video_url)
+                                    response.raise_for_status()
+                                    with open(final_video_path, 'wb') as f:
+                                        f.write(response.content)
+                                progress_bar.progress(100)
+                                status_text.text(tr("status.success"))
+                                return final_video_path
+                                
                     # Execute async generation
                     final_video_path = run_async(generate_digital_human_video())
                     

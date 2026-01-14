@@ -40,11 +40,10 @@ def render_style_config(pixelle_video):
         comfyui_config = config_manager.get_comfyui_config()
         tts_config = comfyui_config["tts"]
         
-        # 只使用local模式，移除inference_mode选择
         tts_mode = "local"
         
         # ================================================================
-        # Local Mode UI (简化版本)
+        # Local Mode UI (simple)
         # ================================================================
         # Import voice configuration
         from pixelle_video.tts_voices import EDGE_TTS_VOICES, get_voice_display_name
@@ -99,7 +98,7 @@ def render_style_config(pixelle_video):
             st.caption(tr("tts.speed_label", speed=f"{tts_speed:.1f}"))
         
         # ================================================================
-        # TTS Preview (只支持local模式)
+        # TTS Preview (only local mode)
         # ================================================================
         with st.expander(tr("tts.preview_title"), expanded=False):
             # Preview text input
@@ -140,98 +139,10 @@ def render_style_config(pixelle_video):
                         st.error(tr("tts.preview_failed", error=str(e)))
                         logger.exception(e)
     
-    # ====================================================================
-    # Storyboard Template Section
-    # ====================================================================
-    
-    def get_template_preview_path(template_path: str, language: str = "zh_CN") -> str:
-        """
-        Get the preview image path for a template based on language.
-        
-        Args:
-            template_path: Template path like "1080x1920/image_default.html"
-            language: Language code, either "zh_CN" or "en"
-            
-        Returns:
-            Path to preview image in docs/images/
-        """
-        # Extract size and template name from path
-        # e.g., "1080x1920/image_default.html" -> size="1080x1920", name="image_default"
-        path_parts = template_path.split('/')
-        if len(path_parts) >= 2:
-            size = path_parts[0]  # e.g., "1080x1920"
-            template_file = path_parts[1]  # e.g., "image_default.html"
-            template_name = template_file.replace('.html', '')  # e.g., "image_default"
-            
-            # Build preview image path
-            # Format: docs/images/{size}/{template_name}.jpg or {template_name}_en.jpg
-            # Chinese uses Chinese preview, all other languages use English preview for better i18n
-            suffix = "" if language == "zh_CN" else "_en"
-            
-            # Try different image extensions
-            for ext in ['.jpg', '.png']:
-                preview_path = f"docs/images/{size}/{template_name}{suffix}{ext}"
-                if os.path.exists(preview_path):
-                    return preview_path
-            
-            # Fallback: try without language suffix (for templates with only one version)
-            for ext in ['.jpg', '.png']:
-                preview_path = f"docs/images/{size}/{template_name}{ext}"
-                if os.path.exists(preview_path):
-                    return preview_path
-        
-        # If no preview found, return empty string
-        return ""
-
-    # ====================================================================
-    # Workflow Selection Section (Auto-configured for Digital Human)
-    # ====================================================================
-    with st.container(border=True):
-        st.markdown(f"**{tr('digital_human.section.workflow')}**")
-        
-        with st.expander(tr("help.feature_description"), expanded=False):
-            st.markdown(f"**{tr('help.what')}**")
-            st.markdown(tr("digital_human.workflow.what"))
-        
-        # Get available workflows
-        all_workflows = pixelle_video.media.list_workflows()
-        
-        # Auto-select digital human workflows (check file existence directly)
-        
-        # First workflow: digital_image (generates collage and copy)
-        first_workflow = "runninghub/digital_image.json"
-        first_workflow_path = "workflows/runninghub/digital_image.json"
-        first_workflow_found = os.path.exists(first_workflow_path)
-        
-        # Second workflow: digital_combination (generates final video)  
-        second_workflow = "runninghub/digital_combination.json"
-        second_workflow_path = "workflows/runninghub/digital_combination.json"
-        second_workflow_found = os.path.exists(second_workflow_path)
-        
-        # First workflow status
-        if first_workflow_found:
-            st.success(f"✅ {tr('digital_human.workflow.first_step')}")
-        else:
-            st.error(f"❌ {tr('digital_human.workflow.first_step')} {tr('digital_human.workflow.not_found')}")
-            
-        # Second workflow status  
-        if second_workflow_found:
-            st.success(f"✅ {tr('digital_human.workflow.second_step')}")
-        else:
-            st.error(f"❌ {tr('digital_human.workflow.second_step')} {tr('digital_human.workflow.not_found')}")
-        
-        # Show workflow info
-        if first_workflow_found and second_workflow_found:
-            st.info(f"🎯 {tr('digital_human.workflow.ready')}")
-        else:
-            st.warning(f"⚠️ {tr('digital_human.workflow.missing')}")
-
-    # Return all style configuration parameters (简化版本，只支持local TTS)
+    # Return all style configuration parameters (Simplified version only local TTS)
     return {
         "tts_inference_mode": "local",
         "tts_voice": selected_voice,
-        "tts_speed": tts_speed,
-        "first_workflow": first_workflow,
-        "second_workflow": second_workflow
+        "tts_speed": tts_speed
     }
 

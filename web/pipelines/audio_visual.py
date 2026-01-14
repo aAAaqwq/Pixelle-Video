@@ -115,7 +115,7 @@ class AudioVisualPipelineUI(PipelineUI):
             audio_assets = video_params.get("audio_assets", [])
             prompt_text = video_params.get("prompt_text", "")
 
-            logger.info(f"  - 所有video_params: {video_params}")
+            logger.info(f"video_params: {video_params}")
             
             if not audio_assets:
                 st.info(tr("audio_visual.assets.image_warning"))
@@ -134,7 +134,7 @@ class AudioVisualPipelineUI(PipelineUI):
                     tr("btn.generate"),
                     type="primary",
                     use_container_width=True,
-                    disabled=True,  # 禁用
+                    disabled=True,
                     key="audio_visual_generate"
                 )
                 return
@@ -161,14 +161,14 @@ class AudioVisualPipelineUI(PipelineUI):
                         import json
                         from pathlib import Path
 
-                        status_text.text("加载图片成功，准备生成视频")
+                        status_text.text(tr("progress.generation"))
                         progress_bar.progress(65)
                         image_path = audio_assets[0]
                         prompt = prompt_text
 
                         workflow_path = Path("workflows/runninghub/audio_visual.json")
                         if not workflow_path.exists():
-                            raise Exception(f"工作流文件不存在: {workflow_path}")
+                            raise Exception(f"The workflow file does not exist: {workflow_path}")
                         with open(workflow_path, 'r', encoding='utf-8') as f:
                             workflow_config = json.load(f)
                         workflow_params = {
@@ -192,7 +192,7 @@ class AudioVisualPipelineUI(PipelineUI):
                                         generated_video_url = videos[0]
                                         break
                         if not generated_video_url:
-                            raise Exception("视频生成失败，请检查工作流配置")
+                            raise Exception("The workflow did not return a video. Please check the workflow configuration.")
                                     
                         final_video_path = os.path.join(task_dir, "final.mp4")
                         timeout = httpx.Timeout(300.0)
