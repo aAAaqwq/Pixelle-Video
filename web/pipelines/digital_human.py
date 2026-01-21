@@ -51,9 +51,9 @@ class DigitalHumanPipelineUI(PipelineUI):
             workflow_path = self.workflow_path_config()
             mode_params = self.render_digital_human_mode(asset_params["character_assets"])
         
-        # # ====================================================================
-        # # Right Column: Output Preview
-        # # ====================================================================
+        # ====================================================================
+        # Right Column: Output Preview
+        # ====================================================================
         with right_col:
             # Combine all parameters
             video_params = {
