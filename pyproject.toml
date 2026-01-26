@@ -1,6 +1,6 @@
 [project]
 name = "pixelle-video"
-version = "0.1.12"
+version = "0.1.13"
 description = "AI-powered video creation platform - Part of Pixelle ecosystem"
 authors = [
     {name = "Pixelle.AI"}
