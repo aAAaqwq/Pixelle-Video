@@ -114,13 +114,93 @@ def render_advanced_settings():
                     key=f"llm_base_url_input_{selected_preset}"
                 )
                 
-                # Model (use unique key based on preset to force refresh)
-                llm_model = st.text_input(
-                    f"{tr('settings.llm.model')} *",
-                    value=default_model,
-                    help=tr("settings.llm.model_help"),
-                    key=f"llm_model_input_{selected_preset}"
-                )
+                # Model selection with dropdown and load button
+                # Initialize session state for loaded models
+                if "llm_loaded_models" not in st.session_state:
+                    st.session_state.llm_loaded_models = []
+                
+                # Build model options: Custom option + loaded models
+                CUSTOM_MODEL_OPTION = f"✏️ {tr('settings.llm.custom_model')}"
+                model_options = [CUSTOM_MODEL_OPTION] + st.session_state.llm_loaded_models
+                
+                # Determine default selection
+                if default_model in st.session_state.llm_loaded_models:
+                    default_model_index = model_options.index(default_model)
+                else:
+                    # Default model not in loaded list, use custom
+                    default_model_index = 0
+                
+                # Model dropdown with load button on the right
+                model_col, load_col, test_col = st.columns([3, 1, 1])
+                
+                with model_col:
+                    selected_model_option = st.selectbox(
+                        f"{tr('settings.llm.model')} *",
+                        options=model_options,
+                        index=default_model_index,
+                        help=tr("settings.llm.model_help"),
+                        key=f"llm_model_select_{selected_preset}"
+                    )
+                
+                with load_col:
+                    st.markdown("<div style='height: 28px'></div>", unsafe_allow_html=True)
+                    load_clicked = st.button(
+                        f"🔄 {tr('settings.llm.load_models')}",
+                        help=tr("settings.llm.load_models_help"),
+                        key="load_models_btn",
+                        use_container_width=True
+                    )
+                
+                with test_col:
+                    st.markdown("<div style='height: 28px'></div>", unsafe_allow_html=True)
+                    test_clicked = st.button(
+                        f"🔌 {tr('settings.llm.test_connection')}",
+                        help=tr("settings.llm.test_connection_help"),
+                        key="test_llm_connection_btn",
+                        use_container_width=True
+                    )
+                
+                # Handle load models button click
+                if load_clicked:
+                    if llm_api_key and llm_base_url:
+                        try:
+                            from pixelle_video.utils.llm_util import fetch_available_models
+                            with st.spinner(tr("settings.llm.loading_models")):
+                                models = fetch_available_models(llm_api_key, llm_base_url)
+                                st.session_state.llm_loaded_models = models
+                                st.success(tr("settings.llm.models_loaded").replace("{count}", str(len(models))))
+                                safe_rerun()
+                        except Exception as e:
+                            st.error(tr("settings.llm.models_load_failed").replace("{error}", str(e)))
+                    else:
+                        st.warning(tr("status.llm_config_incomplete"))
+                
+                # Handle test connection button click
+                if test_clicked:
+                    if llm_api_key and llm_base_url:
+                        try:
+                            from pixelle_video.utils.llm_util import test_llm_connection
+                            with st.spinner(tr("settings.llm.loading_models")):
+                                success, message, model_count = test_llm_connection(llm_api_key, llm_base_url)
+                                if success:
+                                    st.success(tr("settings.llm.connection_success").replace("{count}", str(model_count)))
+                                else:
+                                    st.error(tr("settings.llm.connection_failed").replace("{error}", message))
+                        except Exception as e:
+                            st.error(tr("settings.llm.connection_failed").replace("{error}", str(e)))
+                    else:
+                        st.warning(tr("status.llm_config_incomplete"))
+                
+                # If custom option selected, show text input for custom model name
+                if selected_model_option == CUSTOM_MODEL_OPTION:
+                    llm_model = st.text_input(
+                        tr("settings.llm.custom_model_input"),
+                        value=default_model,
+                        help=tr("settings.llm.model_help"),
+                        key=f"llm_custom_model_input_{selected_preset}"
+                    )
+                else:
+                    llm_model = selected_model_option
         
         # ====================================================================
         # Column 2: ComfyUI Settings
