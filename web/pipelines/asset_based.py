@@ -196,13 +196,8 @@ class AssetBasedPipelineUI(PipelineUI):
             has_runninghub = bool(comfyui_config.get("runninghub_api_key"))
             has_selfhost = bool(comfyui_config.get("comfyui_url"))
             
-            # Default to available source
-            if has_runninghub:
-                default_source_index = 0
-            elif has_selfhost:
-                default_source_index = 1
-            else:
-                default_source_index = 0
+            # Default to runninghub always
+            default_source_index = 0
             
             source = st.radio(
                 tr("asset_based.source.select"),
