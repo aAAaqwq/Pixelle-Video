@@ -4,11 +4,31 @@ set -euo pipefail
 echo "[devcontainer] postStart: launching Pixelle-Video Web UI in background..."
 cd /workspaces/Pixelle-Video
 
+# Set Streamlit config for headless mode and proper port binding
+export STREAMLIT_SERVER_PORT=8501
+export STREAMLIT_SERVER_ADDRESS=0.0.0.0
+export STREAMLIT_SERVER_HEADLESS=true
+export STREAMLIT_LOGGER_LEVEL=info
+export UV_LINK_MODE=copy
+
 # Start the web UI in background so the forwarded port is ready
 nohup bash start_web.sh > /tmp/pixelle_streamlit.log 2>&1 &
-echo "[devcontainer] Streamlit started (logs: /tmp/pixelle_streamlit.log)"
 WEB_PID=$!
-echo ""
+echo "[devcontainer] Streamlit started with PID $WEB_PID (logs: /tmp/pixelle_streamlit.log)"
+
+# Wait briefly for startup and show success message
+sleep 3
+if ps -p $WEB_PID > /dev/null 2>&1; then
+    echo ""
+    echo "✅ Pixelle-Video Web UI is launching on port 8501"
+    echo "🌐 The URL will be available shortly (usually within 5-10 seconds)"
+    echo ""
+else
+    echo ""
+    echo "⚠️ Warning: Process may have exited. Check logs with: tail -f /tmp/pixelle_streamlit.log"
+    echo ""
+fi
+
 echo "Common commands:"
 echo "1. View logs:"
 echo "   tail -f /tmp/pixelle_streamlit.log"

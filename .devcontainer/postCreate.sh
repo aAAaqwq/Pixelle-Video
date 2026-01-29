@@ -5,12 +5,18 @@ echo "[devcontainer] Running postCreate tasks..."
 
 cd /workspaces/Pixelle-Video
 
+# Install system dependencies
+echo "[devcontainer] Installing system dependencies..."
+sudo apt-get update || true
+sudo apt-get install -y --fix-missing ffmpeg chromium fonts-noto-cjk 2>&1 | tail -5
+
+# Install uv package library
+echo "[devcontainer] Installing uv package library..."
+uv sync --frozen
+
 if [ -f scripts/codespace_setup.sh ]; then
+  echo "[devcontainer] Running codespace setup script..."
   bash scripts/codespace_setup.sh
 fi
 
-echo "[devcontainer] Installing Python dependencies..."
-python -m pip install --upgrade pip
-python -m pip install -e . || true
-
-echo "[devcontainer] postCreate complete. You can start the app with .devcontainer/postStart.sh or let postStart run it automatically."
+echo "[devcontainer] postCreate complete. Streamlit will start automatically via postStart.sh"
