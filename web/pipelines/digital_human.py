@@ -151,27 +151,32 @@ class DigitalHumanPipelineUI(PipelineUI):
                 label_visibility="collapsed"
             )
             
+            # Initialize workflow_config with default value based on source selection
+            # This ensures the variable is always defined even if the backend is not configured
+            if source == "runninghub":
+                workflow_config = {
+                    "first_workflow_path": "workflows/runninghub/digital_image.json",
+                    "second_workflow_path": "workflows/runninghub/digital_combination.json",
+                    "third_workflow_path": "workflows/runninghub/digital_customize.json"
+                }
+            else:
+                workflow_config = {
+                    "first_workflow_path": "workflows/selfhost/digital_image.json",
+                    "second_workflow_path": "workflows/selfhost/digital_combination.json",
+                    "third_workflow_path": "workflows/selfhost/digital_customize.json"
+                }
+            
             # Show hint based on selection
             if source == "runninghub":
                 if not has_runninghub:
                     st.warning(tr("asset_based.source.runninghub_not_configured"))
                 else:
                     st.info(tr("asset_based.source.runninghub_hint"))
-                    workflow_config = {
-                        "first_workflow_path": "workflows/runninghub/digital_image.json",
-                        "second_workflow_path": "workflows/runninghub/digital_combination.json",
-                        "third_workflow_path": "workflows/runninghub/digital_customize.json"
-                    }
             else:
                 if not has_selfhost:
                     st.warning(tr("asset_based.source.selfhost_not_configured"))
                 else:
                     st.info(tr("asset_based.source.selfhost_hint"))
-                    workflow_config = {
-                        "first_workflow_path": "workflows/selfhost/digital_image.json",
-                        "second_workflow_path": "workflows/selfhost/digital_combination.json",
-                        "third_workflow_path": "workflows/selfhost/digital_customize.json"
-                    }
                     # Check and warn for selfhost workflows (auto popup if not confirmed)
                     # Warn for the first workflow as representative
                     # TODO: need to check if the workflow is valid
