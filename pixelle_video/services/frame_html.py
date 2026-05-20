@@ -25,6 +25,7 @@ Linux Environment Requirements:
     Playwright browser install: playwright install --with-deps chromium
 """
 
+import asyncio
 import os
 import re
 import tempfile
@@ -56,7 +57,7 @@ class HTMLFrameGenerator:
     
     _browser = None
     _playwright = None
-    _browser_loop_id = None
+    _browser_loop = None
 
     def __init__(self, template_path: str):
         """
@@ -309,17 +310,22 @@ class HTMLFrameGenerator:
     @classmethod
     async def _ensure_browser(cls):
         """Lazily initialize a shared Playwright browser instance"""
-        current_loop_id = id(asyncio.get_running_loop())
-        browser_stale = (
+        current_loop = asyncio.get_running_loop()
+        browser_usable = (
             cls._browser is not None
-            and cls._browser_loop_id is not None
-            and cls._browser_loop_id != current_loop_id
+            and cls._browser_loop is current_loop
+            and cls._browser.is_connected()
         )
-        if browser_stale:
-            logger.debug("Playwright browser belongs to a closed/previous event loop; recreating it")
-            cls._discard_browser_references()
 
-        if cls._browser is None or not cls._browser.is_connected():
+        if not browser_usable:
+            if cls._browser is not None and cls._browser_loop is not current_loop:
+                logger.warning(
+                    "Detected cross-loop Playwright browser reuse attempt; "
+                    "recreating browser for current event loop"
+                )
+
+            cls._browser = None
+            cls._playwright = None
             from playwright.async_api import async_playwright
             cls._playwright = await async_playwright().start()
             cls._browser = await cls._playwright.chromium.launch(
@@ -330,7 +336,7 @@ class HTMLFrameGenerator:
                     '--disable-extensions',
                 ]
             )
-            cls._browser_loop_id = current_loop_id
+            cls._browser_loop = current_loop
             logger.debug("Initialized Playwright Chromium browser")
         return cls._browser
 
@@ -365,8 +371,14 @@ class HTMLFrameGenerator:
     @classmethod
     async def close_browser(cls):
         """Shutdown the shared browser instance (call on app teardown)"""
-        await cls._reset_browser()
-        logger.debug("Playwright browser closed")
+        if cls._browser:
+            await cls._browser.close()
+            cls._browser = None
+            cls._browser_loop = None
+        if cls._playwright:
+            await cls._playwright.stop()
+            cls._playwright = None
+            logger.debug("Playwright browser closed")
 
     async def generate_frame(
         self,
@@ -458,5 +470,7 @@ class HTMLFrameGenerator:
             return output_path
             
         except Exception as e:
-            logger.error(f"Failed to render HTML template: {e}")
-            raise RuntimeError(f"HTML rendering failed: {e}")
+            logger.exception("Failed to render HTML template")
+            raise RuntimeError(
+                f"HTML rendering failed: {type(e).__name__}: {e}"
+            ) from e
