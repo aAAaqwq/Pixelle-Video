@@ -7,6 +7,7 @@ import os
 import time
 import logging
 from typing import Optional, List, Dict
+import httpx
 from openai import OpenAI
 
 # 模型名称映射表（旧名称 -> 新名称）
@@ -43,6 +44,7 @@ class SeedreamClient:
         self,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
+        local_proxy: Optional[str] = None,
         timeout: int = 120,
     ) -> None:
         """
@@ -55,6 +57,7 @@ class SeedreamClient:
         """
         self.api_key = api_key or os.getenv("ARK_API_KEY")
         self.base_url = base_url or "https://ark.cn-beijing.volces.com/api/v3"
+        self.local_proxy = local_proxy
         self.timeout = timeout
 
         if not self.api_key:
@@ -62,11 +65,15 @@ class SeedreamClient:
                 "SeedreamClient missing api_key. Set ARK_API_KEY."
             )
 
-        self.client = OpenAI(
-            base_url=self.base_url,
-            api_key=self.api_key,
-            timeout=timeout,
-        )
+        client_kwargs = {
+            "base_url": self.base_url,
+            "api_key": self.api_key,
+            "timeout": timeout,
+        }
+        if self.local_proxy:
+            client_kwargs["http_client"] = httpx.Client(proxy=self.local_proxy, timeout=timeout)
+
+        self.client = OpenAI(**client_kwargs)
 
     def generate_image(
         self,
@@ -226,7 +233,8 @@ class SeedreamClient:
         file_path = os.path.join(result_dir, file_name)
 
         try:
-            response = requests.get(url, timeout=self.timeout)
+            proxies = {"http": self.local_proxy, "https": self.local_proxy} if self.local_proxy else None
+            response = requests.get(url, timeout=self.timeout, proxies=proxies)
             response.raise_for_status()
             with open(file_path, "wb") as f:
                 f.write(response.content)

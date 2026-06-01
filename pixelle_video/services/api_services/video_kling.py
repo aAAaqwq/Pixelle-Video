@@ -50,6 +50,12 @@ def _build_session(max_retries: int = 3) -> requests.Session:
     return session
 
 
+def _proxy_dict(local_proxy: Optional[str]) -> dict:
+    if not local_proxy:
+        return {}
+    return {"http": local_proxy, "https": local_proxy}
+
+
 class KlingVideoClient:
     """
     可灵 AI 图生视频客户端
@@ -61,6 +67,7 @@ class KlingVideoClient:
         access_key: Optional[str] = None,
         secret_key: Optional[str] = None,
         base_url: Optional[str] = None,
+        local_proxy: Optional[str] = None,
         token_ttl: int = 1800,
         poll_interval: int = 5,
         max_polls: int = 120,
@@ -77,6 +84,7 @@ class KlingVideoClient:
         self.access_key = access_key or os.getenv("KLING_ACCESS_KEY", "")
         self.secret_key = secret_key or os.getenv("KLING_SECRET_KEY", "")
         self.base_url = (base_url or os.getenv("KLING_BASE_URL", "")).rstrip("/") or KLING_BASE_URL
+        self.local_proxy = local_proxy
         self.token_ttl = token_ttl
         self.poll_interval = poll_interval
         self.max_polls = max_polls
@@ -220,7 +228,13 @@ class KlingVideoClient:
 
         logger.info(f"KlingVideoClient: 提交任务 model={model_name}, mode={mode}, duration={clamped}s, sound={body.get('sound', 'off')}")
 
-        resp = self._session.post(url, json=body, headers=headers, timeout=300)
+        resp = self._session.post(
+            url,
+            json=body,
+            headers=headers,
+            timeout=300,
+            proxies=_proxy_dict(self.local_proxy),
+        )
         if not resp.ok:
             try:
                 err_body = resp.json()
@@ -251,7 +265,12 @@ class KlingVideoClient:
         url = f"{self.base_url}/v1/videos/image2video/{task_id}"
         headers = self._auth_headers()
 
-        resp = self._session.get(url, headers=headers, timeout=30)
+        resp = self._session.get(
+            url,
+            headers=headers,
+            timeout=30,
+            proxies=_proxy_dict(self.local_proxy),
+        )
         resp.raise_for_status()
         data = resp.json()
 

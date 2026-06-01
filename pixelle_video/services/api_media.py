@@ -613,28 +613,35 @@ class APIProviderMediaService:
         from pixelle_video.services.api_services.image_client import ImageClient
 
         cfg = config_manager.get_api_providers_config()
+        local_proxy = cfg["common"].get("local_proxy") or None
         return ImageClient(
             dashscope_api_key=cfg["dashscope"].get("api_key") or None,
             dashscope_base_url=cfg["dashscope"].get("base_url") or None,
+            dashscope_local_proxy=local_proxy if cfg["dashscope"].get("use_proxy") else None,
             gpt_api_key=cfg["openai"].get("api_key") or None,
             gpt_base_url=cfg["openai"].get("base_url") or None,
-            local_proxy=cfg["common"].get("local_proxy") or None,
+            local_proxy=local_proxy if cfg["openai"].get("use_proxy") else None,
             ark_api_key=cfg["ark"].get("api_key") or None,
             ark_base_url=cfg["ark"].get("base_url") or None,
+            ark_local_proxy=local_proxy if cfg["ark"].get("use_proxy") else None,
         )
 
     def _create_video_client(self):
         from pixelle_video.services.api_services.video_client import VideoClient
 
         cfg = config_manager.get_api_providers_config()
+        local_proxy = cfg["common"].get("local_proxy") or None
         return VideoClient(
             dashscope_api_key=cfg["dashscope"].get("api_key") or None,
             dashscope_base_url=cfg["dashscope"].get("base_url") or None,
+            dashscope_local_proxy=local_proxy if cfg["dashscope"].get("use_proxy") else None,
             kling_access_key=cfg["kling"].get("access_key") or None,
             kling_secret_key=cfg["kling"].get("secret_key") or None,
             kling_base_url=cfg["kling"].get("base_url") or None,
+            kling_local_proxy=local_proxy if cfg["kling"].get("use_proxy") else None,
             ark_api_key=cfg["ark"].get("api_key") or None,
             ark_base_url=cfg["ark"].get("base_url") or None,
+            ark_local_proxy=local_proxy if cfg["ark"].get("use_proxy") else None,
         )
 
     def _save_dir(self, output_path: Optional[str], fallback_name: str) -> str:

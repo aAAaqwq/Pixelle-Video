@@ -7,6 +7,8 @@
 import os
 import logging
 import time
+import threading
+from contextlib import contextmanager
 from typing import Optional
 from http import HTTPStatus
 
@@ -24,6 +26,8 @@ logger = logging.getLogger(__name__)
 
 class DashscopeVideoClient:
     """
+    _proxy_env_lock = threading.Lock()
+
     阿里云通义万象视频生成客户端
     使用 dashscope SDK 的 VideoSynthesis 接口
     """
@@ -32,14 +36,36 @@ class DashscopeVideoClient:
         self,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
+        local_proxy: Optional[str] = None,
     ) -> None:
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
         self.base_url = base_url or os.getenv("DASHSCOPE_BASE_URL")
+        self.local_proxy = local_proxy
 
         if dashscope and self.api_key:
             dashscope.api_key = self.api_key
         if dashscope and self.base_url:
             dashscope.base_http_api_url = self.base_url
+
+    @contextmanager
+    def _proxy_env(self):
+        if not self.local_proxy:
+            yield
+            return
+
+        with self._proxy_env_lock:
+            keys = ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy")
+            old_values = {key: os.environ.get(key) for key in keys}
+            try:
+                for key in keys:
+                    os.environ[key] = self.local_proxy
+                yield
+            finally:
+                for key, value in old_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
 
     _RETRYABLE_EXCEPTIONS = (
         requests_exceptions.ConnectionError,
@@ -56,7 +82,8 @@ class DashscopeVideoClient:
         last_error = None
         for attempt in range(1, max_attempts + 1):
             try:
-                return func()
+                with self._proxy_env():
+                    return func()
             except self._RETRYABLE_EXCEPTIONS as exc:
                 last_error = exc
             except Exception as exc:
@@ -350,7 +377,12 @@ class DashscopeVideoClient:
         # 下载视频
         resp = self._with_network_retry(
             "download video",
-            lambda: requests.get(video_url, stream=True, timeout=120),
+            lambda: requests.get(
+                video_url,
+                stream=True,
+                timeout=120,
+                proxies={"http": self.local_proxy, "https": self.local_proxy} if self.local_proxy else None,
+            ),
             max_attempts=5,
             base_delay=3.0,
         )

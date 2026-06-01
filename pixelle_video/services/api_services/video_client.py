@@ -32,16 +32,20 @@ class VideoClient:
         self,
         dashscope_api_key: Optional[str] = None,
         dashscope_base_url: Optional[str] = None,
+        dashscope_local_proxy: Optional[str] = None,
         kling_access_key: Optional[str] = None,
         kling_secret_key: Optional[str] = None,
         kling_base_url: Optional[str] = None,
+        kling_local_proxy: Optional[str] = None,
         ark_api_key: Optional[str] = None,
         ark_base_url: Optional[str] = None,
+        ark_local_proxy: Optional[str] = None,
     ):
         # 万象客户端
         self.Dashscope_client = DashscopeVideoClient(
             api_key=dashscope_api_key or Config.DASHSCOPE_API_KEY,
             base_url=dashscope_base_url or Config.DASHSCOPE_BASE_URL,
+            local_proxy=dashscope_local_proxy,
         )
 
         # 可灵客户端
@@ -49,12 +53,14 @@ class VideoClient:
             access_key=kling_access_key or Config.KLING_ACCESS_KEY,
             secret_key=kling_secret_key or Config.KLING_SECRET_KEY,
             base_url=kling_base_url or Config.KLING_BASE_URL,
+            local_proxy=kling_local_proxy,
         )
 
         # Seedance 客户端
         self.seedance_client = SeedanceVideoClient(
             api_key=ark_api_key or Config.ARK_API_KEY or os.getenv("ARK_API_KEY"),
             base_url=ark_base_url or Config.ARK_BASE_URL or os.getenv("ARK_BASE_URL"),
+            local_proxy=ark_local_proxy,
         )
 
     def generate_video(

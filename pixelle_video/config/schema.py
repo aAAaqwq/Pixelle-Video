@@ -36,6 +36,7 @@ class APIKeyProviderConfig(BaseModel):
     """Provider settings with API key and optional base URL"""
     api_key: str = Field(default="", description="Provider API Key")
     base_url: str = Field(default="", description="Provider API Base URL")
+    use_proxy: bool = Field(default=False, description="Route provider requests through common local proxy")
 
 
 class AccessSecretProviderConfig(BaseModel):
@@ -43,6 +44,7 @@ class AccessSecretProviderConfig(BaseModel):
     base_url: str = Field(default="", description="Provider API Base URL")
     access_key: str = Field(default="", description="Provider Access Key")
     secret_key: str = Field(default="", description="Provider Secret Key")
+    use_proxy: bool = Field(default=False, description="Route provider requests through common local proxy")
 
 
 class APIProvidersConfig(BaseModel):

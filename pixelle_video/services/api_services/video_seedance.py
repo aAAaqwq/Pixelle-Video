@@ -22,10 +22,12 @@ class SeedanceVideoClient:
         self,
         api_key: Optional[str] = None,
         base_url: Optional[str] = None,
+        local_proxy: Optional[str] = None,
         timeout: int = 120,
     ) -> None:
         self.api_key = api_key or os.getenv("ARK_API_KEY")
         self.base_url = (base_url or os.getenv("ARK_BASE_URL") or "https://ark.cn-beijing.volces.com/api/v3").rstrip("/")
+        self.local_proxy = local_proxy
         self.timeout = timeout
 
         if not self.api_key:
@@ -36,6 +38,11 @@ class SeedanceVideoClient:
             "Authorization": f"Bearer {self.api_key}",
             "Content-Type": "application/json",
         }
+
+    def _proxies(self) -> Optional[dict]:
+        if not self.local_proxy:
+            return None
+        return {"http": self.local_proxy, "https": self.local_proxy}
 
     def generate_video(
         self,
@@ -114,7 +121,13 @@ class SeedanceVideoClient:
                 payload[key] = kwargs[key]
 
         logger.info(f"SeedanceVideoClient: 提交任务 model={model}, duration={duration}s")
-        resp = requests.post(url, headers=self._headers(), json=payload, timeout=self.timeout)
+        resp = requests.post(
+            url,
+            headers=self._headers(),
+            json=payload,
+            timeout=self.timeout,
+            proxies=self._proxies(),
+        )
         
         if not resp.ok:
             logger.error(f"Seedance 提交失败: {resp.text}")
@@ -132,7 +145,7 @@ class SeedanceVideoClient:
         url = f"{self.base_url}/contents/generations/tasks/{task_id}"
         
         for i in range(max_polls):
-            resp = requests.get(url, headers=self._headers(), timeout=30)
+            resp = requests.get(url, headers=self._headers(), timeout=30, proxies=self._proxies())
             resp.raise_for_status()
             data = resp.json()
             
@@ -154,7 +167,7 @@ class SeedanceVideoClient:
 
     def _download_video(self, url: str, save_path: str):
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        resp = requests.get(url, stream=True, timeout=120)
+        resp = requests.get(url, stream=True, timeout=120, proxies=self._proxies())
         resp.raise_for_status()
         with open(save_path, "wb") as f:
             for chunk in resp.iter_content(chunk_size=8192):

@@ -19,7 +19,8 @@ class ImageProcessor:
     def __init__(self,
                  image_path='',
                  api_key: str = "sk-REVOKED-DO-NOT-USE",
-                 model_name: str = "wan2.6-i2v-flash"):
+                 model_name: str = "wan2.6-i2v-flash",
+                 local_proxy: str | None = None):
         """
         初始化图片处理器
         
@@ -44,6 +45,12 @@ class ImageProcessor:
         # 上传功能部分
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
         self.model_name = model_name
+        self.local_proxy = local_proxy
+
+    def _proxies(self):
+        if not self.local_proxy:
+            return None
+        return {"http": self.local_proxy, "https": self.local_proxy}
 
     @staticmethod
     def check_column_white(column_pixels):
@@ -151,6 +158,7 @@ class ImageProcessor:
                     timeout=(10, 30),
                     stream=True,
                     verify=True,
+                    proxies=self._proxies(),
                     headers={
                         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                     }
@@ -180,6 +188,7 @@ class ImageProcessor:
                             timeout=(10, 30),
                             stream=True,
                             verify=False,
+                            proxies=self._proxies(),
                             headers={
                                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
                             }
@@ -274,7 +283,12 @@ class ImageProcessor:
             "model": self.model_name
         }
         
-        response = requests.get(self.UPLOAD_API_URL, headers=headers, params=params)
+        response = requests.get(
+            self.UPLOAD_API_URL,
+            headers=headers,
+            params=params,
+            proxies=self._proxies(),
+        )
         if response.status_code != 200:
             raise Exception(f"Failed to get upload policy: {response.text}")
         
@@ -312,7 +326,11 @@ class ImageProcessor:
                 'file': (safe_file_name, file)
             }
             
-            response = requests.post(policy_data['upload_host'], files=files)
+            response = requests.post(
+                policy_data['upload_host'],
+                files=files,
+                proxies=self._proxies(),
+            )
             if response.status_code != 200:
                 raise Exception(f"Failed to upload file: {response.text}")
         

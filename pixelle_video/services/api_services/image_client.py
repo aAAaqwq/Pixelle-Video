@@ -20,11 +20,13 @@ class ImageClient:
     def __init__(self,
                  dashscope_api_key: Optional[str] = None,
                  dashscope_base_url: Optional[str] = None,
+                 dashscope_local_proxy: Optional[str] = None,
                  gpt_api_key: Optional[str] = None,
                  gpt_base_url: Optional[str] = None,
                  local_proxy: Optional[str] = None,
                  ark_api_key: Optional[str] = None,
-                 ark_base_url: Optional[str] = None):
+                 ark_base_url: Optional[str] = None,
+                 ark_local_proxy: Optional[str] = None):
         """
         Unified Image Generation Client
         Routes requests to DashScope, Seedream, or GPT based on model name.
@@ -32,13 +34,15 @@ class ImageClient:
         # Initialize DashScope Client
         self.dashscope_client = DashScopeClient(
             api_key=dashscope_api_key or Config.DASHSCOPE_API_KEY,
-            base_url=dashscope_base_url or Config.DASHSCOPE_BASE_URL
+            base_url=dashscope_base_url or Config.DASHSCOPE_BASE_URL,
+            local_proxy=dashscope_local_proxy,
         )
 
         # Initialize Seedream Client
         self.seedream_client = SeedreamClient(
             api_key=ark_api_key or Config.ARK_API_KEY,
-            base_url=ark_base_url or Config.ARK_BASE_URL
+            base_url=ark_base_url or Config.ARK_BASE_URL,
+            local_proxy=ark_local_proxy,
         )
 
         # Initialize GPT Image Client

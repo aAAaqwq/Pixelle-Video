@@ -34,7 +34,7 @@ class ImageGPT:
         kwargs = {"api_key": self.api_key, "timeout": self.timeout}
         
         self.base_url = base_url
-        if not self.base_url and local_proxy:
+        if local_proxy:
             kwargs["http_client"] = httpx.Client(
                 proxy=local_proxy,
                 timeout=self.timeout,
@@ -44,7 +44,7 @@ class ImageGPT:
             
         self.client = OpenAI(**kwargs)
         self.max_attempts = 10
-        self.image_processor = ImageProcessor()
+        self.image_processor = ImageProcessor(local_proxy=local_proxy)
 
     def _encode_image_to_base64(self, image_path: str) -> str:
         """将本地图片转换为 Base64 编码"""

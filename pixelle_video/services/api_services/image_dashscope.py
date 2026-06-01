@@ -3,6 +3,8 @@ import json
 import logging
 import time
 import uuid
+import threading
+from contextlib import contextmanager
 from typing import Any
 try:
     import dashscope
@@ -18,14 +20,37 @@ except ImportError:
     from image_processor import ImageProcessor
 
 class DashScopeClient:
-    def __init__(self, api_key=None, base_url=None):
+    _proxy_env_lock = threading.Lock()
+
+    def __init__(self, api_key=None, base_url=None, local_proxy=None):
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY")
         # 默认使用中国（北京）地域 API，如果环境变量或参数未设置则使用默认地址
         self.base_url = base_url or os.getenv("DASHSCOPE_BASE_URL")
+        self.local_proxy = local_proxy
         if dashscope:
             dashscope.api_key = self.api_key
             dashscope.base_http_api_url = self.base_url
-        self.image_processor = ImageProcessor()
+        self.image_processor = ImageProcessor(local_proxy=local_proxy)
+
+    @contextmanager
+    def _proxy_env(self):
+        if not self.local_proxy:
+            yield
+            return
+
+        with self._proxy_env_lock:
+            keys = ("HTTP_PROXY", "HTTPS_PROXY", "http_proxy", "https_proxy")
+            old_values = {key: os.environ.get(key) for key in keys}
+            try:
+                for key in keys:
+                    os.environ[key] = self.local_proxy
+                yield
+            finally:
+                for key, value in old_values.items():
+                    if value is None:
+                        os.environ.pop(key, None)
+                    else:
+                        os.environ[key] = value
 
     def _extract_image_urls(self, payload: Any) -> list[str]:
         """Extract image URLs from the different DashScope response shapes."""
@@ -75,14 +100,15 @@ class DashScopeClient:
 
         try:
             messages = [{"role": "user", "content": [{"text": prompt}]}]
-            response = ImageGeneration.call(
-                model=model,
-                api_key=self.api_key,
-                messages=messages,
-                n=n,
-                size=size,
-                watermark=False,
-            )
+            with self._proxy_env():
+                response = ImageGeneration.call(
+                    model=model,
+                    api_key=self.api_key,
+                    messages=messages,
+                    n=n,
+                    size=size,
+                    watermark=False,
+                )
 
             if response.status_code == 200:
                 results = self._extract_image_urls(getattr(response, "output", None))
@@ -129,14 +155,15 @@ class DashScopeClient:
 
         try:
             # Use ImageGeneration.call with messages, same as generate_image
-            response = ImageGeneration.call(
-                model=model,
-                api_key=self.api_key,
-                messages=messages,
-                n=n,
-                size=size,
-                watermark=False,
-            )
+            with self._proxy_env():
+                response = ImageGeneration.call(
+                    model=model,
+                    api_key=self.api_key,
+                    messages=messages,
+                    n=n,
+                    size=size,
+                    watermark=False,
+                )
 
             if response.status_code == 200:
                 results = self._extract_image_urls(getattr(response, "output", None))
