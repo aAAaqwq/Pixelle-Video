@@ -31,14 +31,6 @@ api_providers:
     api_key: ""
     base_url: "https://dashscope.aliyuncs.com/api/v1"
     use_proxy: false
-  deepseek:
-    api_key: ""
-    base_url: "https://api.deepseek.com/v1"
-    use_proxy: false
-  gemini:
-    api_key: ""
-    base_url: "https://generativelanguage.googleapis.com/v1"
-    use_proxy: false
   ark:
     api_key: ""
     base_url: "https://ark.cn-beijing.volces.com/api/v3"
