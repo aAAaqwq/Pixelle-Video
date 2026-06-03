@@ -16,6 +16,7 @@ LLM utility functions for model discovery and connection testing.
 Uses the OpenAI-compatible models endpoint.
 """
 
+import re
 from typing import List, Tuple
 import httpx
 from loguru import logger
@@ -23,16 +24,31 @@ from loguru import logger
 
 def _build_models_url(base_url: str) -> str:
     """Build a provider models endpoint from a user-entered API base URL."""
-    normalized = (base_url or "").strip().rstrip("/")
-    for suffix in ("/chat/completions", "/completions", "/responses"):
-        if normalized.endswith(suffix):
-            normalized = normalized[: -len(suffix)].rstrip("/")
-            break
+    raw = (base_url or "").strip().rstrip("/")
+    if raw.endswith("/models"):
+        return raw
 
-    if normalized.endswith(("/v1", "/v2", "/v3", "/v4")):
+    normalized = normalize_openai_base_url(base_url)
+
+    if re.search(r"/v\d+(?:\.\d+)?$", normalized):
         return f"{normalized}/models"
 
     return f"{normalized}/v1/models"
+
+
+def normalize_openai_base_url(base_url: str) -> str:
+    """Normalize a user-entered OpenAI-compatible Base URL for SDK calls.
+
+    Users sometimes paste a concrete endpoint such as /chat/completions or
+    /models. The OpenAI SDK expects the API root, so concrete endpoint suffixes
+    must be stripped before real model calls.
+    """
+    normalized = (base_url or "").strip().rstrip("/")
+    for suffix in ("/chat/completions", "/completions", "/responses", "/models"):
+        if normalized.endswith(suffix):
+            normalized = normalized[: -len(suffix)].rstrip("/")
+            break
+    return normalized
 
 
 def fetch_available_models(api_key: str, base_url: str, timeout: float = 10.0) -> List[str]:
