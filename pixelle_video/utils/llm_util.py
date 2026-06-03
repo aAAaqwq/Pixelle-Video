@@ -13,7 +13,7 @@
 """
 LLM utility functions for model discovery and connection testing.
 
-Uses the standard OpenAI-compatible /v1/models endpoint.
+Uses the OpenAI-compatible models endpoint.
 """
 
 from typing import List, Tuple
@@ -21,15 +21,30 @@ import httpx
 from loguru import logger
 
 
+def _build_models_url(base_url: str) -> str:
+    """Build a provider models endpoint from a user-entered API base URL."""
+    normalized = (base_url or "").strip().rstrip("/")
+    for suffix in ("/chat/completions", "/completions", "/responses"):
+        if normalized.endswith(suffix):
+            normalized = normalized[: -len(suffix)].rstrip("/")
+            break
+
+    if normalized.endswith(("/v1", "/v2", "/v3", "/v4")):
+        return f"{normalized}/models"
+
+    return f"{normalized}/v1/models"
+
+
 def fetch_available_models(api_key: str, base_url: str, timeout: float = 10.0) -> List[str]:
     """
     Fetch available models from an OpenAI-compatible API endpoint.
     
-    Uses the standard GET /v1/models endpoint with Bearer token authentication.
+    Uses the provider models endpoint with Bearer token authentication.
     
     Args:
         api_key: The API key for authentication
-        base_url: The base URL of the API (e.g., https://api.openai.com/v1)
+        base_url: The base URL of the API (e.g., https://api.openai.com/v1).
+            If a chat endpoint is pasted by mistake, it will be normalized.
         timeout: Request timeout in seconds
     
     Returns:
@@ -39,15 +54,7 @@ def fetch_available_models(api_key: str, base_url: str, timeout: float = 10.0) -
         httpx.HTTPStatusError: If the API returns an error status code
         httpx.RequestError: If there's a network error
     """
-    # Normalize base_url - ensure it ends with /v1 or similar
-    base_url = base_url.rstrip("/")
-    
-    # Build the models endpoint URL
-    # Handle cases where base_url might or might not include /v1
-    if base_url.endswith("/v1"):
-        models_url = f"{base_url}/models"
-    else:
-        models_url = f"{base_url}/v1/models"
+    models_url = _build_models_url(base_url)
     
     headers = {
         "Authorization": f"Bearer {api_key}",
