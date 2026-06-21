@@ -54,6 +54,7 @@ from api.routers import (
     files_router,
     resources_router,
     frame_router,
+    digital_human_router,
 )
 
 
@@ -133,6 +134,7 @@ app.include_router(tasks_router, prefix=api_config.api_prefix)
 app.include_router(files_router, prefix=api_config.api_prefix)
 app.include_router(resources_router, prefix=api_config.api_prefix)
 app.include_router(frame_router, prefix=api_config.api_prefix)
+app.include_router(digital_human_router, prefix=api_config.api_prefix)
 
 
 @app.get("/")
@@ -153,6 +155,7 @@ async def root():
             "files": f"{api_config.api_prefix}/files",
             "resources": f"{api_config.api_prefix}/resources",
             "frame": f"{api_config.api_prefix}/frame",
+            "digital_human": f"{api_config.api_prefix}/digital-human",
         }
     }
 
