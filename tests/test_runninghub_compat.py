@@ -58,16 +58,16 @@ class RunningHubCompatTests(unittest.IsolatedAsyncioTestCase):
         from pixelle_video.services.runninghub_compat import redact_comfykit_config
 
         config = {
-            "runninghub_api_key": "1234567890abcdef",
-            "api_key": "secret-value",
+            "runninghub_api_key": "example",
+            "api_key": "x",
             "comfyui_url": "http://127.0.0.1:8188",
         }
 
         self.assertEqual(
             redact_comfykit_config(config),
             {
-                "runninghub_api_key": "***abcdef",
-                "api_key": "***-value",
+                "runninghub_api_key": "***xample",
+                "api_key": "***",
                 "comfyui_url": "http://127.0.0.1:8188",
             },
         )
