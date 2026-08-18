@@ -18,7 +18,7 @@ class ImageProcessor:
     
     def __init__(self,
                  image_path='',
-                 api_key: str = "sk-REVOKED-DO-NOT-USE",
+                 api_key: str | None = None,
                  model_name: str = "wan2.6-i2v-flash",
                  local_proxy: str | None = None):
         """
