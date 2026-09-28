@@ -23,10 +23,15 @@ config.yaml `comfyui.runninghub_api_key`):
                -> TTS -> digital_combination workflow -> talking video
     customize: character image is the final talking-head, goods_text is the script
                -> TTS -> digital_combination workflow -> talking video
+
+When no explicit script is supplied, the narration is written by the script LLM
+following the caller's `content_type` (see CONTENT_TYPES). That choice is
+orthogonal to `mode`, which only decides where the talking-head image comes from.
 """
 
 import json
 import os
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -40,6 +45,60 @@ DEFAULT_DIGITAL_IMAGE_WORKFLOW = "workflows/runninghub/digital_image.json"
 DEFAULT_COMBINATION_WORKFLOW = "workflows/runninghub/digital_combination.json"
 
 DOWNLOAD_TIMEOUT_SECONDS = 300.0
+
+
+@dataclass(frozen=True)
+class ContentType:
+    """A narration orientation: display label + prompt template for the script LLM."""
+
+    label: str
+    prompt: str
+
+
+# Narration orientations offered to callers. This registry is the single source of
+# truth for the taxonomy: the REST layer lists it instead of re-declaring the keys.
+CONTENT_TYPES: dict[str, ContentType] = {
+    "knowledge": ContentType(
+        label="知识传播",
+        prompt=(
+            "请围绕主题“{subject}”写一段适合数字人口播短视频的中文知识分享文案。"
+            "以传递信息为目的：开头用提问或反常识的结论抓住注意力，中间给出一到两个具体依据，"
+            "结尾落到一句能被记住的结论。不要使用推销、促销、下单、优惠等带货话术。"
+            "控制在120字以内，只输出文案正文。"
+        ),
+    ),
+    "product": ContentType(
+        label="带货",
+        prompt=(
+            "请为商品“{subject}”写一段适合数字人口播短视频的中文推广文案。"
+            "要求自然、有吸引力，控制在80字以内，只输出文案正文。"
+        ),
+    ),
+    "general": ContentType(
+        label="通用口播",
+        prompt=(
+            "请围绕主题“{subject}”写一段适合数字人口播短视频的中文口播文案。"
+            "要求口语自然、节奏明快、中心明确，控制在100字以内，只输出文案正文。"
+        ),
+    ),
+    "story": ContentType(
+        label="情感故事",
+        prompt=(
+            "请围绕主题“{subject}”写一段适合数字人口播短视频的中文情感故事文案。"
+            "要求有具体场景与细节、情绪有起伏，结尾落到一句能引起共鸣的话。"
+            "控制在150字以内，只输出文案正文。"
+        ),
+    ),
+}
+
+# 默认不做带货：未指定内容取向时按知识传播生成。
+DEFAULT_CONTENT_TYPE = "knowledge"
+
+
+def _resolve_script_prompt(content_type: str, subject: str) -> str:
+    """Render the narration prompt template for a content type."""
+    return CONTENT_TYPES[content_type].prompt.format(subject=subject)
+
 
 
 def _load_workflow_input(workflow_path: str) -> str:
@@ -97,6 +156,7 @@ async def generate_digital_human(
     pixelle_video: Any,
     *,
     mode: str = "digital",
+    content_type: str = DEFAULT_CONTENT_TYPE,
     character_image: str,
     product_image: Optional[str] = None,
     goods_title: str = "",
@@ -118,10 +178,14 @@ async def generate_digital_human(
         pixelle_video: initialized PixelleVideoCore instance.
         mode: "digital" (synthesize promo image from character+product) or
               "customize" (character image is already the talking-head).
+        content_type: narration orientation used when no script is supplied, one of
+                      CONTENT_TYPES ("knowledge" | "product" | "general" | "story").
+                      Defaults to knowledge, i.e. not a product pitch.
         character_image: local path to the person/character image.
         product_image: local path to the product image (required for mode="digital").
-        goods_title: product title, used as the `goodstype` synthesis input and for
-                     auto-generating a script when goods_text is empty.
+        goods_title: product title for content_type="product"; for every other
+                     content_type it is the narration topic. Also the `goodstype`
+                     synthesis input for mode="digital".
         goods_text: explicit narration script. Required for mode="customize"; optional
                     for mode="digital" (falls back to the workflow/LLM-generated copy).
         tts_*: voice synthesis options.
@@ -142,9 +206,16 @@ async def generate_digital_human(
 
     if mode not in ("digital", "customize"):
         raise ValueError(f"Unsupported mode: {mode!r} (expected 'digital' or 'customize')")
+    if content_type not in CONTENT_TYPES:
+        raise ValueError(
+            f"Unsupported content_type: {content_type!r} "
+            f"(expected one of {', '.join(CONTENT_TYPES)})"
+        )
 
     task_dir, task_id = create_task_output_dir(task_id)
-    logger.info(f"[digital_human] task={task_id} mode={mode} dir={task_dir}")
+    logger.info(
+        f"[digital_human] task={task_id} mode={mode} content_type={content_type} dir={task_dir}"
+    )
 
     kit = await pixelle_video._get_or_create_comfykit()
     audio_path = os.path.join(task_dir, "narration.mp3")
@@ -181,10 +252,7 @@ async def generate_digital_human(
             script = workflow_script
         else:
             script = await pixelle_video.llm(
-                prompt=(
-                    f"请为商品“{goods_title}”写一段适合数字人口播短视频的中文推广文案。"
-                    "要求自然、有吸引力，控制在80字以内，只输出文案正文。"
-                ),
+                prompt=_resolve_script_prompt(content_type, goods_title),
                 temperature=0.7,
                 max_tokens=300,
             )

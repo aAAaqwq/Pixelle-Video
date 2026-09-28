@@ -17,6 +17,7 @@ Wraps pixelle_video.pipelines.digital_human_service.generate_digital_human and
 reuses the shared async task manager + file serving:
 
     POST /api/digital-human/generate/async   -> { task_id }
+    GET  /api/digital-human/content-types     -> narration orientations
     GET  /api/tasks/{task_id}                 -> status + result.video_url
     GET  /api/files/<task>/final.mp4          -> the video
 """
@@ -33,7 +34,11 @@ from api.dependencies import PixelleVideoDep
 from api.routers.video import path_to_url
 from api.schemas.video import VideoGenerateAsyncResponse
 from api.tasks import TaskType, task_manager
-from pixelle_video.pipelines.digital_human_service import generate_digital_human
+from pixelle_video.pipelines.digital_human_service import (
+    CONTENT_TYPES,
+    DEFAULT_CONTENT_TYPE,
+    generate_digital_human,
+)
 
 router = APIRouter(prefix="/digital-human", tags=["Digital Human"])
 
@@ -50,6 +55,21 @@ def _save_upload(file: UploadFile, dest_dir: Path) -> str:
     return str(dest.absolute())
 
 
+@router.get("/content-types")
+async def list_content_types() -> dict:
+    """List the narration orientations accepted by `content_type`.
+
+    Exposed so callers render their picker from the registry instead of
+    hardcoding the keys and drifting from the prompts.
+    """
+    return {
+        "default": DEFAULT_CONTENT_TYPE,
+        "content_types": [
+            {"value": key, "label": spec.label} for key, spec in CONTENT_TYPES.items()
+        ],
+    }
+
+
 @router.post("/generate/async", response_model=VideoGenerateAsyncResponse)
 async def generate_digital_human_async(
     pixelle_video: PixelleVideoDep,
@@ -57,6 +77,10 @@ async def generate_digital_human_async(
     character: UploadFile = File(..., description="Person/character image"),
     product: Optional[UploadFile] = File(None, description="Product image (required for mode=digital)"),
     mode: str = Form("digital", description="'digital' or 'customize'"),
+    content_type: str = Form(
+        DEFAULT_CONTENT_TYPE,
+        description="Narration orientation when no script is given; see GET /content-types",
+    ),
     goods_title: str = Form("", description="Product title (mode=digital)"),
     goods_text: str = Form("", description="Narration script (required for mode=customize)"),
     tts_voice: str = Form("zh-CN-YunjianNeural"),
@@ -67,11 +91,19 @@ async def generate_digital_human_async(
     """
     Create a digital-human talking video generation task.
 
+    `content_type` only decides how the narration is written when the caller does
+    not supply one; an explicit `goods_text` always wins.
+
     Poll `/api/tasks/{task_id}`; when status is "completed", `result.video_url`
     holds the playable URL.
     """
     if mode not in ("digital", "customize"):
         raise HTTPException(status_code=400, detail="mode must be 'digital' or 'customize'")
+    if content_type not in CONTENT_TYPES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"content_type must be one of {', '.join(CONTENT_TYPES)}",
+        )
     if mode == "digital" and product is None:
         raise HTTPException(status_code=400, detail="product image is required for mode='digital'")
     if mode == "customize" and not goods_text.strip():
@@ -90,6 +122,7 @@ async def generate_digital_human_async(
         task_type=TaskType.DIGITAL_HUMAN_GENERATION,
         request_params={
             "mode": mode,
+            "content_type": content_type,
             "goods_title": goods_title,
             "tts_voice": tts_voice,
             "tts_speed": tts_speed,
@@ -101,6 +134,7 @@ async def generate_digital_human_async(
         result = await generate_digital_human(
             pixelle_video,
             mode=mode,
+            content_type=content_type,
             character_image=character_path,
             product_image=product_path,
             goods_title=goods_title,
