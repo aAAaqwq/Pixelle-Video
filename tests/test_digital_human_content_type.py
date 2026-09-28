@@ -43,15 +43,12 @@ class TestResolveScriptPrompt:
         p = _resolve_script_prompt("knowledge", "手冲咖啡入门")
         assert "知识分享" in p
         assert "请围绕主题“手冲咖啡入门”" in p
-        # The prompt instructs the LLM to avoid sales language; those words appear
-        # only as part of the "不要使用…" instruction.
-        assert "不要使用" in p
-        assert "带货" in p
+        for bad in ("推销", "促销", "下单", "优惠"):
+            assert bad not in p
 
-    def test_product_has_no_sales_avoidance(self):
+    def test_product_targets_goods(self):
         p = _resolve_script_prompt("product", "某商品")
         assert "商品“某商品”" in p
-        assert "不要使用" not in p
 
     def test_each_type_renders(self):
         for key in ("knowledge", "product", "general", "story"):
