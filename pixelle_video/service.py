@@ -35,9 +35,17 @@ from pixelle_video.services.video import VideoService
 from pixelle_video.services.frame_processor import FrameProcessor
 from pixelle_video.services.persistence import PersistenceService
 from pixelle_video.services.history_manager import HistoryManager
+from pixelle_video.services.runninghub_compat import (
+    RUNNINGHUB_CN_BASE_URL,
+    install_runninghub_v2_compat,
+    redact_comfykit_config,
+)
 from pixelle_video.pipelines.standard import StandardPipeline
 from pixelle_video.pipelines.custom import CustomPipeline
 from pixelle_video.pipelines.asset_based import AssetBasedPipeline
+
+
+install_runninghub_v2_compat()
 
 
 class PixelleVideoCore:
@@ -123,6 +131,9 @@ class PixelleVideoCore:
             kit_config["api_key"] = comfyui_config["comfyui_api_key"]
         if comfyui_config.get("runninghub_api_key"):
             kit_config["runninghub_api_key"] = comfyui_config["runninghub_api_key"]
+            kit_config["runninghub_url"] = comfyui_config.get(
+                "runninghub_url", RUNNINGHUB_CN_BASE_URL
+            )
         # Only pass instance_type if it has a non-empty value
         instance_type = comfyui_config.get("runninghub_instance_type")
         if instance_type and instance_type.strip():
@@ -172,7 +183,7 @@ class PixelleVideoCore:
             
             # Create new instance with current config
             logger.info("✨ Creating ComfyKit instance...")
-            logger.debug(f"ComfyKit config: {current_config}")
+            logger.debug(f"ComfyKit config: {redact_comfykit_config(current_config)}")
             self._comfykit = ComfyKit(**current_config)
             self._comfykit_config_hash = current_hash
             logger.info("✅ ComfyKit instance created")

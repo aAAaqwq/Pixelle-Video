@@ -131,6 +131,7 @@ class ConfigManager:
         return {
             "comfyui_url": self.config.comfyui.comfyui_url,
             "comfyui_api_key": self.config.comfyui.comfyui_api_key,
+            "runninghub_url": self.config.comfyui.runninghub_url,
             "runninghub_api_key": self.config.comfyui.runninghub_api_key,
             "runninghub_concurrent_limit": self.config.comfyui.runninghub_concurrent_limit,
             "runninghub_instance_type": self.config.comfyui.runninghub_instance_type,

@@ -104,6 +104,9 @@ class ComfyUIConfig(BaseModel):
     """ComfyUI configuration (includes global settings and service-specific configs)"""
     comfyui_url: str = Field(default="http://127.0.0.1:8188", description="ComfyUI Server URL")
     comfyui_api_key: Optional[str] = Field(default=None, description="ComfyUI API Key (optional)")
+    runninghub_url: str = Field(
+        default="https://www.runninghub.cn", description="RunningHub API Base URL"
+    )
     runninghub_api_key: Optional[str] = Field(default=None, description="RunningHub API Key (optional)")
     runninghub_concurrent_limit: int = Field(default=1, ge=1, le=10, description="RunningHub concurrent execution limit (1-10)")
     runninghub_instance_type: Optional[str] = Field(default=None, description="RunningHub instance type (optional, set to 'plus' for 48GB VRAM)")
