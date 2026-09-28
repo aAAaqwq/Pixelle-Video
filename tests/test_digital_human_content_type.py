@@ -25,6 +25,7 @@ from api import dependencies as deps
 from api.routers import digital_human as router
 from pixelle_video.pipelines.digital_human_service import (
     DEFAULT_CONTENT_TYPE,
+    _narration_llm_call,
     _resolve_script_prompt,
     _select_script,
 )
@@ -83,6 +84,49 @@ class TestSelectScript:
         # An explicit script should not need a valid content_type.
         script = await _select_script("写好的文案", "bogus", "x", _fake_llm)
         assert script == "写好的文案"
+
+
+# --------------------------------------------------------------------------- #
+# _narration_llm_call (reasoning models must not eat the narration budget)
+# --------------------------------------------------------------------------- #
+
+class _RecordingCore:
+    """Stands in for PixelleVideoCore: records the kwargs of the LLM call."""
+
+    def __init__(self, model: str, base_url: str):
+        self.config = {"llm": {"model": model, "base_url": base_url}}
+        self.calls: list[dict] = []
+
+    async def llm(self, **kwargs) -> str:
+        self.calls.append(kwargs)
+        return "文案"
+
+
+class TestNarrationLlmCall:
+    async def _call(self, model: str, base_url: str) -> dict:
+        core = _RecordingCore(model, base_url)
+        await _narration_llm_call(core)("写点什么")
+        return core.calls[0]
+
+    async def test_disables_thinking_for_deepseek_behind_gateway(self):
+        # base_url is a gateway and does not contain "deepseek"; the model name must
+        # still trigger the flag, else reasoning eats the budget and content is empty.
+        kwargs = await self._call("deepseek-v4-flash", "http://gateway.internal:3000/v1")
+        assert kwargs["extra_body"] == {"thinking": {"type": "disabled"}}
+
+    async def test_disables_thinking_for_deepseek_base_url(self):
+        kwargs = await self._call("some-model", "https://api.deepseek.com")
+        assert kwargs["extra_body"] == {"thinking": {"type": "disabled"}}
+
+    async def test_leaves_other_providers_untouched(self):
+        # A strict non-DeepSeek provider would reject an unknown body field.
+        kwargs = await self._call("gpt-4o", "https://api.openai.com/v1")
+        assert "extra_body" not in kwargs
+
+    async def test_keeps_prompt_and_budget(self):
+        kwargs = await self._call("deepseek-v4-flash", "http://gateway:3000/v1")
+        assert kwargs["prompt"] == "写点什么"
+        assert kwargs["max_tokens"] == 300
 
 
 # --------------------------------------------------------------------------- #
