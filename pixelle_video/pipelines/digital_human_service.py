@@ -122,6 +122,35 @@ async def _select_script(
     return (await llm_call(_resolve_script_prompt(content_type, goods_title))).strip()
 
 
+# 口播文案只有一小段，关掉思维链后这个预算足够。
+_NARRATION_MAX_TOKENS = 300
+
+# 关闭思维链的请求体参数（非推理供应商/模型会忽略，见 _narration_llm_call）。
+_DISABLE_THINKING = {"extra_body": {"thinking": {"type": "disabled"}}}
+
+
+def _narration_llm_call(pixelle_video: Any) -> Callable[[str], Awaitable[str]]:
+    """Build the narration LLM callable shared by both modes.
+
+    DeepSeek v4 推理模型默认开思维链：预算会被 reasoning 全部吃掉，正文返回空串
+    （实测 finish_reason=length、content 为空、reasoning_content 有内容），最终表现为
+    「No narration script available」——看起来像是文案没生成。关掉 thinking 后同一预算
+    正常出稿（实测 1.2s / 94 字）。
+
+    判断同时看 model 与 base_url：经网关中转时 base_url 不含 "deepseek"，只有模型名
+    命中；漏判就会退回上面的空正文。
+    """
+    llm_config = (getattr(pixelle_video, "config", None) or {}).get("llm") or {}
+    probe = f"{llm_config.get('model', '')} {llm_config.get('base_url', '')}".lower()
+    extra = _DISABLE_THINKING if "deepseek" in probe else {}
+
+    async def call(prompt: str) -> str:
+        return await pixelle_video.llm(
+            prompt=prompt, temperature=0.7, max_tokens=_NARRATION_MAX_TOKENS, **extra
+        )
+
+    return call
+
 
 def _load_workflow_input(workflow_path: str) -> str:
     """Read a workflow json and return the RunningHub workflow_id (or raw json string)."""
@@ -253,7 +282,7 @@ async def generate_digital_human(
             goods_text,
             content_type,
             goods_title,
-            lambda prompt: pixelle_video.llm(prompt=prompt, temperature=0.7, max_tokens=300),
+            _narration_llm_call(pixelle_video),
         )
     else:
         if not product_image:
@@ -278,7 +307,7 @@ async def generate_digital_human(
             goods_text or workflow_script,
             content_type,
             goods_title,
-            lambda prompt: pixelle_video.llm(prompt=prompt, temperature=0.7, max_tokens=300),
+            _narration_llm_call(pixelle_video),
         )
 
     if not generated_image_url:
