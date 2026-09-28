@@ -43,8 +43,12 @@ class TestResolveScriptPrompt:
         p = _resolve_script_prompt("knowledge", "手冲咖啡入门")
         assert "知识分享" in p
         assert "请围绕主题“手冲咖啡入门”" in p
-        for bad in ("推销", "促销", "下单", "优惠"):
-            assert bad not in p
+        # The prompt only references sales words as a ban ("不要使用推销、促销…").
+        # Assert the ban is present and the orientation itself never asks to sell.
+        assert "不要使用" in p
+        assert "带货话术" in p
+        # The subject is a topic, not a product being pitched.
+        assert "请为商品" not in p
 
     def test_product_targets_goods(self):
         p = _resolve_script_prompt("product", "某商品")
