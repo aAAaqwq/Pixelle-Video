@@ -180,7 +180,15 @@ class ComfyBaseService:
             ValueError: If default_workflow not configured
         """
         default_workflow = self.config.get("default_workflow")
-        
+
+        # Services whose config has an inference-mode split (tts) keep the
+        # workflow nested under the mode sub-config. The top-level alias is a
+        # pydantic property, so it never survives model_dump() into this dict.
+        if not default_workflow:
+            mode_config = self.config.get("comfyui")
+            if isinstance(mode_config, dict):
+                default_workflow = mode_config.get("default_workflow")
+
         if not default_workflow:
             raise ValueError(
                 f"No default workflow configured for {self.service_name}. "
