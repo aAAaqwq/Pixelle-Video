@@ -164,6 +164,20 @@ def _load_workflow_input(workflow_path: str) -> str:
     return str(cfg)
 
 
+def _first_output(result: Any, attr: str) -> Optional[str]:
+    """First value of a ComfyKit result list, or None when the workflow produced none.
+
+    ``getattr(result, attr, [None])[0]`` reads as "default to None when missing", but a
+    getattr default only applies when the attribute is ABSENT. ComfyKit's ExecuteResult
+    always defines these lists, so an empty one reaches the subscript and raises
+    IndexError instead. That turned a recoverable miss — RunningHub's ``.txt`` script
+    output failing to download — into a hard failure of every mode="digital" run, even
+    though the script is only a fallback for an empty goods_text.
+    """
+    values = getattr(result, attr, None)
+    return values[0] if values else None
+
+
 def _extract_video_url(result: Any) -> Optional[str]:
     """Pull the first video URL out of a ComfyKit result (mirrors the UI pipeline)."""
     if hasattr(result, "videos") and result.videos:
@@ -301,8 +315,8 @@ async def generate_digital_human(
             raise RuntimeError(
                 f"digital_image workflow failed: {getattr(synthesis, 'msg', 'unknown error')}"
             )
-        generated_image_url = getattr(synthesis, "images", [None])[0]
-        workflow_script = getattr(synthesis, "texts", [None])[0]
+        generated_image_url = _first_output(synthesis, "images")
+        workflow_script = _first_output(synthesis, "texts")
         script = await _select_script(
             goods_text or workflow_script,
             content_type,
