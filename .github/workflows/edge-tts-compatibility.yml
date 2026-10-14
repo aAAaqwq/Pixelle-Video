@@ -1,0 +1,39 @@
+name: Edge TTS compatibility
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - pyproject.toml
+      - uv.lock
+      - tests/**
+      - pixelle_video/utils/tts_util.py
+      - .github/workflows/edge-tts-compatibility.yml
+  push:
+    branches: [main]
+    paths:
+      - pyproject.toml
+      - uv.lock
+      - tests/**
+      - pixelle_video/utils/tts_util.py
+      - .github/workflows/edge-tts-compatibility.yml
+
+permissions:
+  contents: read
+
+jobs:
+  offline-regression:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependency tooling
+        run: python -m pip install uv==0.12.13
+      - name: Install locked dependencies
+        run: uv sync --locked --extra dev
+      - name: Run offline regression suite
+        run: uv run --no-sync python -m pytest -q
+      - name: Lint new regression checks
+        run: uv run --no-sync ruff check tests/test_edge_tts_dependency.py
